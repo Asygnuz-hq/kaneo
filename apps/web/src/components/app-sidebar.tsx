@@ -36,6 +36,17 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
       {...props}
     >
       <SidebarHeader className="pt-1 pb-1.5">
+        <div className="flex items-center gap-1.5 px-2 pb-1.5">
+          <img src="/mark-dark.png" alt="" className="h-4 w-auto dark:hidden" />
+          <img
+            src="/mark-light.png"
+            alt=""
+            className="hidden h-4 w-auto dark:block"
+          />
+          <span className="text-xs font-semibold tracking-wide text-foreground/70">
+            ASYGNUZ
+          </span>
+        </div>
         <WorkspaceSwitcher />
       </SidebarHeader>
       <SidebarContent className="overflow-hidden gap-1 py-1">
