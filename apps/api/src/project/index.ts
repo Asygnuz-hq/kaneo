@@ -45,10 +45,12 @@ const project = new Hono<{
     workspaceAccess.fromQuery(),
     async (c) => {
       const workspaceId = c.get("workspaceId");
+      const userId = c.get("userId");
       const { includeArchived } = c.req.valid("query");
       const projects = await getProjectsCtrl(
         workspaceId,
         includeArchived === "true",
+        userId,
       );
       return c.json(projects);
     },

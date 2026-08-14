@@ -339,6 +339,36 @@ export const projectTable = pgTable(
   ],
 );
 
+// ASYGNUZ: control de acceso por proyecto, además del rol de workspace.
+// Si un proyecto tiene al menos una fila aquí, solo esos usuarios (más
+// owner/admin de workspace) pueden verlo. Sin filas, se comporta como
+// antes: visible para todo el workspace. Ver get-projects.ts.
+export const projectMemberTable = pgTable(
+  "project_member",
+  {
+    id: text("id")
+      .$defaultFn(() => createId())
+      .primaryKey(),
+    projectId: text("project_id")
+      .notNull()
+      .references(() => projectTable.id, {
+        onDelete: "cascade",
+        onUpdate: "cascade",
+      }),
+    userId: text("user_id")
+      .notNull()
+      .references(() => userTable.id, { onDelete: "cascade" }),
+    createdAt: timestamp("created_at", { mode: "date" }).defaultNow().notNull(),
+  },
+  (table) => [
+    unique("project_member_project_id_user_id_unique").on(
+      table.projectId,
+      table.userId,
+    ),
+    index("project_member_userId_idx").on(table.userId),
+  ],
+);
+
 export const columnTable = pgTable(
   "column",
   {

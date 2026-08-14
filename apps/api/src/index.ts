@@ -47,6 +47,7 @@ import { initializePlugins } from "./plugins";
 import { migrateGitHubIntegration } from "./plugins/github/migration";
 import project from "./project";
 import { getPublicProject } from "./project/controllers/get-public-project";
+import projectMember from "./project-member";
 import { initializeScheduler, shutdownScheduler } from "./scheduler";
 import search from "./search";
 import slackIntegration from "./slack-integration";
@@ -601,6 +602,7 @@ export function createApp() {
 
   const billingApi = api.route("/billing", billing);
   const projectApi = api.route("/project", project);
+  const projectMemberApi = api.route("/project-member", projectMember);
   const taskApi = api.route("/task", task);
   const columnApi = api.route("/column", column);
   const activityApi = api.route("/activity", activity);
@@ -792,6 +794,7 @@ export function createApp() {
     notificationApi,
     notificationPreferencesApi,
     projectApi,
+    projectMemberApi,
     publicProjectApi,
     searchApi,
     slackIntegrationApi,
@@ -910,6 +913,7 @@ const {
   notificationApi,
   notificationPreferencesApi,
   projectApi,
+  projectMemberApi,
   publicProjectApi,
   searchApi,
   slackIntegrationApi,
@@ -937,6 +941,7 @@ export type AppType =
   | typeof billingApi
   | typeof configApi
   | typeof projectApi
+  | typeof projectMemberApi
   | typeof taskApi
   | typeof columnApi
   | typeof activityApi

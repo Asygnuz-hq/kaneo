@@ -1,6 +1,11 @@
 import { and, count, eq, isNull, min, sql } from "drizzle-orm";
 import db from "../../database";
-import { projectTable, taskTable } from "../../database/schema";
+import {
+  projectMemberTable,
+  projectTable,
+  taskTable,
+} from "../../database/schema";
+import { bypassesProjectFilter } from "../../project-member/utils/can-access-project";
 
 type ProjectStatistics = {
   completionPercentage: number;
@@ -62,7 +67,38 @@ async function getProjectStatistics(
   return statisticsByProject;
 }
 
-async function getProjects(workspaceId: string, includeArchived = false) {
+// ASYGNUZ: un proyecto sin ninguna fila en project_member sigue visible para
+// todo el workspace (comportamiento actual, sin romper nada). En cuanto un
+// proyecto tiene AL MENOS un miembro asignado, queda restringido solo a esos
+// miembros (más owner/admin/instance-admin, que ya no pasan por aquí).
+async function filtrarPorMembresia(
+  workspaceId: string,
+  userId: string,
+  proyectos: (typeof projectTable.$inferSelect)[],
+) {
+  const restringidosRows = await db
+    .selectDistinct({ projectId: projectMemberTable.projectId })
+    .from(projectMemberTable)
+    .innerJoin(projectTable, eq(projectTable.id, projectMemberTable.projectId))
+    .where(eq(projectTable.workspaceId, workspaceId));
+
+  if (restringidosRows.length === 0) return proyectos;
+  const restringidos = new Set(restringidosRows.map((r) => r.projectId));
+
+  const misRows = await db
+    .select({ projectId: projectMemberTable.projectId })
+    .from(projectMemberTable)
+    .where(eq(projectMemberTable.userId, userId));
+  const misIds = new Set(misRows.map((r) => r.projectId));
+
+  return proyectos.filter((p) => !restringidos.has(p.id) || misIds.has(p.id));
+}
+
+async function getProjects(
+  workspaceId: string,
+  includeArchived = false,
+  userId?: string,
+) {
   const projects = await db.query.projectTable.findMany({
     where: includeArchived
       ? eq(projectTable.workspaceId, workspaceId)
@@ -79,12 +115,16 @@ async function getProjects(workspaceId: string, includeArchived = false) {
     ],
   });
 
+  const visibles = (await bypassesProjectFilter(workspaceId, userId))
+    ? projects
+    : await filtrarPorMembresia(workspaceId, userId as string, projects);
+
   const statisticsByProject = await getProjectStatistics(
     workspaceId,
     includeArchived,
   );
 
-  return projects.map((project) => ({
+  return visibles.map((project) => ({
     ...project,
     statistics: statisticsByProject.get(project.id) ?? EMPTY_STATISTICS,
     archivedTasks: [],
