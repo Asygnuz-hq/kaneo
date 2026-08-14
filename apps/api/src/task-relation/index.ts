@@ -10,6 +10,7 @@ import { validateWorkspaceAccess } from "../utils/validate-workspace-access";
 import { workspaceAccess } from "../utils/workspace-access-middleware";
 import createTaskRelation from "./controllers/create-task-relation";
 import deleteTaskRelation from "./controllers/delete-task-relation";
+import getProjectSubtaskRelations from "./controllers/get-project-subtask-relations";
 import getTaskRelations from "./controllers/get-task-relations";
 
 const taskRelationSchema = v.object({
@@ -26,6 +27,29 @@ const taskRelation = new Hono<{
     workspaceId: string;
   };
 }>()
+  .get(
+    "/project/:projectId",
+    describeRoute({
+      operationId: "getProjectSubtaskRelations",
+      tags: ["Task Relations"],
+      description:
+        "Get all subtask relations for a project in one call (ASYGNUZ, for rendering the task list as a tree)",
+      responses: {
+        200: {
+          description: "Subtask relations for the project",
+          content: {
+            "application/json": { schema: resolver(v.any()) },
+          },
+        },
+      },
+    }),
+    validator("param", v.object({ projectId: v.string() })),
+    workspaceAccess.fromProject("projectId"),
+    async (c) => {
+      const { projectId } = c.req.valid("param");
+      return c.json(await getProjectSubtaskRelations(projectId));
+    },
+  )
   .get(
     "/:taskId",
     describeRoute({
