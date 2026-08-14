@@ -33,24 +33,43 @@ async function addProjectMember(projectId: string, userId: string) {
     });
   }
 
+  const membershipWhere = and(
+    eq(projectMemberTable.projectId, projectId),
+    eq(projectMemberTable.userId, userId),
+  );
+
   const [existing] = await db
-    .select({ id: projectMemberTable.id })
+    .select()
     .from(projectMemberTable)
-    .where(
-      and(
-        eq(projectMemberTable.projectId, projectId),
-        eq(projectMemberTable.userId, userId),
-      ),
-    )
+    .where(membershipWhere)
     .limit(1);
   if (existing) return existing;
 
-  const [created] = await db
-    .insert(projectMemberTable)
-    .values({ id: createId(), projectId, userId })
-    .returning();
+  try {
+    const [created] = await db
+      .insert(projectMemberTable)
+      .values({ id: createId(), projectId, userId })
+      .returning();
+    return created;
+  } catch (error) {
+    // Dos requests concurrentes agregando a la misma persona: el segundo
+    // choca contra project_member_project_id_user_id_unique en vez de
+    // encontrar la fila del select de arriba (condición de carrera). En ese
+    // caso el resultado deseado ya existe — devolverlo en vez de un 500.
+    const isUniqueViolation =
+      error instanceof Error &&
+      "code" in error &&
+      (error as { code?: string }).code === "23505";
+    if (!isUniqueViolation) throw error;
 
-  return created;
+    const [row] = await db
+      .select()
+      .from(projectMemberTable)
+      .where(membershipWhere)
+      .limit(1);
+    if (!row) throw error;
+    return row;
+  }
 }
 
 export default addProjectMember;

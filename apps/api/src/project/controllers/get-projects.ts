@@ -1,10 +1,11 @@
 import { and, count, eq, isNull, min, sql } from "drizzle-orm";
-import db, { schema } from "../../database";
+import db from "../../database";
 import {
   projectMemberTable,
   projectTable,
   taskTable,
 } from "../../database/schema";
+import { bypassesProjectFilter } from "../../project-member/utils/can-access-project";
 
 type ProjectStatistics = {
   completionPercentage: number;
@@ -64,37 +65,6 @@ async function getProjectStatistics(
   }
 
   return statisticsByProject;
-}
-
-// ASYGNUZ: true si el usuario debe ver TODOS los proyectos del workspace sin
-// filtrar por project_member — instance admin, o rol de workspace owner/admin.
-// Mismo criterio que require-workspace-permission.ts, pero de solo lectura
-// (no lanza 403, solo decide si aplica el filtro por proyecto).
-async function bypassesProjectFilter(
-  workspaceId: string,
-  userId: string | undefined,
-): Promise<boolean> {
-  if (!userId) return true; // llamadas de sistema/sin usuario: no filtrar
-
-  const [user] = await db
-    .select({ role: schema.userTable.role })
-    .from(schema.userTable)
-    .where(eq(schema.userTable.id, userId))
-    .limit(1);
-  if (user?.role === "admin") return true;
-
-  const [member] = await db
-    .select({ role: schema.workspaceUserTable.role })
-    .from(schema.workspaceUserTable)
-    .where(
-      and(
-        eq(schema.workspaceUserTable.workspaceId, workspaceId),
-        eq(schema.workspaceUserTable.userId, userId),
-      ),
-    )
-    .limit(1);
-
-  return member?.role === "owner" || member?.role === "admin";
 }
 
 // ASYGNUZ: un proyecto sin ninguna fila en project_member sigue visible para
