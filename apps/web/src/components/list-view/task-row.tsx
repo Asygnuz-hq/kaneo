@@ -6,8 +6,10 @@ import {
   Calendar,
   CalendarClock,
   CalendarX,
+  ChevronRight,
   GitMerge,
   GitPullRequest,
+  Zap,
 } from "lucide-react";
 import { type CSSProperties, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
@@ -51,9 +53,21 @@ import { ContextMenu, ContextMenuTrigger } from "../ui/context-menu";
 type TaskRowProps = {
   task: Task;
   projectSlug: string;
+  // ASYGNUZ: soporte de árbol Épica -> Tareas -> Subtareas en la lista.
+  indentLevel?: number;
+  childCount?: number;
+  isExpanded?: boolean;
+  onToggleExpand?: () => void;
 };
 
-function TaskRow({ task, projectSlug }: TaskRowProps) {
+function TaskRow({
+  task,
+  projectSlug,
+  indentLevel = 0,
+  childCount = 0,
+  isExpanded = true,
+  onToggleExpand,
+}: TaskRowProps) {
   const { t } = useTranslation();
   const navigate = useNavigate();
   const {
@@ -199,9 +213,34 @@ function TaskRow({ task, projectSlug }: TaskRowProps) {
               "group relative flex items-center gap-3 px-4 py-1.5 transition-colors cursor-pointer",
               isTaskSelected ? "bg-accent/45" : "hover:bg-accent/60",
             )}
-            {...attributes}
-            {...listeners}
+            style={{ paddingLeft: 16 + indentLevel * 20 }}
+            {...(indentLevel === 0 ? attributes : {})}
+            {...(indentLevel === 0 ? listeners : {})}
           >
+            {indentLevel > 0 && (
+              <div className="flex-shrink-0 w-3 border-l-2 border-b-2 border-border/70 h-3 -mr-1 rounded-bl-sm" />
+            )}
+            {childCount > 0 ? (
+              <button
+                type="button"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  onToggleExpand?.();
+                }}
+                className="flex-shrink-0 flex items-center gap-1 text-muted-foreground hover:text-foreground"
+                title={t("tasks:subtasks.title")}
+              >
+                <ChevronRight
+                  className={cn(
+                    "size-3.5 transition-transform",
+                    isExpanded && "rotate-90",
+                  )}
+                />
+                <Zap className="size-3.5 text-warning" />
+              </button>
+            ) : (
+              indentLevel === 0 && <div className="w-[15px] flex-shrink-0" />
+            )}
             {showPriority && (
               <div className="flex-shrink-0 first:[&_svg]:h-4 first:[&_svg]:w-4">
                 {getPriorityIcon(task.priority ?? "")}

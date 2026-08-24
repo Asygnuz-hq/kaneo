@@ -22,10 +22,11 @@ import { useNavigate } from "@tanstack/react-router";
 import { AnimatePresence, motion } from "framer-motion";
 import { produce } from "immer";
 import { Archive, ChevronRight, Flag, Plus } from "lucide-react";
-import { useEffect, useState } from "react";
+import { type ReactNode, useEffect, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { priorityColorsTaskCard } from "@/constants/priority-colors";
 import { useUpdateTask } from "@/hooks/mutations/task/use-update-task";
+import useGetProjectSubtaskRelations from "@/hooks/queries/task-relation/use-get-project-subtask-relations";
 import { useRegisterShortcuts } from "@/hooks/use-keyboard-shortcuts";
 import { cn } from "@/lib/cn";
 import { getColumnIcon } from "@/lib/column";
@@ -74,6 +75,34 @@ function ListView({ project, disableDragDrop = false }: ListViewProps) {
   const [columnToArchive, setColumnToArchive] = useState<
     ProjectWithTasks["columns"][number] | null
   >(null);
+
+  // ASYGNUZ: árbol Épica -> Tareas -> Subtareas en la lista.
+  const { data: subtaskRelations } = useGetProjectSubtaskRelations(
+    project?.id ?? "",
+  );
+  const childrenOf = useMemo(() => {
+    const map = new Map<string, string[]>();
+    for (const rel of subtaskRelations ?? []) {
+      const kids = map.get(rel.sourceTaskId) ?? [];
+      kids.push(rel.targetTaskId);
+      map.set(rel.sourceTaskId, kids);
+    }
+    return map;
+  }, [subtaskRelations]);
+  const [collapsedTaskIds, setCollapsedTaskIds] = useState<Set<string>>(
+    new Set(),
+  );
+  const toggleCollapsed = (taskId: string) => {
+    setCollapsedTaskIds((prev) => {
+      const next = new Set(prev);
+      if (next.has(taskId)) {
+        next.delete(taskId);
+      } else {
+        next.add(taskId);
+      }
+      return next;
+    });
+  };
 
   useEffect(() => {
     if (project?.columns) {
@@ -291,6 +320,55 @@ function ListView({ project, disableDragDrop = false }: ListViewProps) {
 
     const showDropIndicator = activeId && overColumnId === column.id;
 
+    // Un task es "raíz" en esta columna si nadie más de la misma columna lo
+    // lista como subtarea -- si el padre está en otra columna/estado, el
+    // hijo se muestra suelto (no hay dónde anidarlo en esta vista agrupada
+    // por columna).
+    const idsInColumn = new Set(column.tasks.map((t) => t.id));
+    const childIdsInColumn = new Set<string>();
+    for (const [parentId, kidIds] of childrenOf) {
+      if (!idsInColumn.has(parentId)) continue;
+      for (const kidId of kidIds) {
+        if (idsInColumn.has(kidId)) childIdsInColumn.add(kidId);
+      }
+    }
+    const rootTasks = column.tasks.filter((t) => !childIdsInColumn.has(t.id));
+
+    const renderTaskTree = (
+      task: ProjectWithTasks["columns"][number]["tasks"][number],
+      level: number,
+    ): ReactNode => {
+      const childIds = (childrenOf.get(task.id) ?? []).filter((id) =>
+        idsInColumn.has(id),
+      );
+      const children = childIds
+        .map((id) => column.tasks.find((t) => t.id === id))
+        .filter((t): t is NonNullable<typeof t> => Boolean(t));
+      const isExpanded = !collapsedTaskIds.has(task.id);
+
+      return (
+        <div key={task.id}>
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.15, ease: [0.23, 1, 0.32, 1] }}
+          >
+            <TaskRow
+              task={task}
+              projectSlug={project?.slug ?? ""}
+              indentLevel={level}
+              childCount={children.length}
+              isExpanded={isExpanded}
+              onToggleExpand={() => toggleCollapsed(task.id)}
+            />
+          </motion.div>
+          {isExpanded &&
+            children.map((child) => renderTaskTree(child, level + 1))}
+        </div>
+      );
+    };
+
     return (
       <div
         className={cn(
@@ -353,21 +431,11 @@ function ListView({ project, disableDragDrop = false }: ListViewProps) {
             className="bg-card transition-[translate,opacity] duration-150 ease-out starting:-translate-y-1 starting:opacity-0 motion-reduce:starting:translate-y-0"
           >
             <SortableContext
-              items={column.tasks}
+              items={rootTasks}
               strategy={verticalListSortingStrategy}
             >
               <AnimatePresence initial={false} mode="popLayout">
-                {column.tasks.map((task) => (
-                  <motion.div
-                    key={task.id}
-                    initial={{ opacity: 0 }}
-                    animate={{ opacity: 1 }}
-                    exit={{ opacity: 0 }}
-                    transition={{ duration: 0.15, ease: [0.23, 1, 0.32, 1] }}
-                  >
-                    <TaskRow task={task} projectSlug={project?.slug ?? ""} />
-                  </motion.div>
-                ))}
+                {rootTasks.map((task) => renderTaskTree(task, 0))}
               </AnimatePresence>
             </SortableContext>
 
