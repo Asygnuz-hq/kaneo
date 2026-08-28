@@ -1,5 +1,5 @@
 {
-	"id": "f2c94c78-57b5-4089-9de8-adcd3bfec637",
+	"id": "9f67f0d6-b802-4751-9d9a-577ce21440a0",
 	"prevId": "6ed5db76-6409-4440-81ab-7a38f6832db9",
 	"version": "7",
 	"dialect": "postgresql",
@@ -2120,85 +2120,6 @@
 			"checkConstraints": {},
 			"isRLSEnabled": false
 		},
-		"public.project_member": {
-			"name": "project_member",
-			"schema": "",
-			"columns": {
-				"id": {
-					"name": "id",
-					"type": "text",
-					"primaryKey": true,
-					"notNull": true
-				},
-				"project_id": {
-					"name": "project_id",
-					"type": "text",
-					"primaryKey": false,
-					"notNull": true
-				},
-				"user_id": {
-					"name": "user_id",
-					"type": "text",
-					"primaryKey": false,
-					"notNull": true
-				},
-				"created_at": {
-					"name": "created_at",
-					"type": "timestamp",
-					"primaryKey": false,
-					"notNull": true,
-					"default": "now()"
-				}
-			},
-			"indexes": {
-				"project_member_userId_idx": {
-					"name": "project_member_userId_idx",
-					"columns": [
-						{
-							"expression": "user_id",
-							"isExpression": false,
-							"asc": true,
-							"nulls": "last"
-						}
-					],
-					"isUnique": false,
-					"concurrently": false,
-					"method": "btree",
-					"with": {}
-				}
-			},
-			"foreignKeys": {
-				"project_member_project_id_project_id_fk": {
-					"name": "project_member_project_id_project_id_fk",
-					"tableFrom": "project_member",
-					"tableTo": "project",
-					"columnsFrom": ["project_id"],
-					"columnsTo": ["id"],
-					"onDelete": "cascade",
-					"onUpdate": "cascade"
-				},
-				"project_member_user_id_user_id_fk": {
-					"name": "project_member_user_id_user_id_fk",
-					"tableFrom": "project_member",
-					"tableTo": "user",
-					"columnsFrom": ["user_id"],
-					"columnsTo": ["id"],
-					"onDelete": "cascade",
-					"onUpdate": "no action"
-				}
-			},
-			"compositePrimaryKeys": {},
-			"uniqueConstraints": {
-				"project_member_project_id_user_id_unique": {
-					"name": "project_member_project_id_user_id_unique",
-					"nullsNotDistinct": false,
-					"columns": ["project_id", "user_id"]
-				}
-			},
-			"policies": {},
-			"checkConstraints": {},
-			"isRLSEnabled": false
-		},
 		"public.project": {
 			"name": "project",
 			"schema": "",
@@ -2669,7 +2590,7 @@
 					"name": "priority",
 					"type": "text",
 					"primaryKey": false,
-					"notNull": false,
+					"notNull": true,
 					"default": "'low'"
 				},
 				"start_date": {

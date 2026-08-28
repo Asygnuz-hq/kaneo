@@ -231,12 +231,15 @@ function ListView({ project, disableDragDrop = false }: ListViewProps) {
         destinationColumn.tasks.forEach((t, index) => {
           updateTask({
             ...t,
-            status: destinationColumn.id,
+            status: destinationColumn.slug,
             position: index,
           });
         });
       } else {
-        task.status = destinationColumn.id;
+        // A task's status is a column slug. The column id is only the
+        // droppable identity here, and the two are interchangeable only
+        // because the tasks endpoint happens to return `id: column.slug`.
+        task.status = destinationColumn.slug;
         const destinationIndex =
           overId === destinationColumn.id
             ? destinationColumn.tasks.length
@@ -247,7 +250,7 @@ function ListView({ project, disableDragDrop = false }: ListViewProps) {
         destinationColumn.tasks.forEach((t, index) => {
           updateTask({
             ...t,
-            status: destinationColumn.id,
+            status: destinationColumn.slug,
             position: index,
           });
         });
