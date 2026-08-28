@@ -9,7 +9,6 @@ import {
   ChevronRight,
   GitMerge,
   GitPullRequest,
-  Zap,
 } from "lucide-react";
 import { type CSSProperties, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
@@ -40,6 +39,7 @@ import {
 } from "@/lib/due-date-status";
 import { getInitials } from "@/lib/get-initials";
 import { getPriorityIcon } from "@/lib/priority";
+import { getIssueTypeIcon } from "@/lib/task-type";
 import { toast } from "@/lib/toast";
 import queryClient from "@/query-client";
 import useBulkSelectionStore from "@/store/bulk-selection";
@@ -227,7 +227,7 @@ function TaskRow({
                   e.stopPropagation();
                   onToggleExpand?.();
                 }}
-                className="flex-shrink-0 flex items-center gap-1 text-muted-foreground hover:text-foreground"
+                className="flex-shrink-0 flex items-center text-muted-foreground hover:text-foreground"
                 title={t("tasks:subtasks.title")}
               >
                 <ChevronRight
@@ -236,11 +236,20 @@ function TaskRow({
                     isExpanded && "rotate-90",
                   )}
                 />
-                <Zap className="size-3.5 text-warning" />
               </button>
             ) : (
               indentLevel === 0 && <div className="w-[15px] flex-shrink-0" />
             )}
+            {/* ASYGNUZ: the task's own type (task/story/bug/epic) -- set
+            explicitly, independent of whether it has subtasks. The chevron
+            above is what reflects "has children"; this is what reflects
+            "is an epic". */}
+            <div
+              className="flex-shrink-0"
+              title={t(`tasks:type.${task.issueType || "task"}`)}
+            >
+              {getIssueTypeIcon(task.issueType)}
+            </div>
             {showPriority && (
               <div className="flex-shrink-0 first:[&_svg]:h-4 first:[&_svg]:w-4">
                 {getPriorityIcon(task.priority ?? "")}

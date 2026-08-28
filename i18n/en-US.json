@@ -1983,7 +1983,8 @@
 			"label": "Type",
 			"task": "Task",
 			"story": "Story",
-			"bug": "Bug"
+			"bug": "Bug",
+			"epic": "Epic"
 		},
 		"sprint": {
 			"label": "Sprint",
