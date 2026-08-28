@@ -4,6 +4,7 @@ import {
   CalendarRange,
   SquareKanban,
   SquircleDashed,
+  Users,
 } from "lucide-react";
 import { type ReactNode, useState } from "react";
 import { useTranslation } from "react-i18next";
@@ -86,6 +87,17 @@ export default function ProjectLayout({
   const handleNavigateToGantt = () => {
     navigate({
       to: "/dashboard/workspace/$workspaceId/project/$projectId/gantt",
+      params: { workspaceId, projectId },
+    });
+  };
+
+  // ASYGNUZ: Service Desk client management. Not part of the view switcher
+  // above (that's for the four task views a project can be seen through) --
+  // this is a settings-style destination, so it lives as its own icon
+  // button next to whatever headerActions the current page passes in.
+  const handleNavigateToClients = () => {
+    navigate({
+      to: "/dashboard/workspace/$workspaceId/project/$projectId/clients",
       params: { workspaceId, projectId },
     });
   };
@@ -214,6 +226,23 @@ export default function ProjectLayout({
           </div>
 
           <div className="flex shrink-0 items-center gap-1.5">
+            <TooltipProvider>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Button
+                    variant="ghost"
+                    size="icon-xs"
+                    className="h-7 w-7 text-foreground/85 hover:text-foreground"
+                    onClick={handleNavigateToClients}
+                  >
+                    <Users className="size-4" />
+                  </Button>
+                </TooltipTrigger>
+                <TooltipContent>
+                  <p className="text-[10px]">Clientes del portal</p>
+                </TooltipContent>
+              </Tooltip>
+            </TooltipProvider>
             {headerActions}
           </div>
         </div>
