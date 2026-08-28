@@ -12,6 +12,7 @@ import {
   invitationTable,
   labelTable,
   notificationTable,
+  projectMemberTable,
   projectTable,
   sessionTable,
   taskRelationTable,
@@ -107,6 +108,24 @@ export const projectTableRelations = relations(
     githubIntegration: many(githubIntegrationTable),
     integrations: many(integrationTable),
     notificationWorkspaceProjects: many(userNotificationWorkspaceProjectTable),
+    // ASYGNUZ
+    members: many(projectMemberTable),
+  }),
+);
+
+// ASYGNUZ: quién tiene acceso explícito a un proyecto restringido. Ver
+// project-member/utils/can-access-project.ts.
+export const projectMemberTableRelations = relations(
+  projectMemberTable,
+  ({ one }) => ({
+    project: one(projectTable, {
+      fields: [projectMemberTable.projectId],
+      references: [projectTable.id],
+    }),
+    user: one(userTable, {
+      fields: [projectMemberTable.userId],
+      references: [userTable.id],
+    }),
   }),
 );
 
