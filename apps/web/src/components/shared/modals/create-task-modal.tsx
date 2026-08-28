@@ -63,7 +63,7 @@ type CreateTaskModalProps = {
 };
 
 type Priority = "no-priority" | "low" | "medium" | "high" | "urgent";
-type IssueType = "task" | "story" | "bug";
+type IssueType = "task" | "story" | "bug" | "epic";
 
 type LabelColor =
   | "gray"
@@ -488,7 +488,7 @@ function CreateTaskModal({
 
   const issueTypeOptions = useMemo(
     () =>
-      (["task", "story", "bug"] as const).map((value) => ({
+      (["task", "story", "bug", "epic"] as const).map((value) => ({
         value,
         label: t(`tasks:type.${value}`),
       })),

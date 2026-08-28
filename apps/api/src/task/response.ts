@@ -1,7 +1,7 @@
 import { nullableResponseTimestamp, responseTimestamp, z } from "../openapi";
 
 const priorityDescription = "One of: no-priority, low, medium, high, urgent.";
-const issueTypeDescription = "One of: task, story, bug.";
+const issueTypeDescription = "One of: task, story, bug, epic.";
 
 export const taskSchema = z
   .object({
