@@ -1,5 +1,5 @@
 @import "tailwindcss";
-@import "@fontsource-variable/geist";
+@import "@fontsource-variable/roboto";
 @import "@fontsource-variable/geist-mono";
 
 input:-webkit-autofill,
@@ -107,7 +107,7 @@ input:-webkit-autofill:active {
 
 :root {
   --font-sans:
-    "Geist Variable",
+    "Roboto Variable",
     ui-sans-serif,
     system-ui,
     sans-serif;
