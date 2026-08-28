@@ -15,6 +15,7 @@ import {
   projectMemberTable,
   projectTable,
   sessionTable,
+  sprintTable,
   taskRelationTable,
   taskReminderSentTable,
   taskTable,
@@ -110,8 +111,18 @@ export const projectTableRelations = relations(
     notificationWorkspaceProjects: many(userNotificationWorkspaceProjectTable),
     // ASYGNUZ
     members: many(projectMemberTable),
+    sprints: many(sprintTable),
   }),
 );
+
+// ASYGNUZ: Scrum sprints for a project.
+export const sprintTableRelations = relations(sprintTable, ({ one, many }) => ({
+  project: one(projectTable, {
+    fields: [sprintTable.projectId],
+    references: [projectTable.id],
+  }),
+  tasks: many(taskTable),
+}));
 
 // ASYGNUZ: quién tiene acceso explícito a un proyecto restringido. Ver
 // project-member/utils/can-access-project.ts.
@@ -164,6 +175,10 @@ export const taskTableRelations = relations(taskTable, ({ one, many }) => ({
   column: one(columnTable, {
     fields: [taskTable.columnId],
     references: [columnTable.id],
+  }),
+  sprint: one(sprintTable, {
+    fields: [taskTable.sprintId],
+    references: [sprintTable.id],
   }),
   timeEntries: many(timeEntryTable),
   activities: many(activityTable),

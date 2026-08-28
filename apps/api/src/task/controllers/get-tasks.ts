@@ -133,6 +133,7 @@ async function getTasks(projectId: string, options: GetTasksOptions = {}) {
     status: taskTable.status,
     priority: taskTable.priority,
     issueType: taskTable.issueType,
+    sprintId: taskTable.sprintId,
     startDate: taskTable.startDate,
     dueDate: taskTable.dueDate,
     position: taskTable.position,

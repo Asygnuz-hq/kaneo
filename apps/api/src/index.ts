@@ -48,6 +48,7 @@ import projectMember from "./project-member";
 import { initializeScheduler, shutdownScheduler } from "./scheduler";
 import search from "./search";
 import slackIntegration from "./slack-integration";
+import sprint from "./sprint";
 import { getPrivateObject } from "./storage/s3";
 import task from "./task";
 import taskRelation from "./task-relation";
@@ -575,6 +576,7 @@ export function createApp() {
   const billingApi = api.route("/billing", billing);
   const projectApi = api.route("/project", project);
   const projectMemberApi = api.route("/project-member", projectMember);
+  const sprintApi = api.route("/sprint", sprint);
   const taskApi = api.route("/task", task);
   const columnApi = api.route("/column", column);
   const activityApi = api.route("/activity", activity);
@@ -770,6 +772,7 @@ export function createApp() {
     publicProjectApi,
     searchApi,
     slackIntegrationApi,
+    sprintApi,
     taskApi,
     taskRelationApi,
     telegramIntegrationApi,
@@ -889,6 +892,7 @@ const {
   publicProjectApi,
   searchApi,
   slackIntegrationApi,
+  sprintApi,
   taskApi,
   taskRelationApi,
   telegramIntegrationApi,
@@ -914,6 +918,7 @@ export type AppType =
   | typeof configApi
   | typeof projectApi
   | typeof projectMemberApi
+  | typeof sprintApi
   | typeof taskApi
   | typeof columnApi
   | typeof activityApi

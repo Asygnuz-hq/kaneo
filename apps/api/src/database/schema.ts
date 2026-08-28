@@ -369,6 +369,38 @@ export const projectMemberTable = pgTable(
   ],
 );
 
+// ASYGNUZ: Scrum-style sprints. A project can have several, but only one
+// "active" at a time (enforced in app code, not the DB) — starting one is
+// what puts its tasks on the board instead of the backlog. Deleting a sprint
+// unassigns its tasks (sets taskTable.sprintId to null) rather than deleting
+// them.
+export const sprintTable = pgTable(
+  "sprint",
+  {
+    id: text("id")
+      .$defaultFn(() => createId())
+      .primaryKey(),
+    projectId: text("project_id")
+      .notNull()
+      .references(() => projectTable.id, {
+        onDelete: "cascade",
+        onUpdate: "cascade",
+      }),
+    name: text("name").notNull(),
+    goal: text("goal"),
+    startDate: timestamp("start_date", { mode: "date" }),
+    endDate: timestamp("end_date", { mode: "date" }),
+    status: text("status").notNull().default("planned"),
+    position: integer("position").default(0).notNull(),
+    createdAt: timestamp("created_at", { mode: "date" }).defaultNow().notNull(),
+    updatedAt: timestamp("updated_at", { mode: "date" })
+      .defaultNow()
+      .$onUpdate(() => new Date())
+      .notNull(),
+  },
+  (table) => [index("sprint_projectId_idx").on(table.projectId)],
+);
+
 export const columnTable = pgTable(
   "column",
   {
@@ -456,6 +488,11 @@ export const taskTable = pgTable(
     priority: text("priority").default("low").notNull(),
     // ASYGNUZ: task | story | bug — shown as an icon next to the task ID.
     issueType: text("issue_type").default("task").notNull(),
+    // ASYGNUZ: null = sits in the backlog, not assigned to any sprint yet.
+    sprintId: text("sprint_id").references(() => sprintTable.id, {
+      onDelete: "set null",
+      onUpdate: "cascade",
+    }),
     startDate: timestamp("start_date", { mode: "date" }),
     dueDate: timestamp("due_date", { mode: "date" }),
     createdAt: timestamp("created_at", { mode: "date" }).defaultNow().notNull(),
@@ -469,6 +506,7 @@ export const taskTable = pgTable(
     index("task_dueDate_idx").on(table.dueDate),
     index("task_assigneeId_idx").on(table.userId),
     index("task_columnId_idx").on(table.columnId),
+    index("task_sprintId_idx").on(table.sprintId),
     unique("task_project_number_unique").on(table.projectId, table.number),
   ],
 );

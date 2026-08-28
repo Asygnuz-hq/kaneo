@@ -24,6 +24,9 @@ export const taskSchema = z
     }),
     priority: z.string().openapi({ description: priorityDescription }),
     issueType: z.string().openapi({ description: issueTypeDescription }),
+    sprintId: z.string().nullable().openapi({
+      description: "Null means the task sits in the backlog.",
+    }),
     startDate: nullableResponseTimestamp,
     dueDate: nullableResponseTimestamp,
     createdAt: responseTimestamp,
@@ -68,6 +71,9 @@ export const boardTaskSchema = z
     status: z.string(),
     priority: z.string().openapi({ description: priorityDescription }),
     issueType: z.string().openapi({ description: issueTypeDescription }),
+    sprintId: z.string().nullable().openapi({
+      description: "Null means the task sits in the backlog.",
+    }),
     startDate: nullableResponseTimestamp,
     dueDate: nullableResponseTimestamp,
     position: z.number().nullable(),

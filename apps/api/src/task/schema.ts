@@ -100,6 +100,12 @@ export const updateIssueTypeBody = z.object({ issueType });
 export const updateAssigneeBody = z.object({
   userId: z.string().nullable().openapi({ description: "Null unassigns." }),
 });
+export const updateTaskSprintBody = z.object({
+  sprintId: z
+    .string()
+    .nullable()
+    .openapi({ description: "Null sends the task back to the backlog." }),
+});
 export const updateDueDateBody = z.object({ dueDate: z.string().optional() });
 export const updateTitleBody = z.object({ title: z.string() });
 export const updateDescriptionBody = z.object({ description: z.string() });
