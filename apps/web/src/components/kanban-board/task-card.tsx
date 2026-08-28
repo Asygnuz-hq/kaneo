@@ -36,6 +36,7 @@ import {
 } from "@/lib/due-date-status";
 import { getInitials } from "@/lib/get-initials";
 import { getPriorityIcon } from "@/lib/priority";
+import { getIssueTypeIcon } from "@/lib/task-type";
 import { toast } from "@/lib/toast";
 import queryClient from "@/query-client";
 import useBulkSelectionStore from "@/store/bulk-selection";
@@ -205,8 +206,11 @@ function TaskCard({ task, disableDragDrop = false }: TaskCardProps) {
             }}
           >
             {showTaskNumbers && (
-              <div className="mb-2 text-[10px] font-mono text-muted-foreground/90">
-                {project?.slug}-{task.number}
+              <div className="mb-2 flex items-center gap-1 text-[10px] font-mono text-muted-foreground/90">
+                {getIssueTypeIcon(task.issueType)}
+                <span>
+                  {project?.slug}-{task.number}
+                </span>
               </div>
             )}
 

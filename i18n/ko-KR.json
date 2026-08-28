@@ -150,7 +150,8 @@
 					"terracotta": "테라코타",
 					"rose": "로즈",
 					"crimson": "크림슨"
-				}
+				},
+				"issueType": "Type"
 			}
 		}
 	},
@@ -1971,6 +1972,12 @@
 				"deleteRow": "행 삭제",
 				"deleteTable": "표 삭제"
 			}
+		},
+		"type": {
+			"bug": "Bug",
+			"label": "Type",
+			"story": "Story",
+			"task": "Task"
 		}
 	},
 	"invitations": {

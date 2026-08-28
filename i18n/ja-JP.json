@@ -150,7 +150,8 @@
 					"terracotta": "テラコッタ",
 					"rose": "ローズ",
 					"crimson": "クリムゾン"
-				}
+				},
+				"issueType": "Type"
 			}
 		}
 	},
@@ -1971,6 +1972,12 @@
 				"deleteRow": "行を削除",
 				"deleteTable": "表を削除"
 			}
+		},
+		"type": {
+			"bug": "Bug",
+			"label": "Type",
+			"story": "Story",
+			"task": "Task"
 		}
 	},
 	"invitations": {

@@ -13,10 +13,23 @@ export const VALID_PRIORITIES = [
 
 export const VIRTUAL_STATUSES = ["planned", "archived"] as const;
 
+// ASYGNUZ: issue type, shown as an icon next to the task ID (Jira-style).
+// Separate from the épica concept in list-view, which is derived from
+// "subtask" task_relation rows, not a stored field.
+export const VALID_ISSUE_TYPES = ["task", "story", "bug"] as const;
+
 export function assertValidPriority(priority: string): void {
   if (!(VALID_PRIORITIES as readonly string[]).includes(priority)) {
     throw new HTTPException(400, {
       message: `Invalid priority "${priority}". Valid values: ${VALID_PRIORITIES.join(", ")}`,
+    });
+  }
+}
+
+export function assertValidIssueType(issueType: string): void {
+  if (!(VALID_ISSUE_TYPES as readonly string[]).includes(issueType)) {
+    throw new HTTPException(400, {
+      message: `Invalid issue type "${issueType}". Valid values: ${VALID_ISSUE_TYPES.join(", ")}`,
     });
   }
 }

@@ -150,7 +150,8 @@
 					"terracotta": "Đất nung",
 					"rose": "Hồng",
 					"crimson": "Đỏ thẫm"
-				}
+				},
+				"issueType": "Type"
 			}
 		}
 	},
@@ -1971,6 +1972,12 @@
 			"title": "Calendar",
 			"today": "Today",
 			"loadError": "Failed to load tasks."
+		},
+		"type": {
+			"bug": "Bug",
+			"label": "Type",
+			"story": "Story",
+			"task": "Task"
 		}
 	},
 	"invitations": {

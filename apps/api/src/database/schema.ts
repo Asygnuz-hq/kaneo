@@ -454,6 +454,8 @@ export const taskTable = pgTable(
       onUpdate: "cascade",
     }),
     priority: text("priority").default("low").notNull(),
+    // ASYGNUZ: task | story | bug — shown as an icon next to the task ID.
+    issueType: text("issue_type").default("task").notNull(),
     startDate: timestamp("start_date", { mode: "date" }),
     dueDate: timestamp("due_date", { mode: "date" }),
     createdAt: timestamp("created_at", { mode: "date" }).defaultNow().notNull(),

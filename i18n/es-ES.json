@@ -150,7 +150,8 @@
 					"terracotta": "Terracota",
 					"rose": "Rosa",
 					"crimson": "Carmesí"
-				}
+				},
+				"issueType": "Tipo"
 			}
 		}
 	},
@@ -1983,6 +1984,12 @@
 			"title": "Calendar",
 			"today": "Today",
 			"loadError": "Failed to load tasks."
+		},
+		"type": {
+			"label": "Tipo",
+			"task": "Tarea",
+			"story": "Historia",
+			"bug": "Bug"
 		}
 	},
 	"invitations": {

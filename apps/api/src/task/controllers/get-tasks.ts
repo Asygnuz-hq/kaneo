@@ -27,6 +27,7 @@ type GetTasksOptions = {
   limit?: number;
   page?: number;
   priority?: string;
+  issueType?: string;
   sortBy?:
     | "createdAt"
     | "priority"
@@ -89,6 +90,10 @@ async function getTasks(projectId: string, options: GetTasksOptions = {}) {
     conditions.push(eq(taskTable.priority, options.priority));
   }
 
+  if (options.issueType) {
+    conditions.push(eq(taskTable.issueType, options.issueType));
+  }
+
   if (options.assigneeId) {
     conditions.push(eq(taskTable.userId, options.assigneeId));
   }
@@ -127,6 +132,7 @@ async function getTasks(projectId: string, options: GetTasksOptions = {}) {
     description: taskTable.description,
     status: taskTable.status,
     priority: taskTable.priority,
+    issueType: taskTable.issueType,
     startDate: taskTable.startDate,
     dueDate: taskTable.dueDate,
     position: taskTable.position,

@@ -581,8 +581,16 @@ const task = apiRouter<BaseVariables & { workspaceId: string }>()
   })
   .openapi(createTaskRoute, async (c) => {
     const { projectId } = c.req.param();
-    const { title, description, startDate, dueDate, priority, status, userId } =
-      c.req.valid("json");
+    const {
+      title,
+      description,
+      startDate,
+      dueDate,
+      priority,
+      issueType,
+      status,
+      userId,
+    } = c.req.valid("json");
 
     const parsedStartDate =
       startDate !== undefined
@@ -604,6 +612,7 @@ const task = apiRouter<BaseVariables & { workspaceId: string }>()
       startDate: parsedStartDate,
       dueDate: parsedDueDate,
       priority,
+      issueType,
       status,
     });
 
@@ -638,6 +647,7 @@ const task = apiRouter<BaseVariables & { workspaceId: string }>()
       startDate,
       dueDate,
       priority,
+      issueType,
       status,
       projectId,
       position,
@@ -669,6 +679,7 @@ const task = apiRouter<BaseVariables & { workspaceId: string }>()
       position,
       userId,
       currentUserId,
+      issueType,
     );
 
     return c.json(task, 200);
