@@ -39,9 +39,13 @@ import { ContextMenu, ContextMenuTrigger } from "../ui/context-menu";
 
 type BacklogTaskRowProps = {
   task: Task;
+  disableDragDrop?: boolean;
 };
 
-export default function BacklogTaskRow({ task }: BacklogTaskRowProps) {
+export default function BacklogTaskRow({
+  task,
+  disableDragDrop = false,
+}: BacklogTaskRowProps) {
   const { t } = useTranslation();
   const navigate = useNavigate();
   const {
@@ -51,7 +55,7 @@ export default function BacklogTaskRow({ task }: BacklogTaskRowProps) {
     transform,
     transition,
     isDragging,
-  } = useSortable({ id: task.id });
+  } = useSortable({ id: task.id, disabled: disableDragDrop });
 
   const { project } = useProjectStore();
   const taskIsCompleted = isTaskCompleted(task.status, project?.columns);

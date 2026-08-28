@@ -19,7 +19,8 @@ type WorkspaceIdSource =
         | "activity"
         | "comment"
         | "column"
-        | "workflowRule";
+        | "workflowRule"
+        | "sprint";
       idKey: string;
     }
   | {
@@ -158,7 +159,8 @@ async function lookupAccessContext(
     | "activity"
     | "comment"
     | "column"
-    | "workflowRule",
+    | "workflowRule"
+    | "sprint",
   id: string,
 ): Promise<{ workspaceId: string; projectId: string | null } | null> {
   try {
@@ -321,6 +323,24 @@ async function lookupAccessContext(
           : null;
       }
 
+      case "sprint": {
+        const [sprint] = await db
+          .select({
+            workspaceId: schema.projectTable.workspaceId,
+            projectId: schema.projectTable.id,
+          })
+          .from(schema.sprintTable)
+          .innerJoin(
+            schema.projectTable,
+            eq(schema.sprintTable.projectId, schema.projectTable.id),
+          )
+          .where(eq(schema.sprintTable.id, id))
+          .limit(1);
+        return sprint
+          ? { workspaceId: sprint.workspaceId, projectId: sprint.projectId }
+          : null;
+      }
+
       default:
         return null;
     }
@@ -412,5 +432,11 @@ export const workspaceAccess = {
         { type: "lookup", resource: "workflowRule", idKey },
         { type: "query", key: "workspaceId" },
       ],
+    }),
+
+  // ASYGNUZ
+  fromSprint: (idKey = "id") =>
+    workspaceAccessMiddleware({
+      sources: [{ type: "lookup", resource: "sprint", idKey }],
     }),
 };
