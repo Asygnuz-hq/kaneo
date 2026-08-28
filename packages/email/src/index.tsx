@@ -1,4 +1,5 @@
 export {
+  sendClientPortalInvitationEmail,
   sendMagicLinkEmail,
   sendNotificationEmail,
   sendOtpEmail,

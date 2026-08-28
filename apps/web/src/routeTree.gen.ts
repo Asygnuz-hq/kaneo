@@ -22,6 +22,9 @@ import { Route as AuthVerifyOtpRouteImport } from './routes/auth/verify-otp'
 import { Route as DeviceIndexRouteImport } from './routes/device/index'
 import { Route as DeviceApproveRouteImport } from './routes/device/approve'
 import { Route as McpAuthorizeRouteImport } from './routes/mcp.authorize'
+import { Route as PortalIndexRouteImport } from './routes/portal/index'
+import { Route as PortalAcceptInviteRouteImport } from './routes/portal/accept-invite'
+import { Route as PortalLoginRouteImport } from './routes/portal/login'
 import { Route as PublicProjectProjectIdRouteImport } from './routes/public-project.$projectId'
 import { Route as LayoutAuthenticatedDashboardRouteImport } from './routes/_layout/_authenticated/dashboard'
 import { Route as LayoutAuthenticatedInvitationsRouteImport } from './routes/_layout/_authenticated/invitations'
@@ -119,6 +122,21 @@ const DeviceApproveRoute = DeviceApproveRouteImport.update({
 const McpAuthorizeRoute = McpAuthorizeRouteImport.update({
   id: '/mcp/authorize',
   path: '/mcp/authorize',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const PortalIndexRoute = PortalIndexRouteImport.update({
+  id: '/portal/',
+  path: '/portal/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const PortalAcceptInviteRoute = PortalAcceptInviteRouteImport.update({
+  id: '/portal/accept-invite',
+  path: '/portal/accept-invite',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const PortalLoginRoute = PortalLoginRouteImport.update({
+  id: '/portal/login',
+  path: '/portal/login',
   getParentRoute: () => rootRouteImport,
 } as any)
 const PublicProjectProjectIdRoute = PublicProjectProjectIdRouteImport.update({
@@ -368,8 +386,11 @@ export interface FileRoutesByFullPath {
   '/auth/verify-otp': typeof AuthVerifyOtpRoute
   '/device/approve': typeof DeviceApproveRoute
   '/mcp/authorize': typeof McpAuthorizeRoute
+  '/portal/accept-invite': typeof PortalAcceptInviteRoute
+  '/portal/login': typeof PortalLoginRoute
   '/public-project/$projectId': typeof PublicProjectProjectIdRoute
   '/device/': typeof DeviceIndexRoute
+  '/portal/': typeof PortalIndexRoute
   '/dashboard': typeof LayoutAuthenticatedDashboardRouteWithChildren
   '/invitations': typeof LayoutAuthenticatedInvitationsRoute
   '/onboarding': typeof LayoutAuthenticatedOnboardingRoute
@@ -415,8 +436,11 @@ export interface FileRoutesByTo {
   '/auth/verify-otp': typeof AuthVerifyOtpRoute
   '/device/approve': typeof DeviceApproveRoute
   '/mcp/authorize': typeof McpAuthorizeRoute
+  '/portal/accept-invite': typeof PortalAcceptInviteRoute
+  '/portal/login': typeof PortalLoginRoute
   '/public-project/$projectId': typeof PublicProjectProjectIdRoute
   '/device': typeof DeviceIndexRoute
+  '/portal': typeof PortalIndexRoute
   '/invitations': typeof LayoutAuthenticatedInvitationsRoute
   '/onboarding': typeof LayoutAuthenticatedOnboardingRoute
   '/profile-setup': typeof LayoutAuthenticatedProfileSetupRoute
@@ -464,8 +488,11 @@ export interface FileRoutesById {
   '/auth/verify-otp': typeof AuthVerifyOtpRoute
   '/device/approve': typeof DeviceApproveRoute
   '/mcp/authorize': typeof McpAuthorizeRoute
+  '/portal/accept-invite': typeof PortalAcceptInviteRoute
+  '/portal/login': typeof PortalLoginRoute
   '/public-project/$projectId': typeof PublicProjectProjectIdRoute
   '/device/': typeof DeviceIndexRoute
+  '/portal/': typeof PortalIndexRoute
   '/_layout/_authenticated/dashboard': typeof LayoutAuthenticatedDashboardRouteWithChildren
   '/_layout/_authenticated/invitations': typeof LayoutAuthenticatedInvitationsRoute
   '/_layout/_authenticated/onboarding': typeof LayoutAuthenticatedOnboardingRoute
@@ -514,8 +541,11 @@ export interface FileRouteTypes {
     | '/auth/verify-otp'
     | '/device/approve'
     | '/mcp/authorize'
+    | '/portal/accept-invite'
+    | '/portal/login'
     | '/public-project/$projectId'
     | '/device/'
+    | '/portal/'
     | '/dashboard'
     | '/invitations'
     | '/onboarding'
@@ -561,8 +591,11 @@ export interface FileRouteTypes {
     | '/auth/verify-otp'
     | '/device/approve'
     | '/mcp/authorize'
+    | '/portal/accept-invite'
+    | '/portal/login'
     | '/public-project/$projectId'
     | '/device'
+    | '/portal'
     | '/invitations'
     | '/onboarding'
     | '/profile-setup'
@@ -609,8 +642,11 @@ export interface FileRouteTypes {
     | '/auth/verify-otp'
     | '/device/approve'
     | '/mcp/authorize'
+    | '/portal/accept-invite'
+    | '/portal/login'
     | '/public-project/$projectId'
     | '/device/'
+    | '/portal/'
     | '/_layout/_authenticated/dashboard'
     | '/_layout/_authenticated/invitations'
     | '/_layout/_authenticated/onboarding'
@@ -654,7 +690,10 @@ export interface RootRouteChildren {
   DeviceRoute: typeof DeviceRouteWithChildren
   TestErrorRoute: typeof TestErrorRoute
   McpAuthorizeRoute: typeof McpAuthorizeRoute
+  PortalAcceptInviteRoute: typeof PortalAcceptInviteRoute
+  PortalLoginRoute: typeof PortalLoginRoute
   PublicProjectProjectIdRoute: typeof PublicProjectProjectIdRoute
+  PortalIndexRoute: typeof PortalIndexRoute
   InvitationAcceptInviteIdRoute: typeof InvitationAcceptInviteIdRoute
 }
 
@@ -749,6 +788,27 @@ declare module '@tanstack/react-router' {
       path: '/mcp/authorize'
       fullPath: '/mcp/authorize'
       preLoaderRoute: typeof McpAuthorizeRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/portal/': {
+      id: '/portal/'
+      path: '/portal'
+      fullPath: '/portal/'
+      preLoaderRoute: typeof PortalIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/portal/accept-invite': {
+      id: '/portal/accept-invite'
+      path: '/portal/accept-invite'
+      fullPath: '/portal/accept-invite'
+      preLoaderRoute: typeof PortalAcceptInviteRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/portal/login': {
+      id: '/portal/login'
+      path: '/portal/login'
+      fullPath: '/portal/login'
+      preLoaderRoute: typeof PortalLoginRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/public-project/$projectId': {
@@ -1223,7 +1283,10 @@ const rootRouteChildren: RootRouteChildren = {
   DeviceRoute: DeviceRouteWithChildren,
   TestErrorRoute: TestErrorRoute,
   McpAuthorizeRoute: McpAuthorizeRoute,
+  PortalAcceptInviteRoute: PortalAcceptInviteRoute,
+  PortalLoginRoute: PortalLoginRoute,
   PublicProjectProjectIdRoute: PublicProjectProjectIdRoute,
+  PortalIndexRoute: PortalIndexRoute,
   InvitationAcceptInviteIdRoute: InvitationAcceptInviteIdRoute,
 }
 export const routeTree = rootRouteImport
