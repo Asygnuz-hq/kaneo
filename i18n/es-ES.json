@@ -150,7 +150,8 @@
 					"terracotta": "Terracota",
 					"rose": "Rosa",
 					"crimson": "Carmesí"
-				}
+				},
+				"issueType": "Tipo"
 			}
 		}
 	},
@@ -1796,7 +1797,7 @@
 			"filter": "Filtrar",
 			"addFilter": "Añadir filtro...",
 			"sections": {
-				"planned": "Planeadas",
+				"planned": "Backlog",
 				"archived": "Archivadas"
 			},
 			"noTasksInSection": "No hay tareas en {{section}}",
@@ -1983,6 +1984,41 @@
 			"title": "Calendar",
 			"today": "Today",
 			"loadError": "Failed to load tasks."
+		},
+		"type": {
+			"label": "Tipo",
+			"task": "Tarea",
+			"story": "Historia",
+			"bug": "Bug",
+			"epic": "Épica"
+		},
+		"sprint": {
+			"label": "Sprint",
+			"backlog": "Backlog",
+			"updateSuccess": "Tarea movida",
+			"updateError": "No se pudo mover la tarea",
+			"create": "Crear sprint",
+			"createTitle": "Nuevo sprint",
+			"namePlaceholder": "Nombre del sprint",
+			"goalPlaceholder": "Objetivo del sprint (opcional)",
+			"createSuccess": "Sprint creado",
+			"createError": "No se pudo crear el sprint",
+			"start": "Iniciar sprint",
+			"startSuccess": "Sprint iniciado",
+			"startError": "No se pudo iniciar el sprint",
+			"complete": "Cerrar sprint",
+			"completeConfirm": "¿Cerrar este sprint? Las tareas sin terminar volverán al backlog.",
+			"completeSuccess": "Sprint cerrado",
+			"completeError": "No se pudo cerrar el sprint",
+			"delete": "Eliminar sprint",
+			"deleteConfirm": "¿Eliminar este sprint? Sus tareas volverán al backlog.",
+			"deleteSuccess": "Sprint eliminado",
+			"deleteError": "No se pudo eliminar el sprint",
+			"statusPlanned": "Planeado",
+			"statusActive": "Activo",
+			"statusCompleted": "Completado",
+			"noTasksInSprint": "Todavía no hay tareas en este sprint",
+			"movedToBacklog": "{{count}} tareas sin terminar volvieron al backlog"
 		}
 	},
 	"invitations": {

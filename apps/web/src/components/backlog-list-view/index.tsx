@@ -31,19 +31,23 @@ import { cn } from "@/lib/cn";
 import useBacklogBulkSelectionStore from "@/store/backlog-bulk-selection";
 import useProjectStore from "@/store/project";
 import type { ProjectWithTasks } from "@/types/project";
+import type Sprint from "@/types/sprint";
 import type Task from "@/types/task";
 import BacklogBulkToolbar from "../bulk-selection/backlog-bulk-toolbar";
 import CreateTaskModal from "../shared/modals/create-task-modal";
 import BacklogTaskRow from "./backlog-task-row";
+import SprintSection from "./sprint-section";
 
 type BacklogListViewProps = {
   project?: ProjectWithTasks;
   disableDragDrop?: boolean;
+  sprints?: Sprint[];
 };
 
 function BacklogListView({
   project,
   disableDragDrop = false,
+  sprints = [],
 }: BacklogListViewProps) {
   const { t } = useTranslation();
   const { mutate: updateTask } = useUpdateTask();
@@ -407,6 +411,19 @@ function BacklogListView({
 
   const plannedTasks = project.plannedTasks || [];
   const archivedTasks = project.archivedTasks || [];
+  // ASYGNUZ: sprint membership is independent of board status -- a task can
+  // be "in Sprint 1" while sitting in In Progress on the board, same as real
+  // Scrum. So a sprint's section needs every task with that sprintId, not
+  // just the ones still sitting in the plain backlog ("planned" status).
+  const allTasks = [
+    ...(project.columns ?? []).flatMap((column) => column.tasks),
+    ...plannedTasks,
+    ...archivedTasks,
+  ];
+  // The "Backlog" section, though, is specifically the unplanned pile --
+  // only tasks that haven't been pulled into a real column yet.
+  const backlogTasks = plannedTasks.filter((task) => !task.sprintId);
+  const sortedSprints = [...sprints].sort((a, b) => a.position - b.position);
 
   const activeTask =
     project.plannedTasks.find((task) => task.id === activeId) ||
@@ -423,11 +440,19 @@ function BacklogListView({
     >
       <div className="w-full h-full overflow-auto bg-muted/20">
         <div className="divide-y divide-border/50">
+          {sortedSprints.map((sprint) => (
+            <SprintSection
+              key={sprint.id}
+              sprint={sprint}
+              tasks={allTasks.filter((task) => task.sprintId === sprint.id)}
+            />
+          ))}
+
           <BacklogSection
             sectionId="planned"
             title={t("tasks:backlog.sections.planned")}
             icon={Clock}
-            tasks={plannedTasks}
+            tasks={backlogTasks}
             showAddButton={true}
           />
 

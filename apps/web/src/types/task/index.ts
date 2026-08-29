@@ -22,6 +22,8 @@ type Task = {
   description: string | null;
   status: string;
   priority: string | null;
+  issueType?: string | null;
+  sprintId?: string | null;
   startDate: string | null;
   dueDate: string | null;
   position: number | null;

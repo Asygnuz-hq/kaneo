@@ -13,10 +13,27 @@ export const VALID_PRIORITIES = [
 
 export const VIRTUAL_STATUSES = ["planned", "archived"] as const;
 
+// ASYGNUZ: issue type, shown as an icon next to the task ID (Jira-style).
+// "epic" is an explicit, opt-in label -- independent of whether the task
+// actually has subtasks. A task can have a couple of ad-hoc subtasks (a
+// checklist) without being a project-spanning epic, and vice versa a
+// freshly-created epic has none yet. The list-view tree (parent/child
+// nesting, expand/collapse) is unrelated: that's still built from
+// "subtask" task_relation rows, on any task type.
+export const VALID_ISSUE_TYPES = ["task", "story", "bug", "epic"] as const;
+
 export function assertValidPriority(priority: string): void {
   if (!(VALID_PRIORITIES as readonly string[]).includes(priority)) {
     throw new HTTPException(400, {
       message: `Invalid priority "${priority}". Valid values: ${VALID_PRIORITIES.join(", ")}`,
+    });
+  }
+}
+
+export function assertValidIssueType(issueType: string): void {
+  if (!(VALID_ISSUE_TYPES as readonly string[]).includes(issueType)) {
+    throw new HTTPException(400, {
+      message: `Invalid issue type "${issueType}". Valid values: ${VALID_ISSUE_TYPES.join(", ")}`,
     });
   }
 }

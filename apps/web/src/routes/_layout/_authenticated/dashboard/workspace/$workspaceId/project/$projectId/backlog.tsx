@@ -8,6 +8,7 @@ import BacklogListView from "@/components/backlog-list-view";
 import ProjectLayout from "@/components/common/project-layout";
 import SortControl from "@/components/common/sort-control";
 import PageTitle from "@/components/page-title";
+import CreateSprintModal from "@/components/shared/modals/create-sprint-modal";
 import CreateTaskModal from "@/components/shared/modals/create-task-modal";
 import TaskDetailsSheet from "@/components/task/task-details-sheet";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -26,6 +27,7 @@ import labelColors from "@/constants/label-colors";
 import { shortcuts } from "@/constants/shortcuts";
 import { useUpdateTask } from "@/hooks/mutations/task/use-update-task";
 import useGetLabelsByWorkspace from "@/hooks/queries/label/use-get-labels-by-workspace";
+import { useGetSprints } from "@/hooks/queries/sprint/use-get-sprints";
 import { useGetTasks } from "@/hooks/queries/task/use-get-tasks";
 import { useGetActiveWorkspaceUsers } from "@/hooks/queries/workspace-users/use-get-active-workspace-users";
 import { useRegisterShortcuts } from "@/hooks/use-keyboard-shortcuts";
@@ -59,8 +61,10 @@ function RouteComponent() {
   const { taskId } = Route.useSearch();
   const navigate = useNavigate();
   const { data } = useGetTasks(projectId);
+  const { data: sprints = [] } = useGetSprints(projectId);
   const { project, setProject } = useProjectStore();
   const [isTaskModalOpen, setIsTaskModalOpen] = useState(false);
+  const [isSprintModalOpen, setIsSprintModalOpen] = useState(false);
   const { mutate: updateTask } = useUpdateTask();
   const [sort, setSort] = useState<SortConfig>({
     field: "position",
@@ -391,6 +395,16 @@ function RouteComponent() {
                   {t("tasks:backlog.moveAll")}
                 </Button>
 
+                <Button
+                  variant="ghost"
+                  size="xs"
+                  onClick={() => setIsSprintModalOpen(true)}
+                  className="h-6 px-2 text-xs text-sidebar-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground"
+                >
+                  <Plus className="h-3 w-3 mr-1" />
+                  {t("tasks:sprint.create")}
+                </Button>
+
                 {filters.priority && (
                   <Button
                     variant="secondary"
@@ -699,6 +713,7 @@ function RouteComponent() {
             <BacklogListView
               project={sortedProject}
               disableDragDrop={sort.field !== "position"}
+              sprints={sprints}
             />
           ) : (
             <div className="flex h-full items-center justify-center">
@@ -718,6 +733,12 @@ function RouteComponent() {
           projectId={projectId}
           onClose={() => setIsTaskModalOpen(false)}
           status="planned"
+        />
+
+        <CreateSprintModal
+          open={isSprintModalOpen}
+          projectId={projectId}
+          onClose={() => setIsSprintModalOpen(false)}
         />
 
         <TaskDetailsSheet

@@ -150,7 +150,8 @@
 					"terracotta": "Terracotta",
 					"rose": "Rose",
 					"crimson": "Crimson"
-				}
+				},
+				"issueType": "Type"
 			}
 		}
 	},
@@ -1802,7 +1803,7 @@
 			"filter": "Filter",
 			"addFilter": "Add filter...",
 			"sections": {
-				"planned": "Planned",
+				"planned": "Backlog",
 				"archived": "Archived"
 			},
 			"noTasksInSection": "No {{section}} tasks",
@@ -1977,6 +1978,41 @@
 				"deleteRow": "Delete row",
 				"deleteTable": "Delete table"
 			}
+		},
+		"type": {
+			"label": "Type",
+			"task": "Task",
+			"story": "Story",
+			"bug": "Bug",
+			"epic": "Epic"
+		},
+		"sprint": {
+			"label": "Sprint",
+			"backlog": "Backlog",
+			"updateSuccess": "Task moved",
+			"updateError": "Couldn't move the task",
+			"create": "Create sprint",
+			"createTitle": "New sprint",
+			"namePlaceholder": "Sprint name",
+			"goalPlaceholder": "Sprint goal (optional)",
+			"createSuccess": "Sprint created",
+			"createError": "Couldn't create the sprint",
+			"start": "Start sprint",
+			"startSuccess": "Sprint started",
+			"startError": "Couldn't start the sprint",
+			"complete": "Complete sprint",
+			"completeConfirm": "Complete this sprint? Unfinished tasks will move back to the backlog.",
+			"completeSuccess": "Sprint completed",
+			"completeError": "Couldn't complete the sprint",
+			"delete": "Delete sprint",
+			"deleteConfirm": "Delete this sprint? Its tasks will move back to the backlog.",
+			"deleteSuccess": "Sprint deleted",
+			"deleteError": "Couldn't delete the sprint",
+			"statusPlanned": "Planned",
+			"statusActive": "Active",
+			"statusCompleted": "Completed",
+			"noTasksInSprint": "No tasks in this sprint yet",
+			"movedToBacklog": "{{count}} unfinished tasks moved to the backlog"
 		}
 	},
 	"invitations": {

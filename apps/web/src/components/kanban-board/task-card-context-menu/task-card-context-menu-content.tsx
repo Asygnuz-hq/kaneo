@@ -16,10 +16,12 @@ import { useUpdateTask } from "@/hooks/mutations/task/use-update-task";
 import { useUpdateTaskAssignee } from "@/hooks/mutations/task/use-update-task-assignee";
 import { useUpdateTaskDescription } from "@/hooks/mutations/task/use-update-task-description";
 import { useUpdateTaskDueDate } from "@/hooks/mutations/task/use-update-task-due-date";
+import { useUpdateTaskSprint } from "@/hooks/mutations/task/use-update-task-sprint";
 import { useUpdateTaskStatus } from "@/hooks/mutations/task/use-update-task-status";
 import { useUpdateTaskPriority } from "@/hooks/mutations/task/use-update-task-status-priority";
 import { useUpdateTaskTitle } from "@/hooks/mutations/task/use-update-task-title";
 import { useGetColumns } from "@/hooks/queries/column/use-get-columns";
+import { useGetSprints } from "@/hooks/queries/sprint/use-get-sprints";
 import { useGetActiveWorkspaceUsers } from "@/hooks/queries/workspace-users/use-get-active-workspace-users";
 import { useWorkspacePermission } from "@/hooks/use-workspace-permission";
 import { getColumnIcon } from "@/lib/column";
@@ -74,6 +76,8 @@ export default function TaskCardContextMenuContent({
   const { mutateAsync: updateTaskTitle } = useUpdateTaskTitle();
   const { mutateAsync: updateTaskDescription } = useUpdateTaskDescription();
   const { mutateAsync: updateTaskDueDate } = useUpdateTaskDueDate();
+  const { mutateAsync: updateTaskSprint } = useUpdateTaskSprint();
+  const { data: sprints = [] } = useGetSprints(taskCardContext.projectId);
   const { canUpdateTasks, canDeleteTasks, canAssignTasks } =
     useWorkspacePermission();
   const canEdit = canUpdateTasks();
@@ -191,6 +195,60 @@ export default function TaskCardContextMenuContent({
                 <span>{col.name}</span>
               </ContextMenuCheckboxItem>
             ))}
+          </ContextMenuSubContent>
+        </ContextMenuSub>
+      )}
+
+      {canEdit && sprints.length > 0 && (
+        <ContextMenuSub>
+          <ContextMenuSubTrigger>
+            <span>{t("tasks:sprint.label")}</span>
+          </ContextMenuSubTrigger>
+          <ContextMenuSubContent className="w-48">
+            <ContextMenuCheckboxItem
+              checked={!task.sprintId}
+              onCheckedChange={async () => {
+                try {
+                  await updateTaskSprint({ id: task.id, sprintId: null });
+                  toast.success(t("tasks:sprint.updateSuccess"));
+                } catch (error) {
+                  toast.error(
+                    error instanceof Error
+                      ? error.message
+                      : t("tasks:sprint.updateError"),
+                  );
+                }
+              }}
+              closeOnClick
+            >
+              <span>{t("tasks:sprint.backlog")}</span>
+            </ContextMenuCheckboxItem>
+            {sprints
+              .filter((sprint) => sprint.status !== "completed")
+              .map((sprint) => (
+                <ContextMenuCheckboxItem
+                  key={sprint.id}
+                  checked={task.sprintId === sprint.id}
+                  onCheckedChange={async () => {
+                    try {
+                      await updateTaskSprint({
+                        id: task.id,
+                        sprintId: sprint.id,
+                      });
+                      toast.success(t("tasks:sprint.updateSuccess"));
+                    } catch (error) {
+                      toast.error(
+                        error instanceof Error
+                          ? error.message
+                          : t("tasks:sprint.updateError"),
+                      );
+                    }
+                  }}
+                  closeOnClick
+                >
+                  <span className="truncate">{sprint.name}</span>
+                </ContextMenuCheckboxItem>
+              ))}
           </ContextMenuSubContent>
         </ContextMenuSub>
       )}

@@ -150,7 +150,8 @@
 					"terracotta": "테라코타",
 					"rose": "로즈",
 					"crimson": "크림슨"
-				}
+				},
+				"issueType": "Type"
 			}
 		}
 	},
@@ -1971,6 +1972,41 @@
 				"deleteRow": "행 삭제",
 				"deleteTable": "표 삭제"
 			}
+		},
+		"type": {
+			"bug": "Bug",
+			"label": "Type",
+			"story": "Story",
+			"task": "Task",
+			"epic": "Epic"
+		},
+		"sprint": {
+			"backlog": "Backlog",
+			"complete": "Complete sprint",
+			"completeConfirm": "Complete this sprint? Unfinished tasks will move back to the backlog.",
+			"completeError": "Couldn't complete the sprint",
+			"completeSuccess": "Sprint completed",
+			"create": "Create sprint",
+			"createError": "Couldn't create the sprint",
+			"createSuccess": "Sprint created",
+			"createTitle": "New sprint",
+			"delete": "Delete sprint",
+			"deleteConfirm": "Delete this sprint? Its tasks will move back to the backlog.",
+			"deleteError": "Couldn't delete the sprint",
+			"deleteSuccess": "Sprint deleted",
+			"goalPlaceholder": "Sprint goal (optional)",
+			"label": "Sprint",
+			"movedToBacklog": "{{count}} unfinished tasks moved to the backlog",
+			"namePlaceholder": "Sprint name",
+			"noTasksInSprint": "No tasks in this sprint yet",
+			"start": "Start sprint",
+			"startError": "Couldn't start the sprint",
+			"startSuccess": "Sprint started",
+			"statusActive": "Active",
+			"statusCompleted": "Completed",
+			"statusPlanned": "Planned",
+			"updateError": "Couldn't move the task",
+			"updateSuccess": "Task moved"
 		}
 	},
 	"invitations": {

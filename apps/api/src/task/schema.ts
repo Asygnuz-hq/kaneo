@@ -1,5 +1,5 @@
 import { z } from "../openapi";
-import { VALID_PRIORITIES } from "./validate-task-fields";
+import { VALID_ISSUE_TYPES, VALID_PRIORITIES } from "./validate-task-fields";
 
 const pagingNumber = (min: number, max: number) =>
   z
@@ -13,11 +13,13 @@ export const taskParam = z.object({ id: z.string() });
 export const projectIdParam = z.object({ projectId: z.string() });
 
 const priority = z.enum(VALID_PRIORITIES);
+const issueType = z.enum(VALID_ISSUE_TYPES);
 
 // Required object of optional filters: a RouteParameter cannot itself be optional.
 export const listTasksQuery = z.object({
   status: z.string().optional(),
   priority: z.string().optional(),
+  issueType: z.string().optional(),
   assigneeId: z.string().optional(),
   // Number("abc") is NaN, which used to reach the limit/offset clause unchecked.
   page: pagingNumber(1, 1_000_000).optional(),
@@ -53,6 +55,7 @@ export const createTaskBody = z.object({
   startDate: z.string().optional(),
   dueDate: z.string().optional(),
   priority,
+  issueType: issueType.optional(),
   status: z.string().openapi({ description: "The target column's slug." }),
   userId: z.string().optional().openapi({ description: "Assignee, if any." }),
 });
@@ -63,6 +66,7 @@ export const updateTaskBody = z.object({
   startDate: z.string().optional(),
   dueDate: z.string().optional(),
   priority,
+  issueType: issueType.optional(),
   status: z.string(),
   projectId: z.string(),
   position: z.number(),
@@ -92,8 +96,15 @@ export const importTasksBody = z.object({
 
 export const updateStatusBody = z.object({ status: z.string() });
 export const updatePriorityBody = z.object({ priority });
+export const updateIssueTypeBody = z.object({ issueType });
 export const updateAssigneeBody = z.object({
   userId: z.string().nullable().openapi({ description: "Null unassigns." }),
+});
+export const updateTaskSprintBody = z.object({
+  sprintId: z
+    .string()
+    .nullable()
+    .openapi({ description: "Null sends the task back to the backlog." }),
 });
 export const updateDueDateBody = z.object({ dueDate: z.string().optional() });
 export const updateTitleBody = z.object({ title: z.string() });

@@ -46,6 +46,7 @@ import updateTaskAssignee from "./controllers/update-task-assignee";
 import updateTaskDescription from "./controllers/update-task-description";
 import updateTaskDueDate from "./controllers/update-task-due-date";
 import updateTaskPriority from "./controllers/update-task-priority";
+import updateTaskSprint from "./controllers/update-task-sprint";
 import updateTaskStatus from "./controllers/update-task-status";
 import updateTaskTitle from "./controllers/update-task-title";
 import {
@@ -75,6 +76,7 @@ import {
   updatePriorityBody,
   updateStatusBody,
   updateTaskBody,
+  updateTaskSprintBody,
   updateTitleBody,
 } from "./schema";
 
@@ -366,6 +368,37 @@ const updateTaskPriorityRoute = createRoute({
   },
 });
 
+// ASYGNUZ
+const updateTaskSprintRoute = createRoute({
+  method: "put",
+  operationId: "updateTaskSprint",
+  path: "/sprint/{id}",
+  tags: ["Tasks"],
+  summary: "Move task to sprint",
+  description:
+    "Assign a task to a sprint, or send it back to the backlog with sprintId: null.",
+  middleware: [
+    workspaceAccess.fromTask(),
+    requireWorkspacePermission({ task: ["update"] }),
+  ] as const,
+  request: {
+    params: taskParam,
+    body: {
+      required: true,
+      content: { "application/json": { schema: updateTaskSprintBody } },
+    },
+  },
+  responses: {
+    200: jsonResponse("The updated task", taskSchema),
+    400: errorResponse(
+      "Unknown task/sprint, or the sprint belongs to a different project",
+    ),
+    403: errorResponse(
+      "No workspace access, or missing task:update permission",
+    ),
+  },
+});
+
 const updateTaskAssigneeRoute = createRoute({
   method: "put",
   operationId: "updateTaskAssignee",
@@ -581,8 +614,16 @@ const task = apiRouter<BaseVariables & { workspaceId: string }>()
   })
   .openapi(createTaskRoute, async (c) => {
     const { projectId } = c.req.param();
-    const { title, description, startDate, dueDate, priority, status, userId } =
-      c.req.valid("json");
+    const {
+      title,
+      description,
+      startDate,
+      dueDate,
+      priority,
+      issueType,
+      status,
+      userId,
+    } = c.req.valid("json");
 
     const parsedStartDate =
       startDate !== undefined
@@ -604,6 +645,7 @@ const task = apiRouter<BaseVariables & { workspaceId: string }>()
       startDate: parsedStartDate,
       dueDate: parsedDueDate,
       priority,
+      issueType,
       status,
     });
 
@@ -638,6 +680,7 @@ const task = apiRouter<BaseVariables & { workspaceId: string }>()
       startDate,
       dueDate,
       priority,
+      issueType,
       status,
       projectId,
       position,
@@ -669,6 +712,7 @@ const task = apiRouter<BaseVariables & { workspaceId: string }>()
       position,
       userId,
       currentUserId,
+      issueType,
     );
 
     return c.json(task, 200);
@@ -712,6 +756,15 @@ const task = apiRouter<BaseVariables & { workspaceId: string }>()
     const currentUserId = c.get("userId");
 
     const task = await updateTaskPriority({ id, priority, currentUserId });
+
+    return c.json(task, 200);
+  })
+  .openapi(updateTaskSprintRoute, async (c) => {
+    const { id } = c.req.valid("param");
+    const { sprintId } = c.req.valid("json");
+    const currentUserId = c.get("userId");
+
+    const task = await updateTaskSprint({ id, sprintId, currentUserId });
 
     return c.json(task, 200);
   })

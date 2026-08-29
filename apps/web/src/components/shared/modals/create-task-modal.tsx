@@ -50,6 +50,7 @@ import { cn } from "@/lib/cn";
 import { formatDateMedium } from "@/lib/format";
 import { getInitials } from "@/lib/get-initials";
 import { getPriorityIcon } from "@/lib/priority";
+import { getIssueTypeIcon } from "@/lib/task-type";
 import { toast } from "@/lib/toast";
 import useProjectStore from "@/store/project";
 import type Task from "@/types/task";
@@ -62,6 +63,7 @@ type CreateTaskModalProps = {
 };
 
 type Priority = "no-priority" | "low" | "medium" | "high" | "urgent";
+type IssueType = "task" | "story" | "bug" | "epic";
 
 type LabelColor =
   | "gray"
@@ -94,6 +96,7 @@ function normalizeTask(
     number: task.number ?? null,
     description: task.description ?? null,
     priority: task.priority ?? null,
+    issueType: task.issueType ?? "task",
     startDate: task.startDate ?? null,
     dueDate: task.dueDate ?? null,
     position: task.position ?? 0,
@@ -185,6 +188,7 @@ function CreateTaskModal({
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
   const [priority, setPriority] = useState<Priority>("no-priority");
+  const [issueType, setIssueType] = useState<IssueType>("task");
   const [assigneeId, setAssigneeId] = useState("");
   const [startDate, setStartDate] = useState<Date | undefined>(undefined);
   const [dueDate, setDueDate] = useState<Date | undefined>(undefined);
@@ -247,6 +251,7 @@ function CreateTaskModal({
     setTitle("");
     setDescription("");
     setPriority("no-priority");
+    setIssueType("task");
     setAssigneeId("");
     setStartDate(undefined);
     setDueDate(undefined);
@@ -344,6 +349,7 @@ function CreateTaskModal({
       description: description.trim() || "",
       userId: assigneeId,
       priority,
+      issueType,
       projectId: resolvedProjectId,
       startDate: startDate ? startDate.toISOString() : undefined,
       dueDate: dueDate ? dueDate.toISOString() : undefined,
@@ -374,6 +380,7 @@ function CreateTaskModal({
     startDate,
     dueDate,
     priority,
+    issueType,
     resolvedProjectId,
     title,
     t,
@@ -396,6 +403,7 @@ function CreateTaskModal({
               userId: assigneeId || null,
               status: taskStatus,
               priority,
+              issueType,
               startDate: startDate ? startDate.toISOString() : null,
               dueDate: dueDate ? dueDate.toISOString() : null,
               projectId: resolvedProjectId,
@@ -407,6 +415,7 @@ function CreateTaskModal({
               description: description.trim() || "",
               userId: assigneeId,
               priority,
+              issueType,
               projectId: resolvedProjectId,
               startDate: startDate ? startDate.toISOString() : undefined,
               dueDate: dueDate ? dueDate.toISOString() : undefined,
@@ -439,6 +448,7 @@ function CreateTaskModal({
         setTitle("");
         setDescription("");
         setPriority("no-priority");
+        setIssueType("task");
         setAssigneeId("");
         setStartDate(undefined);
         setDueDate(undefined);
@@ -475,6 +485,19 @@ function CreateTaskModal({
   );
 
   const selectedPriority = priorityOptions.find((p) => p.value === priority);
+
+  const issueTypeOptions = useMemo(
+    () =>
+      (["task", "story", "bug", "epic"] as const).map((value) => ({
+        value,
+        label: t(`tasks:type.${value}`),
+      })),
+    [t],
+  );
+
+  const selectedIssueType = issueTypeOptions.find(
+    (option) => option.value === issueType,
+  );
 
   const statusLabel = useMemo(() => {
     if (status) {
@@ -721,6 +744,40 @@ function CreateTaskModal({
                 <div className="w-1.5 h-1.5 bg-foreground rounded-full" />
                 {statusLabel}
               </div>
+
+              <Popover>
+                <PopoverTrigger asChild>
+                  <button
+                    type="button"
+                    className="flex items-center gap-1.5 px-2.5 py-1.5 text-xs font-medium rounded-md transition-colors border border-border hover:bg-accent/50 bg-accent/30 text-foreground"
+                  >
+                    {getIssueTypeIcon(issueType)}
+                    <span>
+                      {selectedIssueType
+                        ? selectedIssueType.label
+                        : t("common:modals.createTask.issueType")}
+                    </span>
+                  </button>
+                </PopoverTrigger>
+                <PopoverContent className="w-48 p-1" align="start">
+                  <div className="space-y-1">
+                    {issueTypeOptions.map((option) => (
+                      <button
+                        key={option.value}
+                        type="button"
+                        className="w-full flex items-center gap-2 px-2 py-1.5 text-sm hover:bg-accent/50 text-left transition-colors h-8"
+                        onClick={() => setIssueType(option.value as IssueType)}
+                      >
+                        {getIssueTypeIcon(option.value)}
+                        <span className="text-sm">{option.label}</span>
+                        {issueType === option.value && (
+                          <Check className="ml-auto h-4 w-4" />
+                        )}
+                      </button>
+                    ))}
+                  </div>
+                </PopoverContent>
+              </Popover>
 
               <Popover>
                 <PopoverTrigger asChild>

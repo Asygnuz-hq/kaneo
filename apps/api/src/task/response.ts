@@ -1,6 +1,7 @@
 import { nullableResponseTimestamp, responseTimestamp, z } from "../openapi";
 
 const priorityDescription = "One of: no-priority, low, medium, high, urgent.";
+const issueTypeDescription = "One of: task, story, bug, epic.";
 
 export const taskSchema = z
   .object({
@@ -22,6 +23,10 @@ export const taskSchema = z
       description: "The slug of the column the task sits in.",
     }),
     priority: z.string().openapi({ description: priorityDescription }),
+    issueType: z.string().openapi({ description: issueTypeDescription }),
+    sprintId: z.string().nullable().openapi({
+      description: "Null means the task sits in the backlog.",
+    }),
     startDate: nullableResponseTimestamp,
     dueDate: nullableResponseTimestamp,
     createdAt: responseTimestamp,
@@ -65,6 +70,10 @@ export const boardTaskSchema = z
     description: z.string().nullable(),
     status: z.string(),
     priority: z.string().openapi({ description: priorityDescription }),
+    issueType: z.string().openapi({ description: issueTypeDescription }),
+    sprintId: z.string().nullable().openapi({
+      description: "Null means the task sits in the backlog.",
+    }),
     startDate: nullableResponseTimestamp,
     dueDate: nullableResponseTimestamp,
     position: z.number().nullable(),
