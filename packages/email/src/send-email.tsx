@@ -2,6 +2,9 @@ import { render } from "@react-email/components";
 import { config } from "dotenv-mono";
 import * as nodemailer from "nodemailer";
 import { getSmtpTransportOptions, isSmtpConfigured } from "./smtp-config";
+import ClientPortalInvitationEmail, {
+  type ClientPortalInvitationEmailProps,
+} from "./templates/client-portal-invitation";
 import type { MagicLinkEmailProps } from "./templates/magic-link";
 import MagicLinkEmail from "./templates/magic-link";
 import NotificationEmail, {
@@ -104,6 +107,30 @@ export const sendWorkspaceInvitationEmail = async (
     return { success: true };
   } catch (error) {
     console.error("Error sending workspace invitation email", error);
+    throw error;
+  }
+};
+
+export const sendClientPortalInvitationEmail = async (
+  to: string,
+  subject: string,
+  data: ClientPortalInvitationEmailProps,
+): Promise<EmailResult> => {
+  if (!isSmtpConfigured()) {
+    return { success: false, reason: "SMTP_NOT_CONFIGURED" };
+  }
+
+  try {
+    const emailTemplate = await render(ClientPortalInvitationEmail(data));
+    await transporter.sendMail({
+      from: process.env.SMTP_FROM,
+      to,
+      subject,
+      html: emailTemplate,
+    });
+    return { success: true };
+  } catch (error) {
+    console.error("Error sending client portal invitation email", error);
     throw error;
   }
 };

@@ -4,6 +4,9 @@ import {
   activityTable,
   apikeyTable,
   assetTable,
+  clientAccountTable,
+  clientProjectAccessTable,
+  clientSessionTable,
   columnTable,
   commentTable,
   externalLinkTable,
@@ -112,6 +115,7 @@ export const projectTableRelations = relations(
     // ASYGNUZ
     members: many(projectMemberTable),
     sprints: many(sprintTable),
+    clientAccess: many(clientProjectAccessTable),
   }),
 );
 
@@ -123,6 +127,43 @@ export const sprintTableRelations = relations(sprintTable, ({ one, many }) => ({
   }),
   tasks: many(taskTable),
 }));
+
+// ASYGNUZ: Service Desk -- external client accounts and their access.
+export const clientAccountTableRelations = relations(
+  clientAccountTable,
+  ({ many }) => ({
+    projectAccess: many(clientProjectAccessTable),
+    sessions: many(clientSessionTable),
+  }),
+);
+
+export const clientProjectAccessTableRelations = relations(
+  clientProjectAccessTable,
+  ({ one }) => ({
+    clientAccount: one(clientAccountTable, {
+      fields: [clientProjectAccessTable.clientAccountId],
+      references: [clientAccountTable.id],
+    }),
+    project: one(projectTable, {
+      fields: [clientProjectAccessTable.projectId],
+      references: [projectTable.id],
+    }),
+    invitedBy: one(userTable, {
+      fields: [clientProjectAccessTable.invitedByUserId],
+      references: [userTable.id],
+    }),
+  }),
+);
+
+export const clientSessionTableRelations = relations(
+  clientSessionTable,
+  ({ one }) => ({
+    clientAccount: one(clientAccountTable, {
+      fields: [clientSessionTable.clientAccountId],
+      references: [clientAccountTable.id],
+    }),
+  }),
+);
 
 // ASYGNUZ: quién tiene acceso explícito a un proyecto restringido. Ver
 // project-member/utils/can-access-project.ts.

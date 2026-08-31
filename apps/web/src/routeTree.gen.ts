@@ -22,6 +22,9 @@ import { Route as AuthVerifyOtpRouteImport } from './routes/auth/verify-otp'
 import { Route as DeviceIndexRouteImport } from './routes/device/index'
 import { Route as DeviceApproveRouteImport } from './routes/device/approve'
 import { Route as McpAuthorizeRouteImport } from './routes/mcp.authorize'
+import { Route as PortalIndexRouteImport } from './routes/portal/index'
+import { Route as PortalAcceptInviteRouteImport } from './routes/portal/accept-invite'
+import { Route as PortalLoginRouteImport } from './routes/portal/login'
 import { Route as PublicProjectProjectIdRouteImport } from './routes/public-project.$projectId'
 import { Route as LayoutAuthenticatedDashboardRouteImport } from './routes/_layout/_authenticated/dashboard'
 import { Route as LayoutAuthenticatedInvitationsRouteImport } from './routes/_layout/_authenticated/invitations'
@@ -55,6 +58,7 @@ import { Route as LayoutAuthenticatedDashboardWorkspaceWorkspaceIdProjectProject
 import { Route as LayoutAuthenticatedDashboardWorkspaceWorkspaceIdProjectProjectIdBacklogRouteImport } from './routes/_layout/_authenticated/dashboard/workspace/$workspaceId/project/$projectId/backlog'
 import { Route as LayoutAuthenticatedDashboardWorkspaceWorkspaceIdProjectProjectIdBoardRouteImport } from './routes/_layout/_authenticated/dashboard/workspace/$workspaceId/project/$projectId/board'
 import { Route as LayoutAuthenticatedDashboardWorkspaceWorkspaceIdProjectProjectIdCalendarRouteImport } from './routes/_layout/_authenticated/dashboard/workspace/$workspaceId/project/$projectId/calendar'
+import { Route as LayoutAuthenticatedDashboardWorkspaceWorkspaceIdProjectProjectIdClientsRouteImport } from './routes/_layout/_authenticated/dashboard/workspace/$workspaceId/project/$projectId/clients'
 import { Route as LayoutAuthenticatedDashboardWorkspaceWorkspaceIdProjectProjectIdGanttRouteImport } from './routes/_layout/_authenticated/dashboard/workspace/$workspaceId/project/$projectId/gantt'
 import { Route as LayoutAuthenticatedDashboardWorkspaceWorkspaceIdProjectProjectIdTaskTaskIdRouteImport } from './routes/_layout/_authenticated/dashboard/workspace/$workspaceId/project/$projectId/task/$taskId_'
 
@@ -119,6 +123,21 @@ const DeviceApproveRoute = DeviceApproveRouteImport.update({
 const McpAuthorizeRoute = McpAuthorizeRouteImport.update({
   id: '/mcp/authorize',
   path: '/mcp/authorize',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const PortalIndexRoute = PortalIndexRouteImport.update({
+  id: '/portal/',
+  path: '/portal/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const PortalAcceptInviteRoute = PortalAcceptInviteRouteImport.update({
+  id: '/portal/accept-invite',
+  path: '/portal/accept-invite',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const PortalLoginRoute = PortalLoginRouteImport.update({
+  id: '/portal/login',
+  path: '/portal/login',
   getParentRoute: () => rootRouteImport,
 } as any)
 const PublicProjectProjectIdRoute = PublicProjectProjectIdRouteImport.update({
@@ -338,6 +357,15 @@ const LayoutAuthenticatedDashboardWorkspaceWorkspaceIdProjectProjectIdCalendarRo
         LayoutAuthenticatedDashboardWorkspaceWorkspaceIdRoute,
     } as any,
   )
+const LayoutAuthenticatedDashboardWorkspaceWorkspaceIdProjectProjectIdClientsRoute =
+  LayoutAuthenticatedDashboardWorkspaceWorkspaceIdProjectProjectIdClientsRouteImport.update(
+    {
+      id: '/project/$projectId/clients',
+      path: '/project/$projectId/clients',
+      getParentRoute: () =>
+        LayoutAuthenticatedDashboardWorkspaceWorkspaceIdRoute,
+    } as any,
+  )
 const LayoutAuthenticatedDashboardWorkspaceWorkspaceIdProjectProjectIdGanttRoute =
   LayoutAuthenticatedDashboardWorkspaceWorkspaceIdProjectProjectIdGanttRouteImport.update(
     {
@@ -368,8 +396,11 @@ export interface FileRoutesByFullPath {
   '/auth/verify-otp': typeof AuthVerifyOtpRoute
   '/device/approve': typeof DeviceApproveRoute
   '/mcp/authorize': typeof McpAuthorizeRoute
+  '/portal/accept-invite': typeof PortalAcceptInviteRoute
+  '/portal/login': typeof PortalLoginRoute
   '/public-project/$projectId': typeof PublicProjectProjectIdRoute
   '/device/': typeof DeviceIndexRoute
+  '/portal/': typeof PortalIndexRoute
   '/dashboard': typeof LayoutAuthenticatedDashboardRouteWithChildren
   '/invitations': typeof LayoutAuthenticatedInvitationsRoute
   '/onboarding': typeof LayoutAuthenticatedOnboardingRoute
@@ -401,6 +432,7 @@ export interface FileRoutesByFullPath {
   '/dashboard/workspace/$workspaceId/project/$projectId/backlog': typeof LayoutAuthenticatedDashboardWorkspaceWorkspaceIdProjectProjectIdBacklogRoute
   '/dashboard/workspace/$workspaceId/project/$projectId/board': typeof LayoutAuthenticatedDashboardWorkspaceWorkspaceIdProjectProjectIdBoardRoute
   '/dashboard/workspace/$workspaceId/project/$projectId/calendar': typeof LayoutAuthenticatedDashboardWorkspaceWorkspaceIdProjectProjectIdCalendarRoute
+  '/dashboard/workspace/$workspaceId/project/$projectId/clients': typeof LayoutAuthenticatedDashboardWorkspaceWorkspaceIdProjectProjectIdClientsRoute
   '/dashboard/workspace/$workspaceId/project/$projectId/gantt': typeof LayoutAuthenticatedDashboardWorkspaceWorkspaceIdProjectProjectIdGanttRoute
   '/dashboard/workspace/$workspaceId/project/$projectId/': typeof LayoutAuthenticatedDashboardWorkspaceWorkspaceIdProjectProjectIdIndexRoute
   '/dashboard/workspace/$workspaceId/project/$projectId/task/$taskId': typeof LayoutAuthenticatedDashboardWorkspaceWorkspaceIdProjectProjectIdTaskTaskIdRoute
@@ -415,8 +447,11 @@ export interface FileRoutesByTo {
   '/auth/verify-otp': typeof AuthVerifyOtpRoute
   '/device/approve': typeof DeviceApproveRoute
   '/mcp/authorize': typeof McpAuthorizeRoute
+  '/portal/accept-invite': typeof PortalAcceptInviteRoute
+  '/portal/login': typeof PortalLoginRoute
   '/public-project/$projectId': typeof PublicProjectProjectIdRoute
   '/device': typeof DeviceIndexRoute
+  '/portal': typeof PortalIndexRoute
   '/invitations': typeof LayoutAuthenticatedInvitationsRoute
   '/onboarding': typeof LayoutAuthenticatedOnboardingRoute
   '/profile-setup': typeof LayoutAuthenticatedProfileSetupRoute
@@ -446,6 +481,7 @@ export interface FileRoutesByTo {
   '/dashboard/workspace/$workspaceId/project/$projectId/backlog': typeof LayoutAuthenticatedDashboardWorkspaceWorkspaceIdProjectProjectIdBacklogRoute
   '/dashboard/workspace/$workspaceId/project/$projectId/board': typeof LayoutAuthenticatedDashboardWorkspaceWorkspaceIdProjectProjectIdBoardRoute
   '/dashboard/workspace/$workspaceId/project/$projectId/calendar': typeof LayoutAuthenticatedDashboardWorkspaceWorkspaceIdProjectProjectIdCalendarRoute
+  '/dashboard/workspace/$workspaceId/project/$projectId/clients': typeof LayoutAuthenticatedDashboardWorkspaceWorkspaceIdProjectProjectIdClientsRoute
   '/dashboard/workspace/$workspaceId/project/$projectId/gantt': typeof LayoutAuthenticatedDashboardWorkspaceWorkspaceIdProjectProjectIdGanttRoute
   '/dashboard/workspace/$workspaceId/project/$projectId': typeof LayoutAuthenticatedDashboardWorkspaceWorkspaceIdProjectProjectIdIndexRoute
   '/dashboard/workspace/$workspaceId/project/$projectId/task/$taskId': typeof LayoutAuthenticatedDashboardWorkspaceWorkspaceIdProjectProjectIdTaskTaskIdRoute
@@ -464,8 +500,11 @@ export interface FileRoutesById {
   '/auth/verify-otp': typeof AuthVerifyOtpRoute
   '/device/approve': typeof DeviceApproveRoute
   '/mcp/authorize': typeof McpAuthorizeRoute
+  '/portal/accept-invite': typeof PortalAcceptInviteRoute
+  '/portal/login': typeof PortalLoginRoute
   '/public-project/$projectId': typeof PublicProjectProjectIdRoute
   '/device/': typeof DeviceIndexRoute
+  '/portal/': typeof PortalIndexRoute
   '/_layout/_authenticated/dashboard': typeof LayoutAuthenticatedDashboardRouteWithChildren
   '/_layout/_authenticated/invitations': typeof LayoutAuthenticatedInvitationsRoute
   '/_layout/_authenticated/onboarding': typeof LayoutAuthenticatedOnboardingRoute
@@ -497,6 +536,7 @@ export interface FileRoutesById {
   '/_layout/_authenticated/dashboard/workspace/$workspaceId/project/$projectId/backlog': typeof LayoutAuthenticatedDashboardWorkspaceWorkspaceIdProjectProjectIdBacklogRoute
   '/_layout/_authenticated/dashboard/workspace/$workspaceId/project/$projectId/board': typeof LayoutAuthenticatedDashboardWorkspaceWorkspaceIdProjectProjectIdBoardRoute
   '/_layout/_authenticated/dashboard/workspace/$workspaceId/project/$projectId/calendar': typeof LayoutAuthenticatedDashboardWorkspaceWorkspaceIdProjectProjectIdCalendarRoute
+  '/_layout/_authenticated/dashboard/workspace/$workspaceId/project/$projectId/clients': typeof LayoutAuthenticatedDashboardWorkspaceWorkspaceIdProjectProjectIdClientsRoute
   '/_layout/_authenticated/dashboard/workspace/$workspaceId/project/$projectId/gantt': typeof LayoutAuthenticatedDashboardWorkspaceWorkspaceIdProjectProjectIdGanttRoute
   '/_layout/_authenticated/dashboard/workspace/$workspaceId/project/$projectId/': typeof LayoutAuthenticatedDashboardWorkspaceWorkspaceIdProjectProjectIdIndexRoute
   '/_layout/_authenticated/dashboard/workspace/$workspaceId/project/$projectId/task/$taskId_': typeof LayoutAuthenticatedDashboardWorkspaceWorkspaceIdProjectProjectIdTaskTaskIdRoute
@@ -514,8 +554,11 @@ export interface FileRouteTypes {
     | '/auth/verify-otp'
     | '/device/approve'
     | '/mcp/authorize'
+    | '/portal/accept-invite'
+    | '/portal/login'
     | '/public-project/$projectId'
     | '/device/'
+    | '/portal/'
     | '/dashboard'
     | '/invitations'
     | '/onboarding'
@@ -547,6 +590,7 @@ export interface FileRouteTypes {
     | '/dashboard/workspace/$workspaceId/project/$projectId/backlog'
     | '/dashboard/workspace/$workspaceId/project/$projectId/board'
     | '/dashboard/workspace/$workspaceId/project/$projectId/calendar'
+    | '/dashboard/workspace/$workspaceId/project/$projectId/clients'
     | '/dashboard/workspace/$workspaceId/project/$projectId/gantt'
     | '/dashboard/workspace/$workspaceId/project/$projectId/'
     | '/dashboard/workspace/$workspaceId/project/$projectId/task/$taskId'
@@ -561,8 +605,11 @@ export interface FileRouteTypes {
     | '/auth/verify-otp'
     | '/device/approve'
     | '/mcp/authorize'
+    | '/portal/accept-invite'
+    | '/portal/login'
     | '/public-project/$projectId'
     | '/device'
+    | '/portal'
     | '/invitations'
     | '/onboarding'
     | '/profile-setup'
@@ -592,6 +639,7 @@ export interface FileRouteTypes {
     | '/dashboard/workspace/$workspaceId/project/$projectId/backlog'
     | '/dashboard/workspace/$workspaceId/project/$projectId/board'
     | '/dashboard/workspace/$workspaceId/project/$projectId/calendar'
+    | '/dashboard/workspace/$workspaceId/project/$projectId/clients'
     | '/dashboard/workspace/$workspaceId/project/$projectId/gantt'
     | '/dashboard/workspace/$workspaceId/project/$projectId'
     | '/dashboard/workspace/$workspaceId/project/$projectId/task/$taskId'
@@ -609,8 +657,11 @@ export interface FileRouteTypes {
     | '/auth/verify-otp'
     | '/device/approve'
     | '/mcp/authorize'
+    | '/portal/accept-invite'
+    | '/portal/login'
     | '/public-project/$projectId'
     | '/device/'
+    | '/portal/'
     | '/_layout/_authenticated/dashboard'
     | '/_layout/_authenticated/invitations'
     | '/_layout/_authenticated/onboarding'
@@ -642,6 +693,7 @@ export interface FileRouteTypes {
     | '/_layout/_authenticated/dashboard/workspace/$workspaceId/project/$projectId/backlog'
     | '/_layout/_authenticated/dashboard/workspace/$workspaceId/project/$projectId/board'
     | '/_layout/_authenticated/dashboard/workspace/$workspaceId/project/$projectId/calendar'
+    | '/_layout/_authenticated/dashboard/workspace/$workspaceId/project/$projectId/clients'
     | '/_layout/_authenticated/dashboard/workspace/$workspaceId/project/$projectId/gantt'
     | '/_layout/_authenticated/dashboard/workspace/$workspaceId/project/$projectId/'
     | '/_layout/_authenticated/dashboard/workspace/$workspaceId/project/$projectId/task/$taskId_'
@@ -654,7 +706,10 @@ export interface RootRouteChildren {
   DeviceRoute: typeof DeviceRouteWithChildren
   TestErrorRoute: typeof TestErrorRoute
   McpAuthorizeRoute: typeof McpAuthorizeRoute
+  PortalAcceptInviteRoute: typeof PortalAcceptInviteRoute
+  PortalLoginRoute: typeof PortalLoginRoute
   PublicProjectProjectIdRoute: typeof PublicProjectProjectIdRoute
+  PortalIndexRoute: typeof PortalIndexRoute
   InvitationAcceptInviteIdRoute: typeof InvitationAcceptInviteIdRoute
 }
 
@@ -749,6 +804,27 @@ declare module '@tanstack/react-router' {
       path: '/mcp/authorize'
       fullPath: '/mcp/authorize'
       preLoaderRoute: typeof McpAuthorizeRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/portal/': {
+      id: '/portal/'
+      path: '/portal'
+      fullPath: '/portal/'
+      preLoaderRoute: typeof PortalIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/portal/accept-invite': {
+      id: '/portal/accept-invite'
+      path: '/portal/accept-invite'
+      fullPath: '/portal/accept-invite'
+      preLoaderRoute: typeof PortalAcceptInviteRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/portal/login': {
+      id: '/portal/login'
+      path: '/portal/login'
+      fullPath: '/portal/login'
+      preLoaderRoute: typeof PortalLoginRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/public-project/$projectId': {
@@ -982,6 +1058,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof LayoutAuthenticatedDashboardWorkspaceWorkspaceIdProjectProjectIdCalendarRouteImport
       parentRoute: typeof LayoutAuthenticatedDashboardWorkspaceWorkspaceIdRoute
     }
+    '/_layout/_authenticated/dashboard/workspace/$workspaceId/project/$projectId/clients': {
+      id: '/_layout/_authenticated/dashboard/workspace/$workspaceId/project/$projectId/clients'
+      path: '/project/$projectId/clients'
+      fullPath: '/dashboard/workspace/$workspaceId/project/$projectId/clients'
+      preLoaderRoute: typeof LayoutAuthenticatedDashboardWorkspaceWorkspaceIdProjectProjectIdClientsRouteImport
+      parentRoute: typeof LayoutAuthenticatedDashboardWorkspaceWorkspaceIdRoute
+    }
     '/_layout/_authenticated/dashboard/workspace/$workspaceId/project/$projectId/gantt': {
       id: '/_layout/_authenticated/dashboard/workspace/$workspaceId/project/$projectId/gantt'
       path: '/project/$projectId/gantt'
@@ -1099,6 +1182,7 @@ interface LayoutAuthenticatedDashboardWorkspaceWorkspaceIdRouteChildren {
   LayoutAuthenticatedDashboardWorkspaceWorkspaceIdProjectProjectIdBacklogRoute: typeof LayoutAuthenticatedDashboardWorkspaceWorkspaceIdProjectProjectIdBacklogRoute
   LayoutAuthenticatedDashboardWorkspaceWorkspaceIdProjectProjectIdBoardRoute: typeof LayoutAuthenticatedDashboardWorkspaceWorkspaceIdProjectProjectIdBoardRoute
   LayoutAuthenticatedDashboardWorkspaceWorkspaceIdProjectProjectIdCalendarRoute: typeof LayoutAuthenticatedDashboardWorkspaceWorkspaceIdProjectProjectIdCalendarRoute
+  LayoutAuthenticatedDashboardWorkspaceWorkspaceIdProjectProjectIdClientsRoute: typeof LayoutAuthenticatedDashboardWorkspaceWorkspaceIdProjectProjectIdClientsRoute
   LayoutAuthenticatedDashboardWorkspaceWorkspaceIdProjectProjectIdGanttRoute: typeof LayoutAuthenticatedDashboardWorkspaceWorkspaceIdProjectProjectIdGanttRoute
   LayoutAuthenticatedDashboardWorkspaceWorkspaceIdProjectProjectIdIndexRoute: typeof LayoutAuthenticatedDashboardWorkspaceWorkspaceIdProjectProjectIdIndexRoute
   LayoutAuthenticatedDashboardWorkspaceWorkspaceIdProjectProjectIdTaskTaskIdRoute: typeof LayoutAuthenticatedDashboardWorkspaceWorkspaceIdProjectProjectIdTaskTaskIdRoute
@@ -1118,6 +1202,8 @@ const LayoutAuthenticatedDashboardWorkspaceWorkspaceIdRouteChildren: LayoutAuthe
       LayoutAuthenticatedDashboardWorkspaceWorkspaceIdProjectProjectIdBoardRoute,
     LayoutAuthenticatedDashboardWorkspaceWorkspaceIdProjectProjectIdCalendarRoute:
       LayoutAuthenticatedDashboardWorkspaceWorkspaceIdProjectProjectIdCalendarRoute,
+    LayoutAuthenticatedDashboardWorkspaceWorkspaceIdProjectProjectIdClientsRoute:
+      LayoutAuthenticatedDashboardWorkspaceWorkspaceIdProjectProjectIdClientsRoute,
     LayoutAuthenticatedDashboardWorkspaceWorkspaceIdProjectProjectIdGanttRoute:
       LayoutAuthenticatedDashboardWorkspaceWorkspaceIdProjectProjectIdGanttRoute,
     LayoutAuthenticatedDashboardWorkspaceWorkspaceIdProjectProjectIdIndexRoute:
@@ -1223,7 +1309,10 @@ const rootRouteChildren: RootRouteChildren = {
   DeviceRoute: DeviceRouteWithChildren,
   TestErrorRoute: TestErrorRoute,
   McpAuthorizeRoute: McpAuthorizeRoute,
+  PortalAcceptInviteRoute: PortalAcceptInviteRoute,
+  PortalLoginRoute: PortalLoginRoute,
   PublicProjectProjectIdRoute: PublicProjectProjectIdRoute,
+  PortalIndexRoute: PortalIndexRoute,
   InvitationAcceptInviteIdRoute: InvitationAcceptInviteIdRoute,
 }
 export const routeTree = rootRouteImport
