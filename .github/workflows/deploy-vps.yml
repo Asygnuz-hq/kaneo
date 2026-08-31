@@ -1,0 +1,21 @@
+name: Desplegar a la VPS
+
+# Corre solo cuando algo llega a main (ej. al mergear un PR) — así no
+# importa cuántas ramas/sesiones estén trabajando en paralelo, la VPS
+# siempre termina reflejando lo último que quedó mergeado.
+on:
+  push:
+    branches: [main]
+  workflow_dispatch: {}
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Conectar a la VPS y correr el deploy
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.VPS_HOST }}
+          username: ${{ secrets.VPS_USER }}
+          key: ${{ secrets.VPS_SSH_KEY }}
+          script: bash /home/juanmanuel/kaneo-app/deploy.sh
