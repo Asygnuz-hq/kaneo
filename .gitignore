@@ -58,3 +58,6 @@ apps/web/.tanstack/
 
 # TypeScript incremental build state
 *.tsbuildinfo
+
+# Local Claude Code dev-preview config (per-machine, not project config)
+.claude/launch.json

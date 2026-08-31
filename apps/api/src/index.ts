@@ -17,6 +17,9 @@ import activity from "./activity";
 import { auth } from "./auth";
 import { organizationRoutes } from "./auth-openapi";
 import billing from "./billing";
+import clientAccess from "./client-access";
+import clientAuth from "./client-auth";
+import clientPortal from "./client-portal";
 import column from "./column";
 import comment from "./comment";
 import config from "./config";
@@ -547,7 +550,13 @@ export function createApp() {
     if (
       path.startsWith("/api/mcp") ||
       path.startsWith("/api/.well-known/") ||
-      path === "/api/billing/webhook"
+      path === "/api/billing/webhook" ||
+      // ASYGNUZ: the Service Desk client portal has its own, separate
+      // session mechanism (client-auth/middleware.ts) -- these callers are
+      // never a workspace user, so authenticateApiRequest would always
+      // reject them with a 401 before their own middleware even runs.
+      path.startsWith("/api/client-auth") ||
+      path.startsWith("/api/client-portal")
     ) {
       return next();
     }
@@ -576,6 +585,13 @@ export function createApp() {
   const billingApi = api.route("/billing", billing);
   const projectApi = api.route("/project", project);
   const projectMemberApi = api.route("/project-member", projectMember);
+  const clientAccessApi = api.route("/client-access", clientAccess);
+  // ASYGNUZ: client-auth/client-portal are plain Hono routers with their own
+  // client-session auth (see the api.use("*", ...) bypass above) -- not part
+  // of the internal, typed AppType RPC surface, so their result isn't
+  // captured into a const the way the apiRouter()-based modules are.
+  api.route("/client-auth", clientAuth);
+  api.route("/client-portal", clientPortal);
   const sprintApi = api.route("/sprint", sprint);
   const taskApi = api.route("/task", task);
   const columnApi = api.route("/column", column);
@@ -754,6 +770,7 @@ export function createApp() {
     injectWebSocket,
     activityApi,
     billingApi,
+    clientAccessApi,
     columnApi,
     commentApi,
     configApi,
@@ -874,6 +891,7 @@ const {
   injectWebSocket,
   activityApi,
   billingApi,
+  clientAccessApi,
   columnApi,
   commentApi,
   configApi,
@@ -918,6 +936,7 @@ export type AppType =
   | typeof configApi
   | typeof projectApi
   | typeof projectMemberApi
+  | typeof clientAccessApi
   | typeof sprintApi
   | typeof taskApi
   | typeof columnApi

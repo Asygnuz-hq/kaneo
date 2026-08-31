@@ -401,6 +401,88 @@ export const sprintTable = pgTable(
   (table) => [index("sprint_projectId_idx").on(table.projectId)],
 );
 
+// ASYGNUZ: Service Desk. External clients are a completely separate identity
+// space from `user` (they're not workspace members and never appear in
+// workspace_member/project_member) -- they authenticate through their own
+// login at /portal, scoped to whichever projects they were granted access to.
+export const clientAccountTable = pgTable("client_account", {
+  id: text("id")
+    .$defaultFn(() => createId())
+    .primaryKey(),
+  email: text("email").notNull().unique(),
+  name: text("name"),
+  // Null until the client accepts their invite and sets a password.
+  passwordHash: text("password_hash"),
+  // Hash of the one-time invite/setup token (never store it raw -- same
+  // reasoning as clientSessionTable.tokenHash below). Null once accepted.
+  inviteTokenHash: text("invite_token_hash").unique(),
+  inviteTokenExpiresAt: timestamp("invite_token_expires_at", {
+    mode: "date",
+  }),
+  createdAt: timestamp("created_at", { mode: "date" }).defaultNow().notNull(),
+  updatedAt: timestamp("updated_at", { mode: "date" })
+    .defaultNow()
+    .$onUpdate(() => new Date())
+    .notNull(),
+});
+
+// Which projects a client account can see. A client can be invited to more
+// than one project (e.g. the same contact across two engagements); a project
+// can have more than one client contact.
+export const clientProjectAccessTable = pgTable(
+  "client_project_access",
+  {
+    id: text("id")
+      .$defaultFn(() => createId())
+      .primaryKey(),
+    clientAccountId: text("client_account_id")
+      .notNull()
+      .references(() => clientAccountTable.id, { onDelete: "cascade" }),
+    projectId: text("project_id")
+      .notNull()
+      .references(() => projectTable.id, {
+        onDelete: "cascade",
+        onUpdate: "cascade",
+      }),
+    invitedByUserId: text("invited_by_user_id").references(() => userTable.id, {
+      onDelete: "set null",
+    }),
+    createdAt: timestamp("created_at", { mode: "date" }).defaultNow().notNull(),
+  },
+  (table) => [
+    unique("client_project_access_client_id_project_id_unique").on(
+      table.clientAccountId,
+      table.projectId,
+    ),
+    index("client_project_access_projectId_idx").on(table.projectId),
+  ],
+);
+
+// Deliberately separate from `session` (better-auth's own table): a client
+// session is a different, much narrower identity than a workspace user's,
+// and mixing the two would let a bug in one auth path leak into the other.
+// Same shape as better-auth's session for consistency, but only a hash of
+// the token is stored -- the raw token lives only in the client's cookie.
+export const clientSessionTable = pgTable(
+  "client_session",
+  {
+    id: text("id")
+      .$defaultFn(() => createId())
+      .primaryKey(),
+    clientAccountId: text("client_account_id")
+      .notNull()
+      .references(() => clientAccountTable.id, { onDelete: "cascade" }),
+    tokenHash: text("token_hash").notNull().unique(),
+    expiresAt: timestamp("expires_at", { mode: "date" }).notNull(),
+    createdAt: timestamp("created_at", { mode: "date" }).defaultNow().notNull(),
+    ipAddress: text("ip_address"),
+    userAgent: text("user_agent"),
+  },
+  (table) => [
+    index("client_session_clientAccountId_idx").on(table.clientAccountId),
+  ],
+);
+
 export const columnTable = pgTable(
   "column",
   {

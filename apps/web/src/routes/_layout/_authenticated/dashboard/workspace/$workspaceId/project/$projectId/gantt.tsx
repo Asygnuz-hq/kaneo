@@ -21,9 +21,11 @@ import TaskDetailsSheet from "@/components/task/task-details-sheet";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useGetTasks } from "@/hooks/queries/task/use-get-tasks";
+import useGetProjectSubtaskRelations from "@/hooks/queries/task-relation/use-get-project-subtask-relations";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { cn } from "@/lib/cn";
 import { getStatusLabel } from "@/lib/i18n/domain";
+import { getIssueTypeIcon } from "@/lib/task-type";
 import { useUserPreferencesStore } from "@/store/user-preferences";
 
 type GanttSearchParams = {
@@ -55,6 +57,36 @@ function RouteComponent() {
   const [searchQuery, setSearchQuery] = useState("");
   const isMobile = useIsMobile();
   const [isTaskRailOpen, setIsTaskRailOpen] = useState(false);
+
+  // ASYGNUZ: mismo árbol Épica -> Historia/Tarea -> Subtarea que usa la
+  // vista de Lista, para que el Gantt anide las barras en vez de mostrar
+  // todo en una sola fila plana.
+  const { data: subtaskRelations } = useGetProjectSubtaskRelations(
+    project?.id ?? "",
+  );
+  const childrenOf = useMemo(() => {
+    const map = new Map<string, string[]>();
+    for (const rel of subtaskRelations ?? []) {
+      const kids = map.get(rel.sourceTaskId) ?? [];
+      kids.push(rel.targetTaskId);
+      map.set(rel.sourceTaskId, kids);
+    }
+    return map;
+  }, [subtaskRelations]);
+  const [collapsedTaskIds, setCollapsedTaskIds] = useState<Set<string>>(
+    new Set(),
+  );
+  const toggleCollapsed = (taskId: string) => {
+    setCollapsedTaskIds((prev) => {
+      const next = new Set(prev);
+      if (next.has(taskId)) {
+        next.delete(taskId);
+      } else {
+        next.add(taskId);
+      }
+      return next;
+    });
+  };
 
   // Wider day columns on small screens so dragging and reading dates is easier.
   const dayColumnWidthRem = isMobile ? 3.125 : 2.75;
@@ -106,20 +138,62 @@ function RouteComponent() {
       );
   }, [allTasks]);
 
+  type ParsedTask = (typeof parsedTasks)[number];
+
+  // ASYGNUZ: aplana el árbol en orden padre -> hijos (cada hijo justo debajo
+  // de su padre, indentado), en vez del orden plano por fecha que había
+  // antes. Solo se anida entre tareas que ya tienen fecha (aparecen en el
+  // Gantt) -- si el padre no tiene fecha, el hijo simplemente sale como raíz.
+  const orderedTasks = useMemo(() => {
+    const byId = new Map(parsedTasks.map((task) => [task.id, task]));
+    const scheduledIds = new Set(byId.keys());
+    const childIds = new Set<string>();
+    for (const [parentId, kidIds] of childrenOf) {
+      if (!scheduledIds.has(parentId)) continue;
+      for (const kidId of kidIds) {
+        if (scheduledIds.has(kidId)) childIds.add(kidId);
+      }
+    }
+    const rootTasks = parsedTasks.filter((task) => !childIds.has(task.id));
+
+    const result: (ParsedTask & { level: number; childCount: number })[] = [];
+    const visit = (task: ParsedTask, level: number) => {
+      const kidIds = (childrenOf.get(task.id) ?? []).filter((id) =>
+        scheduledIds.has(id),
+      );
+      const kids = kidIds
+        .map((id) => byId.get(id))
+        .filter((t): t is ParsedTask => Boolean(t))
+        .sort((a, b) => a.scheduleStart.getTime() - b.scheduleStart.getTime());
+
+      result.push({ ...task, level, childCount: kids.length });
+      if (collapsedTaskIds.has(task.id)) return;
+      for (const kid of kids) visit(kid, level + 1);
+    };
+
+    for (const task of rootTasks) visit(task, 0);
+    return result;
+  }, [parsedTasks, childrenOf, collapsedTaskIds]);
+
   const scheduledTasks = useMemo(() => {
     const normalizedQuery = searchQuery.trim().toLowerCase();
-    if (!normalizedQuery) return parsedTasks;
+    if (!normalizedQuery) return orderedTasks;
 
-    return parsedTasks.filter((task) => {
-      return (
-        task.title.toLowerCase().includes(normalizedQuery) ||
-        `${project?.slug ?? ""}-${task.number ?? ""}`
-          .toLowerCase()
-          .includes(normalizedQuery) ||
-        task.status.toLowerCase().includes(normalizedQuery)
-      );
-    });
-  }, [parsedTasks, project?.slug, searchQuery]);
+    // Con búsqueda activa mostramos coincidencias planas -- mezclar
+    // resultados sueltos con la jerarquía completa confunde más de lo que
+    // ayuda.
+    return parsedTasks
+      .filter((task) => {
+        return (
+          task.title.toLowerCase().includes(normalizedQuery) ||
+          `${project?.slug ?? ""}-${task.number ?? ""}`
+            .toLowerCase()
+            .includes(normalizedQuery) ||
+          task.status.toLowerCase().includes(normalizedQuery)
+        );
+      })
+      .map((task) => ({ ...task, level: 0, childCount: 0 }));
+  }, [orderedTasks, parsedTasks, project?.slug, searchQuery]);
 
   const timeline = useMemo(() => {
     if (parsedTasks.length === 0) return null;
@@ -332,9 +406,17 @@ function RouteComponent() {
                       >
                         {showTaskRail ? (
                           <div className="sticky left-0 z-[11] h-full border-r border-border bg-background">
-                            <button
-                              type="button"
-                              className="flex min-h-[44px] w-full min-w-0 flex-col items-start justify-center gap-0.5 px-2 py-2 text-left transition-colors hover:bg-muted sm:min-h-0 sm:px-3 sm:py-1.5"
+                            {/* ASYGNUZ: div en vez de <button> -- este bloque
+                            ya contiene la flechita de expandir/colapsar como
+                            botón propio, y HTML no permite anidar <button>s
+                            (rompía el click y disparaba un warning de
+                            hidratación en React). */}
+                            {/* biome-ignore lint/a11y/noStaticElementInteractions: false positive for onClick/onKeyDown, matches list-view/task-row.tsx */}
+                            <div
+                              className="flex min-h-[44px] w-full min-w-0 flex-col items-start justify-center gap-0.5 px-2 py-2 text-left transition-colors hover:bg-muted sm:min-h-0 sm:px-3 sm:py-1.5 cursor-pointer"
+                              style={{
+                                paddingLeft: `${task.level * 0.875 + (isMobile ? 0.5 : 0.75)}rem`,
+                              }}
                               onClick={() =>
                                 navigate({
                                   to: ".",
@@ -342,8 +424,48 @@ function RouteComponent() {
                                   replace: true,
                                 })
                               }
+                              onKeyDown={(event) => {
+                                if (event.key !== "Enter" && event.key !== " ")
+                                  return;
+                                event.preventDefault();
+                                navigate({
+                                  to: ".",
+                                  search: { taskId: task.id },
+                                  replace: true,
+                                });
+                              }}
                             >
                               <div className="flex w-full items-center gap-1.5">
+                                {task.childCount > 0 ? (
+                                  <button
+                                    type="button"
+                                    onClick={(event) => {
+                                      event.stopPropagation();
+                                      toggleCollapsed(task.id);
+                                    }}
+                                    className="flex-shrink-0 text-muted-foreground hover:text-foreground"
+                                  >
+                                    <ChevronRight
+                                      className={cn(
+                                        "size-3 transition-transform",
+                                        !collapsedTaskIds.has(task.id) &&
+                                          "rotate-90",
+                                      )}
+                                    />
+                                  </button>
+                                ) : (
+                                  task.level > 0 && (
+                                    <div className="w-3 flex-shrink-0" />
+                                  )
+                                )}
+                                <div
+                                  className="flex-shrink-0"
+                                  title={t(
+                                    `tasks:type.${task.issueType || "task"}`,
+                                  )}
+                                >
+                                  {getIssueTypeIcon(task.issueType)}
+                                </div>
                                 <span className="max-w-[7rem] truncate rounded-full bg-secondary px-1.5 py-px text-[10px] font-medium uppercase tracking-wide text-secondary-foreground sm:max-w-none">
                                   {getStatusLabel(task.status)}
                                 </span>
@@ -361,7 +483,7 @@ function RouteComponent() {
                                   ? ` • ${task.assigneeName}`
                                   : ""}
                               </p>
-                            </button>
+                            </div>
                           </div>
                         ) : null}
 
