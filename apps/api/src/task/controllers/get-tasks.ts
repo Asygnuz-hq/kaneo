@@ -12,6 +12,7 @@ import {
 import { HTTPException } from "hono/http-exception";
 import db from "../../database";
 import {
+  clientAccountTable,
   columnTable,
   externalLinkTable,
   labelTable,
@@ -143,6 +144,12 @@ async function getTasks(projectId: string, options: GetTasksOptions = {}) {
     assigneeId: userTable.id,
     assigneeImage: userTable.image,
     projectId: taskTable.projectId,
+    // ASYGNUZ: no nulo únicamente si la tarea nació como ticket del portal
+    // de cliente (Service Desk fase 2) -- el nombre se usa para la
+    // insignia "🎫 Ticket de X" en el tablero interno.
+    requestedByClientId: taskTable.requestedByClientId,
+    requestedByClientName: clientAccountTable.name,
+    requestedByClientEmail: clientAccountTable.email,
   };
 
   const query = db
@@ -150,6 +157,10 @@ async function getTasks(projectId: string, options: GetTasksOptions = {}) {
     .from(taskTable)
     .leftJoin(userTable, eq(taskTable.userId, userTable.id))
     .leftJoin(projectTable, eq(taskTable.projectId, projectTable.id))
+    .leftJoin(
+      clientAccountTable,
+      eq(taskTable.requestedByClientId, clientAccountTable.id),
+    )
     .where(whereClause)
     .orderBy(orderByClause);
 

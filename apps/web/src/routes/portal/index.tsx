@@ -1,6 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
-import { createFileRoute, useNavigate } from "@tanstack/react-router";
-import { Loader2, LogOut } from "lucide-react";
+import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
+import { ChevronRight, Loader2, LogOut } from "lucide-react";
 import { Logo } from "@/components/common/logo";
 import PageTitle from "@/components/page-title";
 import { Button } from "@/components/ui/button";
@@ -10,9 +10,9 @@ import {
   listClientPortalProjects,
 } from "@/lib/client-portal-api";
 
-// ASYGNUZ: Service Desk client portal landing. Phase 1 -- just confirms the
-// session works and lists accessible projects. Ticket creation/viewing is a
-// follow-up PR.
+// ASYGNUZ: Service Desk client portal landing -- confirms the session works
+// and lists accessible projects. Each one links into its ticket list
+// (fase 2, apps/web/src/routes/portal/project.$projectId.tsx).
 
 export const Route = createFileRoute("/portal/")({
   component: ClientPortalHome,
@@ -77,11 +77,20 @@ function ClientPortalHome() {
         ) : projects && projects.length > 0 ? (
           <div className="space-y-2">
             {projects.map((project) => (
-              <Card key={project.id}>
-                <CardContent className="py-3">
-                  <p className="font-medium text-foreground">{project.name}</p>
-                </CardContent>
-              </Card>
+              <Link
+                key={project.id}
+                to="/portal/project/$projectId"
+                params={{ projectId: project.id }}
+              >
+                <Card className="transition-colors hover:bg-accent/40">
+                  <CardContent className="py-3 flex items-center justify-between">
+                    <p className="font-medium text-foreground">
+                      {project.name}
+                    </p>
+                    <ChevronRight className="w-4 h-4 text-muted-foreground" />
+                  </CardContent>
+                </Card>
+              </Link>
             ))}
           </div>
         ) : (

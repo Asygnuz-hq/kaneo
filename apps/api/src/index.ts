@@ -7,10 +7,11 @@ import { createNodeWebSocket } from "@hono/node-ws";
 import { OpenAPIHono } from "@hono/zod-openapi";
 import * as Sentry from "@sentry/node";
 import type { Session, User } from "better-auth/types";
-import { eq, sql } from "drizzle-orm";
+import { and, eq, sql } from "drizzle-orm";
 import { migrate } from "drizzle-orm/node-postgres/migrator";
 import { Hono } from "hono";
 import { compress } from "hono/compress";
+import { getCookie } from "hono/cookie";
 import { cors } from "hono/cors";
 import { HTTPException } from "hono/http-exception";
 import activity from "./activity";
@@ -19,6 +20,8 @@ import { organizationRoutes } from "./auth-openapi";
 import billing from "./billing";
 import clientAccess from "./client-access";
 import clientAuth from "./client-auth";
+import { CLIENT_SESSION_COOKIE_NAME } from "./client-auth/cookie";
+import { hashToken } from "./client-auth/tokens";
 import clientPortal from "./client-portal";
 import column from "./column";
 import comment from "./comment";
@@ -755,6 +758,96 @@ export function createApp() {
         },
         onClose() {
           if (conn && projectId) {
+            removeConnection(projectId, conn);
+          }
+        },
+      };
+    }),
+  );
+
+  // ASYGNUZ: Service Desk fase 2 -- WS para el portal de cliente. Misma
+  // pool de conexiones que el WS interno (addConnection/projectConnections
+  // no distinguen quién se conectó), así que un ticket comentado por el
+  // equipo llega en vivo al cliente y viceversa sin tocar broadcastToProject
+  // ni el resto de la infraestructura de eventos. La autenticación es la
+  // única diferencia: cookie de sesión de cliente, no better-auth, y el
+  // chequeo de acceso es contra client_project_access, no workspace_member.
+  api.get(
+    "/ws/client/:projectId",
+    upgradeWebSocket(async (c) => {
+      const projectId = c.req.param("projectId");
+      if (!projectId) {
+        throw new HTTPException(400, { message: "Project id required" });
+      }
+
+      const token = getCookie(c, CLIENT_SESSION_COOKIE_NAME);
+      if (!token) {
+        throw new HTTPException(401, { message: "Not signed in" });
+      }
+
+      const [session] = await db
+        .select({
+          clientAccountId: schema.clientSessionTable.clientAccountId,
+          expiresAt: schema.clientSessionTable.expiresAt,
+        })
+        .from(schema.clientSessionTable)
+        .where(eq(schema.clientSessionTable.tokenHash, hashToken(token)))
+        .limit(1);
+
+      if (!session || session.expiresAt.getTime() < Date.now()) {
+        throw new HTTPException(401, { message: "Session expired" });
+      }
+
+      const [access] = await db
+        .select({ id: schema.clientProjectAccessTable.id })
+        .from(schema.clientProjectAccessTable)
+        .where(
+          and(
+            eq(
+              schema.clientProjectAccessTable.clientAccountId,
+              session.clientAccountId,
+            ),
+            eq(schema.clientProjectAccessTable.projectId, projectId),
+          ),
+        )
+        .limit(1);
+
+      if (!access) {
+        throw new HTTPException(404, { message: "Not found" });
+      }
+
+      const initiatorId = `client:${session.clientAccountId}`;
+      let conn: ReturnType<typeof addConnection> | null = null;
+
+      return {
+        onOpen(_evt, ws) {
+          conn = addConnection(
+            projectId,
+            ws,
+            session.clientAccountId,
+            initiatorId,
+          );
+        },
+        onMessage(evt) {
+          try {
+            const raw =
+              typeof evt.data === "string"
+                ? evt.data
+                : Buffer.isBuffer(evt.data)
+                  ? evt.data.toString()
+                  : null;
+            if (raw) {
+              const msg = JSON.parse(raw) as { type?: string };
+              if (msg?.type === "ping") {
+                // keepalive, no-op
+              }
+            }
+          } catch {
+            // Ignore malformed messages
+          }
+        },
+        onClose() {
+          if (conn) {
             removeConnection(projectId, conn);
           }
         },

@@ -85,6 +85,12 @@ export const boardTaskSchema = z
     projectId: z.string(),
     labels: z.array(taskLabelSchema),
     externalLinks: z.array(taskExternalLinkSchema),
+    requestedByClientId: z.string().nullable().openapi({
+      description:
+        "Set only when the task originated as a Service Desk ticket from the client portal.",
+    }),
+    requestedByClientName: z.string().nullable(),
+    requestedByClientEmail: z.string().nullable(),
   })
   .openapi("BoardTask");
 

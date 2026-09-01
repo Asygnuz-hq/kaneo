@@ -37,6 +37,11 @@ type Task = {
   columnId?: string | null;
   labels?: TaskLabel[];
   externalLinks?: TaskExternalLink[];
+  // ASYGNUZ: solo no nulo si la tarea nació como ticket del portal de
+  // cliente (Service Desk fase 2).
+  requestedByClientId?: string | null;
+  requestedByClientName?: string | null;
+  requestedByClientEmail?: string | null;
 };
 
 export default Task;

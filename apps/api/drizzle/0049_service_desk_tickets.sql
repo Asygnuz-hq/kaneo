@@ -1,0 +1,3 @@
+ALTER TABLE "task" ADD COLUMN "requested_by_client_id" text;--> statement-breakpoint
+ALTER TABLE "task" ADD CONSTRAINT "task_requested_by_client_id_client_account_id_fk" FOREIGN KEY ("requested_by_client_id") REFERENCES "public"."client_account"("id") ON DELETE set null ON UPDATE cascade;--> statement-breakpoint
+CREATE INDEX "task_requestedByClientId_idx" ON "task" USING btree ("requested_by_client_id");

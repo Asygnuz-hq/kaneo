@@ -31,6 +31,7 @@ import { Route as LayoutAuthenticatedInvitationsRouteImport } from './routes/_la
 import { Route as LayoutAuthenticatedOnboardingRouteImport } from './routes/_layout/_authenticated/onboarding'
 import { Route as LayoutAuthenticatedProfileSetupRouteImport } from './routes/_layout/_authenticated/profile-setup'
 import { Route as InvitationAcceptInviteIdRouteImport } from './routes/invitation/accept.$inviteId'
+import { Route as PortalProjectProjectIdRouteImport } from './routes/portal/project.$projectId'
 import { Route as LayoutAuthenticatedDashboardIndexRouteImport } from './routes/_layout/_authenticated/dashboard/index'
 import { Route as LayoutAuthenticatedDashboardInvitationsRouteImport } from './routes/_layout/_authenticated/dashboard/invitations'
 import { Route as LayoutAuthenticatedDashboardSettingsRouteImport } from './routes/_layout/_authenticated/dashboard/settings'
@@ -39,6 +40,7 @@ import { Route as LayoutAuthenticatedDashboardSettingsProjectsRouteImport } from
 import { Route as LayoutAuthenticatedDashboardSettingsWorkspaceRouteImport } from './routes/_layout/_authenticated/dashboard/settings/workspace'
 import { Route as LayoutAuthenticatedDashboardWorkspaceWorkspaceIdRouteImport } from './routes/_layout/_authenticated/dashboard/workspace/$workspaceId'
 import { Route as LayoutAuthenticatedDashboardWorkspaceCreateRouteImport } from './routes/_layout/_authenticated/dashboard/workspace/create'
+import { Route as PortalProjectProjectIdTicketTicketIdRouteImport } from './routes/portal/project.$projectId.ticket.$ticketId'
 import { Route as LayoutAuthenticatedDashboardSettingsAccountDeveloperRouteImport } from './routes/_layout/_authenticated/dashboard/settings/account/developer'
 import { Route as LayoutAuthenticatedDashboardSettingsAccountInformationRouteImport } from './routes/_layout/_authenticated/dashboard/settings/account/information'
 import { Route as LayoutAuthenticatedDashboardSettingsAccountNotificationsRouteImport } from './routes/_layout/_authenticated/dashboard/settings/account/notifications'
@@ -175,6 +177,11 @@ const InvitationAcceptInviteIdRoute =
     path: '/invitation/accept/$inviteId',
     getParentRoute: () => rootRouteImport,
   } as any)
+const PortalProjectProjectIdRoute = PortalProjectProjectIdRouteImport.update({
+  id: '/portal/project/$projectId',
+  path: '/portal/project/$projectId',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const LayoutAuthenticatedDashboardIndexRoute =
   LayoutAuthenticatedDashboardIndexRouteImport.update({
     id: '/',
@@ -222,6 +229,12 @@ const LayoutAuthenticatedDashboardWorkspaceCreateRoute =
     id: '/workspace/create',
     path: '/workspace/create',
     getParentRoute: () => LayoutAuthenticatedDashboardRoute,
+  } as any)
+const PortalProjectProjectIdTicketTicketIdRoute =
+  PortalProjectProjectIdTicketTicketIdRouteImport.update({
+    id: '/ticket/$ticketId',
+    path: '/ticket/$ticketId',
+    getParentRoute: () => PortalProjectProjectIdRoute,
   } as any)
 const LayoutAuthenticatedDashboardSettingsAccountDeveloperRoute =
   LayoutAuthenticatedDashboardSettingsAccountDeveloperRouteImport.update({
@@ -406,6 +419,7 @@ export interface FileRoutesByFullPath {
   '/onboarding': typeof LayoutAuthenticatedOnboardingRoute
   '/profile-setup': typeof LayoutAuthenticatedProfileSetupRoute
   '/invitation/accept/$inviteId': typeof InvitationAcceptInviteIdRoute
+  '/portal/project/$projectId': typeof PortalProjectProjectIdRouteWithChildren
   '/dashboard/invitations': typeof LayoutAuthenticatedDashboardInvitationsRoute
   '/dashboard/settings': typeof LayoutAuthenticatedDashboardSettingsRouteWithChildren
   '/dashboard/': typeof LayoutAuthenticatedDashboardIndexRoute
@@ -414,6 +428,7 @@ export interface FileRoutesByFullPath {
   '/dashboard/settings/workspace': typeof LayoutAuthenticatedDashboardSettingsWorkspaceRouteWithChildren
   '/dashboard/workspace/$workspaceId': typeof LayoutAuthenticatedDashboardWorkspaceWorkspaceIdRouteWithChildren
   '/dashboard/workspace/create': typeof LayoutAuthenticatedDashboardWorkspaceCreateRoute
+  '/portal/project/$projectId/ticket/$ticketId': typeof PortalProjectProjectIdTicketTicketIdRoute
   '/dashboard/settings/account/developer': typeof LayoutAuthenticatedDashboardSettingsAccountDeveloperRoute
   '/dashboard/settings/account/information': typeof LayoutAuthenticatedDashboardSettingsAccountInformationRoute
   '/dashboard/settings/account/notifications': typeof LayoutAuthenticatedDashboardSettingsAccountNotificationsRoute
@@ -456,6 +471,7 @@ export interface FileRoutesByTo {
   '/onboarding': typeof LayoutAuthenticatedOnboardingRoute
   '/profile-setup': typeof LayoutAuthenticatedProfileSetupRoute
   '/invitation/accept/$inviteId': typeof InvitationAcceptInviteIdRoute
+  '/portal/project/$projectId': typeof PortalProjectProjectIdRouteWithChildren
   '/dashboard/invitations': typeof LayoutAuthenticatedDashboardInvitationsRoute
   '/dashboard/settings': typeof LayoutAuthenticatedDashboardSettingsRouteWithChildren
   '/dashboard': typeof LayoutAuthenticatedDashboardIndexRoute
@@ -463,6 +479,7 @@ export interface FileRoutesByTo {
   '/dashboard/settings/projects': typeof LayoutAuthenticatedDashboardSettingsProjectsRouteWithChildren
   '/dashboard/settings/workspace': typeof LayoutAuthenticatedDashboardSettingsWorkspaceRouteWithChildren
   '/dashboard/workspace/create': typeof LayoutAuthenticatedDashboardWorkspaceCreateRoute
+  '/portal/project/$projectId/ticket/$ticketId': typeof PortalProjectProjectIdTicketTicketIdRoute
   '/dashboard/settings/account/developer': typeof LayoutAuthenticatedDashboardSettingsAccountDeveloperRoute
   '/dashboard/settings/account/information': typeof LayoutAuthenticatedDashboardSettingsAccountInformationRoute
   '/dashboard/settings/account/notifications': typeof LayoutAuthenticatedDashboardSettingsAccountNotificationsRoute
@@ -510,6 +527,7 @@ export interface FileRoutesById {
   '/_layout/_authenticated/onboarding': typeof LayoutAuthenticatedOnboardingRoute
   '/_layout/_authenticated/profile-setup': typeof LayoutAuthenticatedProfileSetupRoute
   '/invitation/accept/$inviteId': typeof InvitationAcceptInviteIdRoute
+  '/portal/project/$projectId': typeof PortalProjectProjectIdRouteWithChildren
   '/_layout/_authenticated/dashboard/invitations': typeof LayoutAuthenticatedDashboardInvitationsRoute
   '/_layout/_authenticated/dashboard/settings': typeof LayoutAuthenticatedDashboardSettingsRouteWithChildren
   '/_layout/_authenticated/dashboard/': typeof LayoutAuthenticatedDashboardIndexRoute
@@ -518,6 +536,7 @@ export interface FileRoutesById {
   '/_layout/_authenticated/dashboard/settings/workspace': typeof LayoutAuthenticatedDashboardSettingsWorkspaceRouteWithChildren
   '/_layout/_authenticated/dashboard/workspace/$workspaceId': typeof LayoutAuthenticatedDashboardWorkspaceWorkspaceIdRouteWithChildren
   '/_layout/_authenticated/dashboard/workspace/create': typeof LayoutAuthenticatedDashboardWorkspaceCreateRoute
+  '/portal/project/$projectId/ticket/$ticketId': typeof PortalProjectProjectIdTicketTicketIdRoute
   '/_layout/_authenticated/dashboard/settings/account/developer': typeof LayoutAuthenticatedDashboardSettingsAccountDeveloperRoute
   '/_layout/_authenticated/dashboard/settings/account/information': typeof LayoutAuthenticatedDashboardSettingsAccountInformationRoute
   '/_layout/_authenticated/dashboard/settings/account/notifications': typeof LayoutAuthenticatedDashboardSettingsAccountNotificationsRoute
@@ -564,6 +583,7 @@ export interface FileRouteTypes {
     | '/onboarding'
     | '/profile-setup'
     | '/invitation/accept/$inviteId'
+    | '/portal/project/$projectId'
     | '/dashboard/invitations'
     | '/dashboard/settings'
     | '/dashboard/'
@@ -572,6 +592,7 @@ export interface FileRouteTypes {
     | '/dashboard/settings/workspace'
     | '/dashboard/workspace/$workspaceId'
     | '/dashboard/workspace/create'
+    | '/portal/project/$projectId/ticket/$ticketId'
     | '/dashboard/settings/account/developer'
     | '/dashboard/settings/account/information'
     | '/dashboard/settings/account/notifications'
@@ -614,6 +635,7 @@ export interface FileRouteTypes {
     | '/onboarding'
     | '/profile-setup'
     | '/invitation/accept/$inviteId'
+    | '/portal/project/$projectId'
     | '/dashboard/invitations'
     | '/dashboard/settings'
     | '/dashboard'
@@ -621,6 +643,7 @@ export interface FileRouteTypes {
     | '/dashboard/settings/projects'
     | '/dashboard/settings/workspace'
     | '/dashboard/workspace/create'
+    | '/portal/project/$projectId/ticket/$ticketId'
     | '/dashboard/settings/account/developer'
     | '/dashboard/settings/account/information'
     | '/dashboard/settings/account/notifications'
@@ -667,6 +690,7 @@ export interface FileRouteTypes {
     | '/_layout/_authenticated/onboarding'
     | '/_layout/_authenticated/profile-setup'
     | '/invitation/accept/$inviteId'
+    | '/portal/project/$projectId'
     | '/_layout/_authenticated/dashboard/invitations'
     | '/_layout/_authenticated/dashboard/settings'
     | '/_layout/_authenticated/dashboard/'
@@ -675,6 +699,7 @@ export interface FileRouteTypes {
     | '/_layout/_authenticated/dashboard/settings/workspace'
     | '/_layout/_authenticated/dashboard/workspace/$workspaceId'
     | '/_layout/_authenticated/dashboard/workspace/create'
+    | '/portal/project/$projectId/ticket/$ticketId'
     | '/_layout/_authenticated/dashboard/settings/account/developer'
     | '/_layout/_authenticated/dashboard/settings/account/information'
     | '/_layout/_authenticated/dashboard/settings/account/notifications'
@@ -711,6 +736,7 @@ export interface RootRouteChildren {
   PublicProjectProjectIdRoute: typeof PublicProjectProjectIdRoute
   PortalIndexRoute: typeof PortalIndexRoute
   InvitationAcceptInviteIdRoute: typeof InvitationAcceptInviteIdRoute
+  PortalProjectProjectIdRoute: typeof PortalProjectProjectIdRouteWithChildren
 }
 
 declare module '@tanstack/react-router' {
@@ -869,6 +895,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof InvitationAcceptInviteIdRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/portal/project/$projectId': {
+      id: '/portal/project/$projectId'
+      path: '/portal/project/$projectId'
+      fullPath: '/portal/project/$projectId'
+      preLoaderRoute: typeof PortalProjectProjectIdRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/_layout/_authenticated/dashboard/': {
       id: '/_layout/_authenticated/dashboard/'
       path: '/'
@@ -924,6 +957,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/dashboard/workspace/create'
       preLoaderRoute: typeof LayoutAuthenticatedDashboardWorkspaceCreateRouteImport
       parentRoute: typeof LayoutAuthenticatedDashboardRoute
+    }
+    '/portal/project/$projectId/ticket/$ticketId': {
+      id: '/portal/project/$projectId/ticket/$ticketId'
+      path: '/ticket/$ticketId'
+      fullPath: '/portal/project/$projectId/ticket/$ticketId'
+      preLoaderRoute: typeof PortalProjectProjectIdTicketTicketIdRouteImport
+      parentRoute: typeof PortalProjectProjectIdRoute
     }
     '/_layout/_authenticated/dashboard/settings/account/developer': {
       id: '/_layout/_authenticated/dashboard/settings/account/developer'
@@ -1302,6 +1342,21 @@ const DeviceRouteChildren: DeviceRouteChildren = {
 const DeviceRouteWithChildren =
   DeviceRoute._addFileChildren(DeviceRouteChildren)
 
+interface PortalProjectProjectIdRouteChildren {
+  PortalProjectProjectIdTicketTicketIdRoute: typeof PortalProjectProjectIdTicketTicketIdRoute
+}
+
+const PortalProjectProjectIdRouteChildren: PortalProjectProjectIdRouteChildren =
+  {
+    PortalProjectProjectIdTicketTicketIdRoute:
+      PortalProjectProjectIdTicketTicketIdRoute,
+  }
+
+const PortalProjectProjectIdRouteWithChildren =
+  PortalProjectProjectIdRoute._addFileChildren(
+    PortalProjectProjectIdRouteChildren,
+  )
+
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   LayoutRoute: LayoutRouteWithChildren,
@@ -1314,6 +1369,7 @@ const rootRouteChildren: RootRouteChildren = {
   PublicProjectProjectIdRoute: PublicProjectProjectIdRoute,
   PortalIndexRoute: PortalIndexRoute,
   InvitationAcceptInviteIdRoute: InvitationAcceptInviteIdRoute,
+  PortalProjectProjectIdRoute: PortalProjectProjectIdRouteWithChildren,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

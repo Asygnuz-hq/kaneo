@@ -8,6 +8,7 @@ import {
   CalendarX,
   GitMerge,
   GitPullRequest,
+  Ticket,
 } from "lucide-react";
 import { type CSSProperties, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
@@ -257,6 +258,23 @@ function TaskCard({ task, disableDragDrop = false }: TaskCardProps) {
             {showLabels && (
               <div className="mb-2.5">
                 <TaskLabels labels={task.labels ?? []} />
+              </div>
+            )}
+
+            {task.requestedByClientId && (
+              <div className="mb-2.5">
+                <span
+                  className="inline-flex items-center gap-1 rounded border border-accent/40 bg-accent/10 px-2 py-1 text-[10px] font-medium text-accent-bright"
+                  title={`Solicitado por ${task.requestedByClientName || task.requestedByClientEmail || "un cliente"} desde el portal`}
+                >
+                  <Ticket className="h-3 w-3" />
+                  <span>
+                    Ticket de{" "}
+                    {task.requestedByClientName ||
+                      task.requestedByClientEmail ||
+                      "cliente"}
+                  </span>
+                </span>
               </div>
             )}
 
