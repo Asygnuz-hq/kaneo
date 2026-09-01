@@ -71,3 +71,63 @@ export type ClientPortalProject = {
 export function listClientPortalProjects() {
   return request<ClientPortalProject[]>("client-portal", "/projects");
 }
+
+// ASYGNUZ: Service Desk fase 2 -- tickets. Un ticket es una tarea de Kaneo
+// vista desde el lado del cliente (ver apps/api/src/client-portal).
+
+export type ClientPortalTicket = {
+  id: string;
+  number: number | null;
+  title: string;
+  status: string;
+  createdAt: string;
+  projectId: string;
+  projectName: string;
+  projectSlug: string;
+};
+
+export function listClientPortalTickets() {
+  return request<ClientPortalTicket[]>("client-portal", "/tickets");
+}
+
+export function createClientPortalTicket(input: {
+  projectId: string;
+  title: string;
+  description?: string;
+}) {
+  return request<ClientPortalTicket>("client-portal", "/tickets", {
+    method: "POST",
+    body: JSON.stringify(input),
+  });
+}
+
+export type ClientPortalTicketComment = {
+  id: string;
+  content: string | null;
+  createdAt: string;
+  authorName: string;
+  fromTeam: boolean;
+};
+
+export type ClientPortalTicketDetail = ClientPortalTicket & {
+  description: string | null;
+  comments: ClientPortalTicketComment[];
+};
+
+export function getClientPortalTicket(ticketId: string) {
+  return request<ClientPortalTicketDetail>(
+    "client-portal",
+    `/tickets/${encodeURIComponent(ticketId)}`,
+  );
+}
+
+export function createClientPortalTicketComment(
+  ticketId: string,
+  content: string,
+) {
+  return request<ClientPortalTicketComment>(
+    "client-portal",
+    `/tickets/${encodeURIComponent(ticketId)}/comments`,
+    { method: "POST", body: JSON.stringify({ content }) },
+  );
+}

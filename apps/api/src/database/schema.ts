@@ -577,6 +577,13 @@ export const taskTable = pgTable(
     }),
     startDate: timestamp("start_date", { mode: "date" }),
     dueDate: timestamp("due_date", { mode: "date" }),
+    // ASYGNUZ: Service Desk fase 2 -- set solo cuando la tarea nació como
+    // ticket enviado por un cliente del portal (client-portal), no cuando la
+    // crea alguien del equipo. Null en todos los demás casos.
+    requestedByClientId: text("requested_by_client_id").references(
+      () => clientAccountTable.id,
+      { onDelete: "set null", onUpdate: "cascade" },
+    ),
     createdAt: timestamp("created_at", { mode: "date" }).defaultNow().notNull(),
     updatedAt: timestamp("updated_at", { mode: "date" })
       .defaultNow()
@@ -589,6 +596,7 @@ export const taskTable = pgTable(
     index("task_assigneeId_idx").on(table.userId),
     index("task_columnId_idx").on(table.columnId),
     index("task_sprintId_idx").on(table.sprintId),
+    index("task_requestedByClientId_idx").on(table.requestedByClientId),
     unique("task_project_number_unique").on(table.projectId, table.number),
   ],
 );

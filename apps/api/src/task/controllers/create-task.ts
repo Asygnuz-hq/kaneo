@@ -21,6 +21,7 @@ async function createTask({
   description,
   priority,
   issueType,
+  requestedByClientId,
 }: {
   projectId: string;
   currentUserId: string;
@@ -32,6 +33,10 @@ async function createTask({
   description?: string;
   priority?: string;
   issueType?: string;
+  // ASYGNUZ: set únicamente cuando la tarea nace de un ticket del portal
+  // de cliente (Service Desk fase 2) -- currentUserId llega vacío en ese
+  // caso, no hay usuario interno que la haya creado.
+  requestedByClientId?: string;
 }) {
   const resolvedStatus = status || "to-do";
   const resolvedPriority = priority || "no-priority";
@@ -94,6 +99,7 @@ async function createTask({
         issueType: resolvedIssueType,
         number: taskNumber,
         position: nextPosition,
+        requestedByClientId: requestedByClientId ?? null,
       })
       .returning();
 

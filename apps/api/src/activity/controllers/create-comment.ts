@@ -13,7 +13,10 @@ import { parseMentionIds } from "../../utils/parse-mentions";
 
 async function createComment(
   taskId: string,
-  userId: string,
+  // ASYGNUZ: null cuando el comentario lo escribe un cliente del portal de
+  // Service Desk, no un miembro interno -- external lleva su nombre en ese
+  // caso (mismo patrón que ya usaban los webhooks de Gitea/GitHub).
+  userId: string | null,
   content: string,
   external?: { userName: string; source: string },
 ) {
@@ -39,10 +42,15 @@ async function createComment(
     });
   }
 
-  const [user] = await db
-    .select({ name: userTable.name })
-    .from(userTable)
-    .where(eq(userTable.id, userId));
+  const user = userId
+    ? (
+        await db
+          .select({ name: userTable.name })
+          .from(userTable)
+          .where(eq(userTable.id, userId))
+      )[0]
+    : undefined;
+  const commenterName = user?.name ?? external?.userName;
 
   const [task] = await db
     .select({
@@ -58,7 +66,7 @@ async function createComment(
   if (task) {
     await publishEvent("comment.created", {
       ...activity,
-      comment: `**${user?.name}** commented:\n> ${content}`,
+      comment: `**${commenterName}** commented:\n> ${content}`,
       projectId: task.projectId,
     });
   }
@@ -71,7 +79,7 @@ async function createComment(
       type: "task_mention",
       eventData: {
         taskTitle: task?.title ?? null,
-        mentionerName: user?.name ?? null,
+        mentionerName: commenterName ?? null,
         projectId: task?.projectId ?? null,
         workspaceId: task?.workspaceId ?? null,
       },
@@ -90,7 +98,7 @@ async function createComment(
       type: "task_comment",
       eventData: {
         taskTitle: task.title,
-        commenterName: user?.name ?? null,
+        commenterName: commenterName ?? null,
         commentPreview: content.slice(0, 160),
         projectId: task.projectId,
         workspaceId: task.workspaceId,
