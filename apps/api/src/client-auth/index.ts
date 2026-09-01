@@ -13,6 +13,7 @@ import {
 } from "./cookie";
 import { createClientSession } from "./create-session";
 import { type ClientAuthVariables, clientAuthMiddleware } from "./middleware";
+import { rateLimitClientLogin } from "./rate-limit";
 
 // ASYGNUZ: Service Desk client portal auth. Deliberately NOT built on the
 // apiRouter()/createRoute() OpenAPI pattern the rest of the API uses --
@@ -59,7 +60,7 @@ async function parseJsonBody<T extends z.ZodType>(
 
 const clientAuth = new Hono<ClientAuthVariables>();
 
-clientAuth.post("/login", async (c) => {
+clientAuth.post("/login", rateLimitClientLogin, async (c) => {
   const { email, password } = await parseJsonBody(c, loginBody);
   const account = await loginClient(email, password);
   const token = await createClientSession(account.id, requestMeta(c));
