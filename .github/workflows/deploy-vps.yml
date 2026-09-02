@@ -3,6 +3,19 @@ name: Desplegar a la VPS
 # Corre solo cuando algo llega a main (ej. al mergear un PR) — así no
 # importa cuántas ramas/sesiones estén trabajando en paralelo, la VPS
 # siempre termina reflejando lo último que quedó mergeado.
+#
+# ASYGNUZ: el build de Docker en esta VPS puede tardar varios minutos --
+# más aún con caché fría (esbuild descargando su binario desde cero puede
+# sumar más de un minuto él solo). Antes esto corría como un único paso de
+# ssh-action con el script de deploy en primer plano: si el build tardaba
+# más que el timeout del paso, GitHub cortaba la conexión SSH a mitad de
+# camino y eso dejaba la VPS (que también aloja n8n, Vaultwarden y
+# EspoCRM) saturada al punto de no responder ni por SSH ni por HTTP.
+#
+# Ahora el deploy se lanza SIEMPRE desacoplado de esta conexión (nohup +
+# disown en la VPS) -- el build sigue corriendo pase lo que pase con esta
+# sesión de SSH -- y un segundo paso, con su propia conexión y su propio
+# timeout generoso, solo espera y confirma el resultado leyendo el log.
 on:
   push:
     branches: [main]
@@ -12,10 +25,43 @@ jobs:
   deploy:
     runs-on: ubuntu-latest
     steps:
-      - name: Conectar a la VPS y correr el deploy
+      - name: Lanzar el deploy en la VPS (desacoplado de esta conexión)
         uses: appleboy/ssh-action@v1.0.3
         with:
           host: ${{ secrets.VPS_HOST }}
           username: ${{ secrets.VPS_USER }}
           key: ${{ secrets.VPS_SSH_KEY }}
-          script: bash /home/juanmanuel/kaneo-app/deploy.sh
+          script: |
+            set -e
+            rm -f /home/juanmanuel/kaneo-app/deploy.log
+            nohup bash /home/juanmanuel/kaneo-app/deploy.sh > /home/juanmanuel/kaneo-app/deploy.log 2>&1 < /dev/null &
+            echo $! > /home/juanmanuel/kaneo-app/deploy.pid
+            disown
+            echo "Deploy lanzado en segundo plano (pid $(cat /home/juanmanuel/kaneo-app/deploy.pid))."
+
+      - name: Esperar y confirmar el resultado
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.VPS_HOST }}
+          username: ${{ secrets.VPS_USER }}
+          key: ${{ secrets.VPS_SSH_KEY }}
+          command_timeout: 20m
+          script: |
+            PIDFILE=/home/juanmanuel/kaneo-app/deploy.pid
+            LOGFILE=/home/juanmanuel/kaneo-app/deploy.log
+            for i in $(seq 1 90); do
+              if grep -qF "Despliegue completo." "$LOGFILE" 2>/dev/null; then
+                echo "Deploy completado con éxito."
+                exit 0
+              fi
+              PID=$(cat "$PIDFILE" 2>/dev/null || true)
+              if [ -n "$PID" ] && ! kill -0 "$PID" 2>/dev/null; then
+                echo "El proceso de deploy terminó sin la marca de éxito -- probablemente falló. Log:"
+                tail -n 80 "$LOGFILE"
+                exit 1
+              fi
+              sleep 10
+            done
+            echo "Se agotó el tiempo de espera (15 min) sin confirmar el resultado. Log hasta ahora:"
+            tail -n 80 "$LOGFILE"
+            exit 1
