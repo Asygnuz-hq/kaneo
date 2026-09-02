@@ -8,7 +8,6 @@ import {
   Plus,
 } from "lucide-react";
 import { useTranslation } from "react-i18next";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { KbdSequence } from "@/components/ui/kbd";
@@ -35,7 +34,6 @@ import {
   isTaskCompleted,
 } from "@/lib/due-date-status";
 import { formatDateShort } from "@/lib/format";
-import { getInitials } from "@/lib/get-initials";
 import { getPriorityLabel, getStatusDisplayLabel } from "@/lib/i18n/domain";
 import { getPriorityIcon } from "@/lib/priority";
 import { toast } from "@/lib/toast";
@@ -113,7 +111,7 @@ export default function TaskPropertiesSidebar({
     giteaIntegration?.branchPattern ||
     "{slug}-{number}";
 
-  const assignee = workspaceUsers?.members?.find(
+  const _assignee = workspaceUsers?.members?.find(
     (member) => member.userId === task?.userId,
   );
 

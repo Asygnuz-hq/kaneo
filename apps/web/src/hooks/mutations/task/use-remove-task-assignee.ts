@@ -5,8 +5,14 @@ export function useRemoveTaskAssignee() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: ({ taskId, userId }: { taskId: string; userId: string; projectId: string }) =>
-      removeTaskAssignee(taskId, userId),
+    mutationFn: ({
+      taskId,
+      userId,
+    }: {
+      taskId: string;
+      userId: string;
+      projectId: string;
+    }) => removeTaskAssignee(taskId, userId),
     onSuccess: (_, variables) => {
       queryClient.invalidateQueries({
         queryKey: ["task", variables.taskId],

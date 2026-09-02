@@ -5,8 +5,14 @@ export function useAddTaskAssignee() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: ({ taskId, userId }: { taskId: string; userId: string; projectId: string }) =>
-      addTaskAssignee(taskId, userId),
+    mutationFn: ({
+      taskId,
+      userId,
+    }: {
+      taskId: string;
+      userId: string;
+      projectId: string;
+    }) => addTaskAssignee(taskId, userId),
     onSuccess: (_, variables) => {
       queryClient.invalidateQueries({
         queryKey: ["task", variables.taskId],
