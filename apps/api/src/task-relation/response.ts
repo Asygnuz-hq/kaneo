@@ -51,6 +51,20 @@ export const projectSubtaskRelationSchema = z
   })
   .openapi("ProjectSubtaskRelation");
 
+// ASYGNUZ: same shape, but for "blocks" relations -- backs the Gantt view's
+// dependency arrows in bulk per project. sourceTaskId blocks targetTaskId.
+export const projectBlockingRelationSchema = z
+  .object({
+    id: z.string(),
+    sourceTaskId: z.string(),
+    targetTaskId: z.string(),
+  })
+  .openapi("ProjectBlockingRelation");
+
+export const projectBlockingRelationListSchema = z.array(
+  projectBlockingRelationSchema,
+);
+
 export const projectSubtaskRelationListSchema = z.array(
   projectSubtaskRelationSchema,
 );
