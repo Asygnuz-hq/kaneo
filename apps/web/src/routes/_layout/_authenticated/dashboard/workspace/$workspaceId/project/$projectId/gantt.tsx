@@ -15,12 +15,17 @@ import { ChevronLeft, ChevronRight, Search } from "lucide-react";
 import { useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 import ProjectLayout from "@/components/common/project-layout";
+import {
+  type DependencyLine,
+  GanttDependencyOverlay,
+} from "@/components/gantt/gantt-dependency-overlay";
 import { GanttTaskBar } from "@/components/gantt/gantt-task-bar";
 import PageTitle from "@/components/page-title";
 import TaskDetailsSheet from "@/components/task/task-details-sheet";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useGetTasks } from "@/hooks/queries/task/use-get-tasks";
+import useGetProjectBlockingRelations from "@/hooks/queries/task-relation/use-get-project-blocking-relations";
 import useGetProjectSubtaskRelations from "@/hooks/queries/task-relation/use-get-project-subtask-relations";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { cn } from "@/lib/cn";
@@ -64,6 +69,11 @@ function RouteComponent() {
   const { data: subtaskRelations } = useGetProjectSubtaskRelations(
     project?.id ?? "",
   );
+  // ASYGNUZ: flechas de dependencia -- "blocks" es un dato distinto del
+  // árbol de subtareas de arriba, se pide aparte.
+  const { data: blockingRelations } = useGetProjectBlockingRelations(
+    project?.id ?? "",
+  );
   const childrenOf = useMemo(() => {
     const map = new Map<string, string[]>();
     for (const rel of subtaskRelations ?? []) {
@@ -94,6 +104,20 @@ function RouteComponent() {
   const showTaskRail = !isMobile || isTaskRailOpen;
   const timelineTrackRef = useRef<HTMLDivElement>(null);
   const [pixelsPerDay, setPixelsPerDay] = useState(44);
+
+  // ASYGNUZ: flechas de dependencia -- el contenedor del cuerpo del Gantt
+  // (mismo origen de coordenadas que usa el fondo de la cuadrícula) más un
+  // ref por barra visible, para medir posiciones reales en vez de asumir
+  // una altura de fila fija (el alto de fila puede variar entre mobile y
+  // desktop según el contenido de la columna de tareas).
+  const timelineBodyRef = useRef<HTMLDivElement>(null);
+  const barRefs = useRef<Map<string, HTMLDivElement>>(new Map());
+  const setBarRef = (taskId: string) => (el: HTMLDivElement | null) => {
+    if (el) barRefs.current.set(taskId, el);
+    else barRefs.current.delete(taskId);
+  };
+  const [dependencyLines, setDependencyLines] = useState<DependencyLine[]>([]);
+  const [overlaySize, setOverlaySize] = useState({ width: 0, height: 0 });
 
   useEffect(() => {
     if (!isMobile) {
@@ -242,6 +266,73 @@ function RouteComponent() {
     return () => observer.disconnect();
   }, [timeline]);
 
+  // ASYGNUZ: recalcula las flechas de dependencia a partir de las posiciones
+  // REALES en pantalla de cada barra (no de una altura de fila asumida) --
+  // se vuelve a medir cuando cambian las tareas visibles, el orden, el zoom
+  // (pixelsPerDay) o el tamaño del contenedor.
+  useLayoutEffect(() => {
+    const body = timelineBodyRef.current;
+    if (!body || (blockingRelations?.length ?? 0) === 0) {
+      setDependencyLines([]);
+      setOverlaySize({ width: 0, height: 0 });
+      return;
+    }
+
+    const visibleIds = new Set(scheduledTasks.map((task) => task.id));
+
+    const measure = () => {
+      const bodyRect = body.getBoundingClientRect();
+      setOverlaySize({ width: body.scrollWidth, height: body.scrollHeight });
+
+      const lines: DependencyLine[] = [];
+      for (const rel of blockingRelations ?? []) {
+        if (
+          !visibleIds.has(rel.sourceTaskId) ||
+          !visibleIds.has(rel.targetTaskId)
+        ) {
+          continue;
+        }
+        const sourceEl = barRefs.current.get(rel.sourceTaskId);
+        const targetEl = barRefs.current.get(rel.targetTaskId);
+        if (!sourceEl || !targetEl) continue;
+
+        const sourceRect = sourceEl.getBoundingClientRect();
+        const targetRect = targetEl.getBoundingClientRect();
+        // A barra sin fechas en rango (fuera de la ventana visible del
+        // timeline) mide 0x0 -- no dibujar una flecha desde/hacia la nada.
+        if (
+          sourceRect.width === 0 ||
+          sourceRect.height === 0 ||
+          targetRect.width === 0 ||
+          targetRect.height === 0
+        ) {
+          continue;
+        }
+
+        // getBoundingClientRect is viewport-relative for both, so the
+        // subtraction below already cancels out any scrolling of the
+        // ancestor scroll container -- no need to add its scrollLeft/Top.
+        lines.push({
+          id: rel.id,
+          x1: sourceRect.right - bodyRect.left,
+          y1: sourceRect.top + sourceRect.height / 2 - bodyRect.top,
+          x2: targetRect.left - bodyRect.left,
+          y2: targetRect.top + targetRect.height / 2 - bodyRect.top,
+        });
+      }
+      setDependencyLines(lines);
+    };
+
+    measure();
+    // A ResizeObserver on `body` alone is enough: it fires whenever the
+    // container's own rendered width/height changes, which is exactly when
+    // pixelsPerDay would have changed too (both are driven by the same
+    // window/sidebar resize) -- no need to also list pixelsPerDay here.
+    const observer = new ResizeObserver(measure);
+    observer.observe(body);
+    return () => observer.disconnect();
+  }, [scheduledTasks, blockingRelations]);
+
   return (
     <ProjectLayout
       projectId={projectId}
@@ -365,7 +456,7 @@ function RouteComponent() {
                 </div>
               </div>
 
-              <div className="relative">
+              <div ref={timelineBodyRef} className="relative">
                 <div
                   ref={timelineTrackRef}
                   className="absolute inset-y-0 z-0 grid"
@@ -488,6 +579,7 @@ function RouteComponent() {
                         ) : null}
 
                         <div
+                          ref={setBarRef(task.id)}
                           className="relative min-h-11 shrink-0 select-none"
                           style={{
                             minWidth: `${timeline.timelineMinWidthRem}rem`,
@@ -511,6 +603,12 @@ function RouteComponent() {
                     );
                   })}
                 </div>
+
+                <GanttDependencyOverlay
+                  lines={dependencyLines}
+                  width={overlaySize.width}
+                  height={overlaySize.height}
+                />
               </div>
             </div>
           </div>
