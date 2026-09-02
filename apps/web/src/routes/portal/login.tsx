@@ -31,6 +31,16 @@ function ClientPortalLogin() {
   const [error, setError] = useState<string | null>(null);
   const [isPending, setIsPending] = useState(false);
   const [turnstileToken, setTurnstileToken] = useState<string | null>(null);
+  // ASYGNUZ: bumping this remounts <Turnstile> (via key), which forces a
+  // fresh challenge/token. Needed because a Turnstile token is single-use --
+  // once it's sent in a login attempt (success OR failure; the backend calls
+  // Cloudflare's siteverify either way, which burns it), reusing it on a
+  // retry always fails with "timeout-or-duplicate". Without this, a wrong
+  // password (or logging out and back in) left the stale, already-consumed
+  // token in state, the submit button looked usable (a token was still
+  // present), and every retry failed the same way until the user noticed
+  // the widget's own "Actualizar" link.
+  const [turnstileKey, setTurnstileKey] = useState(0);
 
   const captchaConfigured = Boolean(TURNSTILE_SITE_KEY);
   const captchaPending = captchaConfigured && !turnstileToken;
@@ -59,6 +69,12 @@ function ClientPortalLogin() {
       );
     } finally {
       setIsPending(false);
+      // The token this attempt used (if any) is burned either way -- clear
+      // it and remount the widget so the next attempt gets a fresh one.
+      if (captchaConfigured) {
+        setTurnstileToken(null);
+        setTurnstileKey((k) => k + 1);
+      }
     }
   };
 
@@ -102,6 +118,7 @@ function ClientPortalLogin() {
 
           {captchaConfigured && TURNSTILE_SITE_KEY && (
             <Turnstile
+              key={turnstileKey}
               siteKey={TURNSTILE_SITE_KEY}
               onVerify={handleTurnstileVerify}
               onExpire={handleTurnstileExpire}
