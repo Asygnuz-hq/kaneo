@@ -2,6 +2,7 @@ import { Hono } from "hono";
 import { getCookie } from "hono/cookie";
 import { HTTPException } from "hono/http-exception";
 import { z } from "../openapi";
+import { verifyTurnstile } from "../utils/verify-turnstile";
 import acceptClientInvite from "./controllers/accept-invite";
 import getClientAccountById from "./controllers/get-me";
 import loginClient from "./controllers/login";
@@ -26,6 +27,7 @@ import { rateLimitClientLogin } from "./rate-limit";
 const loginBody = z.object({
   email: z.string().email(),
   password: z.string().min(1),
+  turnstileToken: z.string().optional(),
 });
 
 const acceptInviteBody = z.object({
@@ -61,7 +63,17 @@ async function parseJsonBody<T extends z.ZodType>(
 const clientAuth = new Hono<ClientAuthVariables>();
 
 clientAuth.post("/login", rateLimitClientLogin, async (c) => {
-  const { email, password } = await parseJsonBody(c, loginBody);
+  const { email, password, turnstileToken } = await parseJsonBody(c, loginBody);
+  // ASYGNUZ: mismo helper que usa el sign-in interno (auth.ts) -- se
+  // vuelve un no-op si TURNSTILE_SECRET_KEY no está configurado, así que
+  // esto no rompe nada mientras no se active la key.
+  const captcha = await verifyTurnstile(
+    turnstileToken,
+    requestMeta(c).ipAddress,
+  );
+  if (!captcha.ok) {
+    throw new HTTPException(403, { message: captcha.reason });
+  }
   const account = await loginClient(email, password);
   const token = await createClientSession(account.id, requestMeta(c));
   setClientSessionCookie(c, token);
