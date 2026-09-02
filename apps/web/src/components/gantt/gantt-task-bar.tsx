@@ -50,6 +50,26 @@ function toIsoDay(d: Date) {
   return startOfDay(d).toISOString();
 }
 
+// ASYGNUZ: franja de color a la izquierda de la barra según prioridad --
+// mismos tokens semánticos que ya usa el ícono de prioridad en
+// lib/priority.tsx (destructive/warning/info), no colores nuevos. Un
+// elemento propio en vez de border-l-* para no pelear en especificidad
+// contra el "border border-primary/25" que ya trae la barra.
+function getPriorityAccentClass(priority: string | null) {
+  switch (priority) {
+    case "urgent":
+      return "bg-destructive";
+    case "high":
+      return "bg-warning";
+    case "medium":
+      return "bg-warning/50";
+    case "low":
+      return "bg-info/70";
+    default:
+      return "bg-transparent";
+  }
+}
+
 export function GanttTaskBar({
   task,
   timeline,
@@ -291,6 +311,13 @@ export function GanttTaskBar({
         style={{ gridColumn: `${lineStart} / ${lineEnd}` }}
         className="group pointer-events-auto relative mx-1 flex min-h-[44px] min-w-0 items-stretch overflow-hidden rounded-md border border-primary/25 bg-background text-left text-sm font-medium leading-none text-foreground shadow-sm transition-colors hover:border-primary/40 sm:h-11 sm:min-h-0"
       >
+        <span
+          aria-hidden="true"
+          className={cn(
+            "absolute inset-y-0 left-0 z-20 w-1",
+            getPriorityAccentClass(task.priority),
+          )}
+        />
         <button
           type="button"
           aria-label={t("tasks:gantt.resizeStart")}
