@@ -1866,7 +1866,13 @@
 			"updateDatesError": "Αποτυχία ενημέρωσης ημερομηνιών εργασίας",
 			"resizeStart": "Αλλαγή μεγέθους ημερομηνίας έναρξης",
 			"resizeDue": "Αλλαγή μεγέθους ημερομηνίας λήξης",
-			"taskAriaLabel": "{{title}}: άνοιγμα ή σύρσιμο για μετακίνηση"
+			"taskAriaLabel": "{{title}}: άνοιγμα ή σύρσιμο για μετακίνηση",
+			"zoom": {
+				"day": "Day",
+				"month": "Month",
+				"quarter": "Quarter",
+				"week": "Week"
+			}
 		},
 		"delete": {
 			"title": "Διαγραφή εργασίας;",

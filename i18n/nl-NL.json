@@ -1855,7 +1855,13 @@
 			"updateDatesError": "Bijwerken taakdatums mislukt",
 			"resizeStart": "Startdatum wijzigen",
 			"resizeDue": "Einddatum wijzigen",
-			"taskAriaLabel": "{{title}}: openen of slepen om te verplaatsen"
+			"taskAriaLabel": "{{title}}: openen of slepen om te verplaatsen",
+			"zoom": {
+				"day": "Day",
+				"month": "Month",
+				"quarter": "Quarter",
+				"week": "Week"
+			}
 		},
 		"delete": {
 			"title": "Taak verwijderen?",

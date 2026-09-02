@@ -1866,7 +1866,13 @@
 			"updateDatesError": "Aufgabendaten konnten nicht aktualisiert werden",
 			"resizeStart": "Startdatum anpassen",
 			"resizeDue": "Fälligkeitsdatum anpassen",
-			"taskAriaLabel": "{{title}}: öffnen oder ziehen zum Verschieben"
+			"taskAriaLabel": "{{title}}: öffnen oder ziehen zum Verschieben",
+			"zoom": {
+				"day": "Day",
+				"month": "Month",
+				"quarter": "Quarter",
+				"week": "Week"
+			}
 		},
 		"delete": {
 			"title": "Aufgabe löschen?",

@@ -1871,7 +1871,13 @@
 			"updateDatesError": "Aggiornamento date attività fallito",
 			"resizeStart": "Ridimensiona data inizio",
 			"resizeDue": "Ridimensiona data scadenza",
-			"taskAriaLabel": "{{title}}: apri o trascina per spostare"
+			"taskAriaLabel": "{{title}}: apri o trascina per spostare",
+			"zoom": {
+				"day": "Day",
+				"month": "Month",
+				"quarter": "Quarter",
+				"week": "Week"
+			}
 		},
 		"delete": {
 			"title": "Eliminare l'Attività?",

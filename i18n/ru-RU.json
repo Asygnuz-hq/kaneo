@@ -1892,7 +1892,13 @@
 			"updateDatesError": "Не удалось обновить даты задачи",
 			"resizeStart": "Изменить дату начала",
 			"resizeDue": "Изменить срок выполнения",
-			"taskAriaLabel": "{{title}}: откройте или перетащите для перемещения"
+			"taskAriaLabel": "{{title}}: откройте или перетащите для перемещения",
+			"zoom": {
+				"day": "Day",
+				"month": "Month",
+				"quarter": "Quarter",
+				"week": "Week"
+			}
 		},
 		"delete": {
 			"title": "Удалить задачу?",

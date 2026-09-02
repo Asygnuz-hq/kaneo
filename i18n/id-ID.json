@@ -1861,7 +1861,13 @@
 			"updateDatesError": "Gagal memperbarui tanggal tugas",
 			"resizeStart": "Ubah ukuran tanggal mulai",
 			"resizeDue": "Ubah ukuran tenggat",
-			"taskAriaLabel": "{{title}}: buka atau seret untuk memindahkan"
+			"taskAriaLabel": "{{title}}: buka atau seret untuk memindahkan",
+			"zoom": {
+				"day": "Day",
+				"month": "Month",
+				"quarter": "Quarter",
+				"week": "Week"
+			}
 		},
 		"delete": {
 			"title": "Hapus Tugas?",
