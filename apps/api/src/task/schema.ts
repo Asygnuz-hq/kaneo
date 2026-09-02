@@ -10,6 +10,11 @@ const pagingNumber = (min: number, max: number) =>
 
 export const taskParam = z.object({ id: z.string() });
 
+export const taskAssigneeParam = z.object({
+  id: z.string(),
+  userId: z.string(),
+});
+
 export const projectIdParam = z.object({ projectId: z.string() });
 
 const priority = z.enum(VALID_PRIORITIES);

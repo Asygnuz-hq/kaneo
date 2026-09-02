@@ -228,39 +228,7 @@ export default function TaskPropertiesSidebar({
                 </TaskPriorityPopover>
               )}
               {task && (
-                <TaskAssigneePopover task={task} workspaceId={workspaceId}>
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    className="justify-start h-7 px-1.5 gap-1.5"
-                  >
-                    {task.userId ? (
-                      <Avatar className="h-[16px] w-[16px]">
-                        <AvatarImage
-                          src={assignee?.user?.image ?? ""}
-                          alt={assignee?.user?.name || ""}
-                        />
-                        <AvatarFallback className="text-[9px] font-medium border border-border/30 flex-shrink-0 h-[16px] w-[16px]">
-                          {getInitials(
-                            assignee?.user?.name || task.assigneeName,
-                          )}
-                        </AvatarFallback>
-                      </Avatar>
-                    ) : (
-                      <div
-                        className="w-[16px] h-[16px] rounded-full bg-muted border border-border flex items-center justify-center flex-shrink-0"
-                        title={t("tasks:popover.assignee.unassigned")}
-                      >
-                        <span className="text-[8px] font-medium">?</span>
-                      </div>
-                    )}
-                    <span className="text-xs font-semibold truncate max-w-[100px]">
-                      {assignee?.user?.name ||
-                        task.assigneeName ||
-                        t("tasks:popover.assignee.unassigned")}
-                    </span>
-                  </Button>
-                </TaskAssigneePopover>
+                <TaskAssigneePopover task={task} workspaceId={workspaceId} />
               )}
               {task && (
                 <TaskStartDatePopover task={task}>
@@ -419,39 +387,7 @@ export default function TaskPropertiesSidebar({
                   </TaskPriorityPopover>
                 )}
                 {task && (
-                  <TaskAssigneePopover task={task} workspaceId={workspaceId}>
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      className="justify-start h-7 px-1.5 gap-1.5"
-                    >
-                      {task.userId ? (
-                        <Avatar className="h-[16px] w-[16px]">
-                          <AvatarImage
-                            src={assignee?.user?.image ?? ""}
-                            alt={assignee?.user?.name || ""}
-                          />
-                          <AvatarFallback className="text-[9px] font-medium border border-border/30 shrink-0 h-[16px] w-[16px]">
-                            {getInitials(
-                              assignee?.user?.name || task.assigneeName,
-                            )}
-                          </AvatarFallback>
-                        </Avatar>
-                      ) : (
-                        <div
-                          className="w-[16px] h-[16px] rounded-full bg-muted border border-border flex items-center justify-center shrink-0"
-                          title={t("tasks:popover.assignee.unassigned")}
-                        >
-                          <span className="text-[8px] font-medium">?</span>
-                        </div>
-                      )}
-                      <span className="text-xs font-semibold truncate max-w-[100px]">
-                        {assignee?.user?.name ||
-                          task.assigneeName ||
-                          t("tasks:popover.assignee.unassigned")}
-                      </span>
-                    </Button>
-                  </TaskAssigneePopover>
+                  <TaskAssigneePopover task={task} workspaceId={workspaceId} />
                 )}
                 {task && (
                   <TaskStartDatePopover task={task}>
@@ -612,39 +548,7 @@ export default function TaskPropertiesSidebar({
                   </TaskPriorityPopover>
                 )}
                 {task && (
-                  <TaskAssigneePopover task={task} workspaceId={workspaceId}>
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      className="justify-start h-7 px-1.5 gap-1.5 w-full"
-                    >
-                      {task.userId ? (
-                        <Avatar className="h-[16px] w-[16px]">
-                          <AvatarImage
-                            src={assignee?.user?.image ?? ""}
-                            alt={assignee?.user?.name || ""}
-                          />
-                          <AvatarFallback className="text-[9px] font-medium border border-border/30 shrink-0 h-[16px] w-[16px]">
-                            {getInitials(
-                              assignee?.user?.name || task.assigneeName,
-                            )}
-                          </AvatarFallback>
-                        </Avatar>
-                      ) : (
-                        <div
-                          className="w-[16px] h-[16px] rounded-full bg-muted border border-border flex items-center justify-center shrink-0"
-                          title={t("tasks:popover.assignee.unassigned")}
-                        >
-                          <span className="text-[8px] font-medium">?</span>
-                        </div>
-                      )}
-                      <span className="text-xs font-semibold truncate max-w-[100px]">
-                        {assignee?.user?.name ||
-                          task.assigneeName ||
-                          t("tasks:popover.assignee.unassigned")}
-                      </span>
-                    </Button>
-                  </TaskAssigneePopover>
+                  <TaskAssigneePopover task={task} workspaceId={workspaceId} />
                 )}
                 {task && (
                   <TaskStartDatePopover task={task}>

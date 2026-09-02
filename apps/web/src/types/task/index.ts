@@ -33,6 +33,7 @@ type Task = {
   assigneeId: string | null;
   assigneeName: string | null;
   assigneeImage?: string | null;
+  assignees?: { id: string; name: string | null; image: string | null }[];
   projectId: string;
   columnId?: string | null;
   labels?: TaskLabel[];
