@@ -1,17 +1,17 @@
+import { Clock, Play, Square } from "lucide-react";
 import { useEffect, useState } from "react";
-import { Play, Square, Clock } from "lucide-react";
 import { useTranslation } from "react-i18next";
-import { Button } from "@/components/ui/button";
 import useAuth from "@/components/providers/auth-provider/hooks/use-auth";
-import useGetTimeEntriesByTaskId from "@/hooks/queries/time-entry/use-get-time-entries";
+import { Button } from "@/components/ui/button";
 import useCreateTimeEntry from "@/hooks/queries/time-entry/use-create-time-entry";
+import useGetTimeEntriesByTaskId from "@/hooks/queries/time-entry/use-get-time-entries";
 import useUpdateTimeEntry from "@/hooks/queries/time-entry/use-update-time-entry";
 
 function formatDuration(seconds: number): string {
   const h = Math.floor(seconds / 3600);
   const m = Math.floor((seconds % 3600) / 60);
   const s = Math.floor(seconds % 60);
-  
+
   if (h > 0) {
     return `${h}h ${m.toString().padStart(2, "0")}m`;
   }
@@ -25,14 +25,15 @@ type TaskTimeTrackerProps = {
 export default function TaskTimeTracker({ taskId }: TaskTimeTrackerProps) {
   const { t } = useTranslation();
   const { user } = useAuth();
-  const { data: timeEntries = [], isLoading } = useGetTimeEntriesByTaskId(taskId);
+  const { data: timeEntries = [], isLoading } =
+    useGetTimeEntriesByTaskId(taskId);
   const { mutate: createEntry, isPending: isCreating } = useCreateTimeEntry();
   const { mutate: updateEntry, isPending: isUpdating } = useUpdateTimeEntry();
-  
+
   const [activeElapsed, setActiveElapsed] = useState<number>(0);
 
   const activeEntry = timeEntries.find(
-    (entry) => !entry.endTime && entry.userId === user?.id
+    (entry) => !entry.endTime && entry.userId === user?.id,
   );
 
   // Sum up duration of completed entries
@@ -49,7 +50,7 @@ export default function TaskTimeTracker({ taskId }: TaskTimeTrackerProps) {
         const now = Date.now();
         setActiveElapsed(Math.floor((now - start) / 1000));
       }, 1000);
-      
+
       // Initialize immediately
       setActiveElapsed(Math.floor((Date.now() - start) / 1000));
     } else {

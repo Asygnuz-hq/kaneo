@@ -763,7 +763,7 @@ export default function TaskPropertiesSidebar({
               )}
             </div>
           </div>
-          
+
           <div className="flex flex-col gap-1 mt-2">
             <span className="text-xs font-medium text-foreground/70 px-2">
               {t("tasks:properties.timeTracker", "Time Tracker")}

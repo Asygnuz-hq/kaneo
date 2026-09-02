@@ -1,5 +1,7 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import createTimeEntry, { type CreateTimeEntryRequest } from "@/fetchers/time-entry/create-time-entry";
+import createTimeEntry, {
+  type CreateTimeEntryRequest,
+} from "@/fetchers/time-entry/create-time-entry";
 import { toast } from "@/lib/toast";
 
 export default function useCreateTimeEntry() {
