@@ -1,7 +1,8 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { Loader2 } from "lucide-react";
-import { useState } from "react";
+import { useCallback, useState } from "react";
 import { AuthLayout } from "@/components/auth/layout";
+import { Turnstile } from "@/components/auth/turnstile";
 import PageTitle from "@/components/page-title";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
@@ -10,7 +11,14 @@ import { Label } from "@/components/ui/label";
 import { clientPortalAuth } from "@/lib/client-portal-api";
 
 // ASYGNUZ: Service Desk client portal login. Separate identity from the
-// internal app's /auth/sign-in -- see client-auth/middleware.ts.
+// internal app's /auth/sign-in -- see client-auth/middleware.ts. Same
+// Turnstile widget/pattern as /auth/sign-in -- see the KANEO_TURNSTILE_SITE_KEY
+// placeholder in apps/web/.env.production for how the site key reaches the
+// built bundle at container startup.
+
+const TURNSTILE_SITE_KEY = import.meta.env.VITE_TURNSTILE_SITE_KEY as
+  | string
+  | undefined;
 
 export const Route = createFileRoute("/portal/login")({
   component: ClientPortalLogin,
@@ -22,13 +30,28 @@ function ClientPortalLogin() {
   const [password, setPassword] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [isPending, setIsPending] = useState(false);
+  const [turnstileToken, setTurnstileToken] = useState<string | null>(null);
+
+  const captchaConfigured = Boolean(TURNSTILE_SITE_KEY);
+  const captchaPending = captchaConfigured && !turnstileToken;
+
+  const handleTurnstileVerify = useCallback((token: string) => {
+    setTurnstileToken(token);
+  }, []);
+  const handleTurnstileExpire = useCallback(() => {
+    setTurnstileToken(null);
+  }, []);
 
   const onSubmit = async (event: React.FormEvent) => {
     event.preventDefault();
     setError(null);
     setIsPending(true);
     try {
-      await clientPortalAuth.login(email, password);
+      await clientPortalAuth.login(
+        email,
+        password,
+        captchaConfigured ? (turnstileToken ?? undefined) : undefined,
+      );
       navigate({ to: "/portal" });
     } catch (err) {
       setError(
@@ -77,9 +100,17 @@ function ClientPortalLogin() {
             />
           </div>
 
+          {captchaConfigured && TURNSTILE_SITE_KEY && (
+            <Turnstile
+              siteKey={TURNSTILE_SITE_KEY}
+              onVerify={handleTurnstileVerify}
+              onExpire={handleTurnstileExpire}
+            />
+          )}
+
           <Button
             type="submit"
-            disabled={isPending}
+            disabled={isPending || captchaPending}
             size="sm"
             className="w-full mt-4"
           >

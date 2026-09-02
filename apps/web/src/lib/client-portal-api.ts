@@ -46,10 +46,10 @@ export type ClientPortalAccount = {
 };
 
 export const clientPortalAuth = {
-  login: (email: string, password: string) =>
+  login: (email: string, password: string, turnstileToken?: string) =>
     request<ClientPortalAccount>("client-auth", "/login", {
       method: "POST",
-      body: JSON.stringify({ email, password }),
+      body: JSON.stringify({ email, password, turnstileToken }),
     }),
   acceptInvite: (token: string, password: string, name?: string) =>
     request<ClientPortalAccount>("client-auth", "/accept-invite", {
