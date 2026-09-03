@@ -1729,7 +1729,10 @@
 			"copyTaskBranch": "タスクのブランチ名をコピー",
 			"start": "開始",
 			"startDate": "開始日",
-			"noDate": "日付なし"
+			"noDate": "日付なし",
+			"milestone": "Milestone",
+			"milestoneError": "Failed to update the milestone flag",
+			"milestoneHint": "Mark as a milestone -- shows as a diamond on the Gantt instead of a bar"
 		},
 		"move": {
 			"title": "タスクを移動",
@@ -1875,7 +1878,8 @@
 			"resizeStart": "開始日を変更",
 			"resizeDue": "期限を変更",
 			"taskAriaLabel": "{{title}}: 開く、またはドラッグして移動",
-			"undatedChildren_other": "+{{count}} subtasks without a date"
+			"undatedChildren_other": "+{{count}} subtasks without a date",
+			"milestoneAriaLabel": "{{title}} (milestone): open or drag to move"
 		},
 		"delete": {
 			"title": "タスクを削除しますか？",

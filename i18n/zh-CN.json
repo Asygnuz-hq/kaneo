@@ -1729,7 +1729,10 @@
 			"copyTaskBranch": "复制任务分支",
 			"start": "开始",
 			"startDate": "开始日期",
-			"noDate": "无日期"
+			"noDate": "无日期",
+			"milestone": "Milestone",
+			"milestoneError": "Failed to update the milestone flag",
+			"milestoneHint": "Mark as a milestone -- shows as a diamond on the Gantt instead of a bar"
 		},
 		"move": {
 			"title": "移动任务",
@@ -1862,7 +1865,8 @@
 			"resizeStart": "调整开始日期",
 			"resizeDue": "调整截止日期",
 			"taskAriaLabel": "{{title}}：打开或拖动以移动",
-			"undatedChildren_other": "+{{count}} subtasks without a date"
+			"undatedChildren_other": "+{{count}} subtasks without a date",
+			"milestoneAriaLabel": "{{title}} (milestone): open or drag to move"
 		},
 		"delete": {
 			"title": "删除任务？",

@@ -26,6 +26,7 @@ type Task = {
   sprintId?: string | null;
   startDate: string | null;
   dueDate: string | null;
+  isMilestone?: boolean;
   position: number | null;
   createdAt: string;
   updatedAt?: string;

@@ -1729,7 +1729,10 @@
 			"copyTaskBranch": "Sao chép nhánh công việc",
 			"start": "Bắt đầu",
 			"startDate": "Ngày bắt đầu",
-			"noDate": "Không có ngày"
+			"noDate": "Không có ngày",
+			"milestone": "Milestone",
+			"milestoneError": "Failed to update the milestone flag",
+			"milestoneHint": "Mark as a milestone -- shows as a diamond on the Gantt instead of a bar"
 		},
 		"move": {
 			"title": "Di chuyển công việc",
@@ -1862,7 +1865,8 @@
 			"resizeStart": "Thay đổi kích thước ngày bắt đầu",
 			"resizeDue": "Thay đổi kích thước ngày đến hạn",
 			"taskAriaLabel": "{{title}}: mở hoặc kéo để di chuyển",
-			"undatedChildren_other": "+{{count}} subtasks without a date"
+			"undatedChildren_other": "+{{count}} subtasks without a date",
+			"milestoneAriaLabel": "{{title}} (milestone): open or drag to move"
 		},
 		"delete": {
 			"title": "Xóa công việc?",

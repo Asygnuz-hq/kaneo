@@ -1729,7 +1729,10 @@
 			"copyTaskBranch": "작업 브랜치 복사",
 			"start": "시작",
 			"startDate": "시작일",
-			"noDate": "날짜 없음"
+			"noDate": "날짜 없음",
+			"milestone": "Milestone",
+			"milestoneError": "Failed to update the milestone flag",
+			"milestoneHint": "Mark as a milestone -- shows as a diamond on the Gantt instead of a bar"
 		},
 		"move": {
 			"title": "작업 이동",
@@ -1875,7 +1878,8 @@
 			"resizeStart": "시작일 크기 조정",
 			"resizeDue": "마감일 크기 조정",
 			"taskAriaLabel": "{{title}}: 열거나 드래그하여 이동",
-			"undatedChildren_other": "+{{count}} subtasks without a date"
+			"undatedChildren_other": "+{{count}} subtasks without a date",
+			"milestoneAriaLabel": "{{title}} (milestone): open or drag to move"
 		},
 		"delete": {
 			"title": "작업을 삭제하시겠습니까?",

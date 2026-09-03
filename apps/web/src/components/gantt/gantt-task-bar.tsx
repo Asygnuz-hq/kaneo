@@ -304,6 +304,57 @@ export function GanttTaskBar({
     return null;
   }
 
+  // ASYGNUZ: un hito no tiene duracion que redimensionar -- se dibuja como
+  // un rombo en su unico dia en vez de una barra, y solo se puede mover
+  // (arrastrar), no estirar. Reusa el mismo handleMovePointerDown: con
+  // duracion 0 (startDate === dueDate) ya mueve ambas fechas juntas sin
+  // ningun cambio.
+  if (task.isMilestone) {
+    return (
+      <div
+        className="pointer-events-none absolute inset-0 z-[1] grid items-center"
+        style={{ gridTemplateColumns: timeline.gridTemplateColumns }}
+      >
+        <div
+          style={{ gridColumn: `${lineStart} / ${lineEnd}` }}
+          className="group pointer-events-auto relative flex h-full min-h-[44px] items-center justify-center sm:min-h-0"
+        >
+          <button
+            type="button"
+            aria-label={t("tasks:gantt.milestoneAriaLabel", {
+              title: task.title,
+            })}
+            onPointerDown={handleMovePointerDown}
+            onKeyDown={(e) => {
+              if (e.key === "Enter" || e.key === " ") {
+                e.preventDefault();
+                onOpenTask();
+              }
+            }}
+            className={cn(
+              "flex size-6 shrink-0 touch-none cursor-grab items-center justify-center active:cursor-grabbing sm:size-4",
+              "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-1",
+            )}
+          >
+            <span
+              aria-hidden="true"
+              className={cn(
+                "size-3 rotate-45 border shadow-sm transition-colors group-hover:border-primary/70",
+                "border-primary/40",
+                task.priority
+                  ? getPriorityAccentClass(task.priority)
+                  : "bg-primary",
+              )}
+            />
+          </button>
+          <span className="pointer-events-none absolute left-1/2 top-full mt-1 max-w-[8rem] -translate-x-1/2 truncate text-[10px] font-medium text-foreground">
+            {task.title}
+          </span>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div
       className="pointer-events-none absolute inset-0 z-[1] grid items-center"

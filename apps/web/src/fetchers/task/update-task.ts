@@ -26,6 +26,7 @@ async function updateTask(taskId: string, task: Task) {
       dueDate: task.dueDate?.toString(),
       position: task.position ?? 0,
       projectId: task.projectId,
+      isMilestone: task.isMilestone,
     },
   });
 

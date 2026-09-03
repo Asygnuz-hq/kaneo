@@ -16,6 +16,7 @@ async function getTask(taskId: string) {
       sprintId: taskTable.sprintId,
       startDate: taskTable.startDate,
       dueDate: taskTable.dueDate,
+      isMilestone: taskTable.isMilestone,
       position: taskTable.position,
       createdAt: taskTable.createdAt,
       userId: taskTable.userId,

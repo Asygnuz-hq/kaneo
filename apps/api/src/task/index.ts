@@ -45,6 +45,7 @@ import updateTask from "./controllers/update-task";
 import updateTaskAssignee from "./controllers/update-task-assignee";
 import updateTaskDescription from "./controllers/update-task-description";
 import updateTaskDueDate from "./controllers/update-task-due-date";
+import updateTaskMilestone from "./controllers/update-task-milestone";
 import updateTaskPriority from "./controllers/update-task-priority";
 import updateTaskSprint from "./controllers/update-task-sprint";
 import updateTaskStatus from "./controllers/update-task-status";
@@ -73,6 +74,7 @@ import {
   updateAssigneeBody,
   updateDescriptionBody,
   updateDueDateBody,
+  updateMilestoneBody,
   updatePriorityBody,
   updateStatusBody,
   updateTaskBody,
@@ -365,6 +367,36 @@ const updateTaskPriorityRoute = createRoute({
     403: errorResponse(
       "No workspace access, or missing task:update permission",
     ),
+  },
+});
+
+// ASYGNUZ: marca/desmarca una tarea como hito del Gantt.
+const updateTaskMilestoneRoute = createRoute({
+  method: "put",
+  operationId: "updateTaskMilestone",
+  path: "/milestone/{id}",
+  tags: ["Tasks"],
+  summary: "Update task milestone flag",
+  description:
+    "Mark or unmark a task as a Gantt milestone. Marking it forces startDate to equal dueDate, if the task already has a dueDate.",
+  middleware: [
+    workspaceAccess.fromTask(),
+    requireWorkspacePermission({ task: ["update"] }),
+    requireEntitlement,
+  ] as const,
+  request: {
+    params: taskParam,
+    body: {
+      required: true,
+      content: { "application/json": { schema: updateMilestoneBody } },
+    },
+  },
+  responses: {
+    200: jsonResponse("The updated task", taskSchema),
+    403: errorResponse(
+      "No workspace access, or missing task:update permission",
+    ),
+    404: errorResponse("Unknown task"),
   },
 });
 
@@ -685,6 +717,7 @@ const task = apiRouter<BaseVariables & { workspaceId: string }>()
       projectId,
       position,
       userId,
+      isMilestone,
     } = c.req.valid("json");
 
     const currentUserId = c.get("userId");
@@ -713,6 +746,7 @@ const task = apiRouter<BaseVariables & { workspaceId: string }>()
       userId,
       currentUserId,
       issueType,
+      isMilestone,
     );
 
     return c.json(task, 200);
@@ -756,6 +790,14 @@ const task = apiRouter<BaseVariables & { workspaceId: string }>()
     const currentUserId = c.get("userId");
 
     const task = await updateTaskPriority({ id, priority, currentUserId });
+
+    return c.json(task, 200);
+  })
+  .openapi(updateTaskMilestoneRoute, async (c) => {
+    const { id } = c.req.valid("param");
+    const { isMilestone } = c.req.valid("json");
+
+    const task = await updateTaskMilestone({ id, isMilestone });
 
     return c.json(task, 200);
   })

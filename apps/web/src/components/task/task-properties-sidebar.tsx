@@ -42,6 +42,7 @@ import { toast } from "@/lib/toast";
 import TaskAssigneePopover from "./task-assignee-popover";
 import TaskDueDatePopover from "./task-due-date-popover";
 import TaskLabelsPopover from "./task-labels-popover";
+import { TaskMilestoneToggle } from "./task-milestone-toggle";
 import TaskMovePopover from "./task-move-popover";
 import TaskPriorityPopover from "./task-priority-popover";
 import TaskStartDatePopover from "./task-start-date-popover";
@@ -227,6 +228,7 @@ export default function TaskPropertiesSidebar({
                   </Button>
                 </TaskPriorityPopover>
               )}
+              {task && <TaskMilestoneToggle task={task} />}
               {task && (
                 <TaskAssigneePopover task={task} workspaceId={workspaceId}>
                   <Button
@@ -418,6 +420,7 @@ export default function TaskPropertiesSidebar({
                     </Button>
                   </TaskPriorityPopover>
                 )}
+                {task && <TaskMilestoneToggle task={task} />}
                 {task && (
                   <TaskAssigneePopover task={task} workspaceId={workspaceId}>
                     <Button
@@ -611,6 +614,7 @@ export default function TaskPropertiesSidebar({
                     </Button>
                   </TaskPriorityPopover>
                 )}
+                {task && <TaskMilestoneToggle task={task} />}
                 {task && (
                   <TaskAssigneePopover task={task} workspaceId={workspaceId}>
                     <Button

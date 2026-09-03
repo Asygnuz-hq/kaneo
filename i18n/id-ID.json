@@ -1729,7 +1729,10 @@
 			"copyTaskBranch": "Salin branch tugas",
 			"start": "Mulai",
 			"startDate": "Tanggal mulai",
-			"noDate": "Tanpa tanggal"
+			"noDate": "Tanpa tanggal",
+			"milestone": "Milestone",
+			"milestoneError": "Failed to update the milestone flag",
+			"milestoneHint": "Mark as a milestone -- shows as a diamond on the Gantt instead of a bar"
 		},
 		"move": {
 			"title": "Pindahkan tugas",
@@ -1862,7 +1865,8 @@
 			"resizeStart": "Ubah ukuran tanggal mulai",
 			"resizeDue": "Ubah ukuran tenggat",
 			"taskAriaLabel": "{{title}}: buka atau seret untuk memindahkan",
-			"undatedChildren_other": "+{{count}} subtasks without a date"
+			"undatedChildren_other": "+{{count}} subtasks without a date",
+			"milestoneAriaLabel": "{{title}} (milestone): open or drag to move"
 		},
 		"delete": {
 			"title": "Hapus Tugas?",

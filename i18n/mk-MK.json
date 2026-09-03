@@ -1734,7 +1734,10 @@
 			"copyTaskBranch": "Копирај гранка на задача",
 			"start": "Почеток",
 			"startDate": "Почетен датум",
-			"noDate": "Без датум"
+			"noDate": "Без датум",
+			"milestone": "Milestone",
+			"milestoneError": "Failed to update the milestone flag",
+			"milestoneHint": "Mark as a milestone -- shows as a diamond on the Gantt instead of a bar"
 		},
 		"move": {
 			"title": "Премести задача",
@@ -1868,7 +1871,8 @@
 			"resizeDue": "Промени краен рок",
 			"taskAriaLabel": "{{title}}: отвори или повлечи за преместување",
 			"undatedChildren_one": "+{{count}} subtask without a date",
-			"undatedChildren_other": "+{{count}} subtasks without a date"
+			"undatedChildren_other": "+{{count}} subtasks without a date",
+			"milestoneAriaLabel": "{{title}} (milestone): open or drag to move"
 		},
 		"delete": {
 			"title": "Избриши задача?",

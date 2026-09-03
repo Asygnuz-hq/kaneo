@@ -1734,7 +1734,10 @@
 			"copyTaskBranch": "कार्य शाखा कॉपी करें",
 			"start": "शुरू",
 			"startDate": "शुरू की तारीख",
-			"noDate": "कोई तारीख नहीं"
+			"noDate": "कोई तारीख नहीं",
+			"milestone": "Milestone",
+			"milestoneError": "Failed to update the milestone flag",
+			"milestoneHint": "Mark as a milestone -- shows as a diamond on the Gantt instead of a bar"
 		},
 		"move": {
 			"title": "कार्य ले जाएँ",
@@ -1868,7 +1871,8 @@
 			"resizeDue": "नियत तारीख बदलें",
 			"taskAriaLabel": "{{title}}: खोलें या ले जाने के लिए खींचें",
 			"undatedChildren_one": "+{{count}} subtask without a date",
-			"undatedChildren_other": "+{{count}} subtasks without a date"
+			"undatedChildren_other": "+{{count}} subtasks without a date",
+			"milestoneAriaLabel": "{{title}} (milestone): open or drag to move"
 		},
 		"delete": {
 			"title": "कार्य हटाएँ?",
