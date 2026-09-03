@@ -25,7 +25,6 @@ import useGetLabelsByTask from "@/hooks/queries/label/use-get-labels-by-task";
 import useGetProject from "@/hooks/queries/project/use-get-project";
 import useGetProjects from "@/hooks/queries/project/use-get-projects";
 import useGetTask from "@/hooks/queries/task/use-get-task";
-import { useGetActiveWorkspaceUsers } from "@/hooks/queries/workspace-users/use-get-active-workspace-users";
 import { cn } from "@/lib/cn";
 import { getColumnIcon } from "@/lib/column";
 import {
@@ -87,7 +86,6 @@ export default function TaskPropertiesSidebar({
   const { data: project } = useGetProject({ id: projectId, workspaceId });
   const { data: columns = [] } = useGetColumns(projectId);
   const taskIsCompleted = isTaskCompleted(task?.status ?? "", columns);
-  const { data: workspaceUsers } = useGetActiveWorkspaceUsers(workspaceId);
   const { data: taskLabels = [] } = useGetLabelsByTask(taskId ?? "");
   const { data: githubIntegration } = useGetGithubIntegration(projectId);
   const { data: giteaIntegration } = useGetGiteaIntegration(projectId);
@@ -110,10 +108,6 @@ export default function TaskPropertiesSidebar({
     githubIntegration?.branchPattern ||
     giteaIntegration?.branchPattern ||
     "{slug}-{number}";
-
-  const _assignee = workspaceUsers?.members?.find(
-    (member) => member.userId === task?.userId,
-  );
 
   const handleCopyTaskLink = () => {
     navigator.clipboard.writeText(
