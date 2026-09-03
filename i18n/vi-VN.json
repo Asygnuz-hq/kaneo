@@ -1863,7 +1863,8 @@
 			"resizeDue": "Thay đổi kích thước ngày đến hạn",
 			"taskAriaLabel": "{{title}}: mở hoặc kéo để di chuyển",
 			"criticalPath": "On the critical path -- delaying this task pushes back the project's finish date",
-			"criticalPathLegend": "Critical path"
+			"criticalPathLegend": "Critical path",
+			"undatedChildren_other": "+{{count}} subtasks without a date"
 		},
 		"delete": {
 			"title": "Xóa công việc?",

@@ -1876,7 +1876,8 @@
 			"resizeDue": "期限を変更",
 			"taskAriaLabel": "{{title}}: 開く、またはドラッグして移動",
 			"criticalPath": "On the critical path -- delaying this task pushes back the project's finish date",
-			"criticalPathLegend": "Critical path"
+			"criticalPathLegend": "Critical path",
+			"undatedChildren_other": "+{{count}} subtasks without a date"
 		},
 		"delete": {
 			"title": "タスクを削除しますか？",

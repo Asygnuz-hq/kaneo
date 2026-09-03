@@ -1878,7 +1878,11 @@
 			"resizeDue": "Змінити дату завершення",
 			"taskAriaLabel": "{{title}}: відкрити або перетягнути для переміщення",
 			"criticalPath": "On the critical path -- delaying this task pushes back the project's finish date",
-			"criticalPathLegend": "Critical path"
+			"criticalPathLegend": "Critical path",
+			"undatedChildren_few": "+{{count}} subtasks without a date",
+			"undatedChildren_many": "+{{count}} subtasks without a date",
+			"undatedChildren_one": "+{{count}} subtask without a date",
+			"undatedChildren_other": "+{{count}} subtasks without a date"
 		},
 		"delete": {
 			"title": "Видалити завдання?",

@@ -1863,7 +1863,8 @@
 			"resizeDue": "调整截止日期",
 			"taskAriaLabel": "{{title}}：打开或拖动以移动",
 			"criticalPath": "On the critical path -- delaying this task pushes back the project's finish date",
-			"criticalPathLegend": "Critical path"
+			"criticalPathLegend": "Critical path",
+			"undatedChildren_other": "+{{count}} subtasks without a date"
 		},
 		"delete": {
 			"title": "删除任务？",

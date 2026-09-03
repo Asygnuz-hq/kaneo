@@ -137,6 +137,29 @@ function RouteComponent() {
     [project],
   );
 
+  // ASYGNUZ: % de avance en la barra -- no hay un campo de "progreso" en el
+  // modelo de datos, así que se deriva de en qué columna vive la tarea. Se
+  // usa la posición real de la columna (no se asume "to-do/in-progress/
+  // in-review/done" a mano), así que funciona igual con columnas
+  // personalizadas. isFinal siempre vale 100%, sin importar su posición.
+  const columnProgress = useMemo(() => {
+    const columns = project?.columns ?? [];
+    const map = new Map<string, number>();
+    const totalColumns = columns.length;
+    columns.forEach((column, index) => {
+      if (column.isFinal) {
+        map.set(column.id, 100);
+        return;
+      }
+      const pct =
+        totalColumns > 1 ? Math.round((index / (totalColumns - 1)) * 100) : 0;
+      // Que una columna no-final nunca reclame el 100% -- ese numero es
+      // exclusivo de isFinal.
+      map.set(column.id, Math.min(pct, 95));
+    });
+    return map;
+  }, [project?.columns]);
+
   const parsedTasks = useMemo(() => {
     return allTasks
       .map((task) => {
@@ -181,17 +204,29 @@ function RouteComponent() {
     }
     const rootTasks = parsedTasks.filter((task) => !childIds.has(task.id));
 
-    const result: (ParsedTask & { level: number; childCount: number })[] = [];
+    const result: (ParsedTask & {
+      level: number;
+      childCount: number;
+      undatedChildCount: number;
+    })[] = [];
     const visit = (task: ParsedTask, level: number) => {
-      const kidIds = (childrenOf.get(task.id) ?? []).filter((id) =>
-        scheduledIds.has(id),
-      );
+      const allKidIds = childrenOf.get(task.id) ?? [];
+      const kidIds = allKidIds.filter((id) => scheduledIds.has(id));
       const kids = kidIds
         .map((id) => byId.get(id))
         .filter((t): t is ParsedTask => Boolean(t))
         .sort((a, b) => a.scheduleStart.getTime() - b.scheduleStart.getTime());
 
-      result.push({ ...task, level, childCount: kids.length });
+      // ASYGNUZ: una subtarea sin fecha propia no puede tener una barra en
+      // el Gantt (no hay dónde ubicarla), pero antes desaparecía del todo --
+      // ni rastro de que existiera. Se cuenta aquí para mostrar un aviso en
+      // la fila del padre en vez de esconderla en silencio.
+      result.push({
+        ...task,
+        level,
+        childCount: kids.length,
+        undatedChildCount: allKidIds.length - kidIds.length,
+      });
       if (collapsedTaskIds.has(task.id)) return;
       for (const kid of kids) visit(kid, level + 1);
     };
@@ -217,7 +252,12 @@ function RouteComponent() {
           task.status.toLowerCase().includes(normalizedQuery)
         );
       })
-      .map((task) => ({ ...task, level: 0, childCount: 0 }));
+      .map((task) => ({
+        ...task,
+        level: 0,
+        childCount: 0,
+        undatedChildCount: 0,
+      }));
   }, [orderedTasks, parsedTasks, project?.slug, searchQuery]);
 
   // ASYGNUZ: ruta crítica -- se calcula sobre TODAS las tareas con fecha y
@@ -595,6 +635,13 @@ function RouteComponent() {
                                   ? ` • ${task.assigneeName}`
                                   : ""}
                               </p>
+                              {task.undatedChildCount > 0 ? (
+                                <p className="w-full truncate text-[11px] leading-tight text-warning-foreground">
+                                  {t("tasks:gantt.undatedChildren", {
+                                    count: task.undatedChildCount,
+                                  })}
+                                </p>
+                              ) : null}
                             </div>
                           </div>
                         ) : null}
@@ -614,6 +661,7 @@ function RouteComponent() {
                             isCritical={criticalPath.criticalTaskIds.has(
                               task.id,
                             )}
+                            progressPct={columnProgress.get(task.status) ?? 0}
                             onOpenTask={() =>
                               navigate({
                                 to: ".",
