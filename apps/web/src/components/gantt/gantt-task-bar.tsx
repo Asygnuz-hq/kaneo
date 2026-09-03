@@ -23,6 +23,9 @@ type GanttTaskBarProps = {
   };
   pixelsPerDay: number;
   isMobile?: boolean;
+  // 0-100. No hay un campo de "progreso" en el modelo de datos; se deriva
+  // de en qué columna vive la tarea (ver columnProgress en gantt.tsx).
+  progressPct?: number;
   onOpenTask: () => void;
 };
 
@@ -75,6 +78,7 @@ export function GanttTaskBar({
   timeline,
   pixelsPerDay,
   isMobile = false,
+  progressPct = 0,
   onOpenTask,
 }: GanttTaskBarProps) {
   const { t } = useTranslation();
@@ -341,6 +345,13 @@ export function GanttTaskBar({
           }}
         >
           <div className="absolute inset-0 z-0 bg-primary/12 transition-colors group-hover:bg-primary/18" />
+          {progressPct > 0 ? (
+            <div
+              aria-hidden="true"
+              className="absolute inset-y-0 left-0 z-[1] bg-primary/25 transition-[width] group-hover:bg-primary/32"
+              style={{ width: `${Math.min(progressPct, 100)}%` }}
+            />
+          ) : null}
           <span className="relative z-10 block truncate">{task.title}</span>
         </button>
         <button

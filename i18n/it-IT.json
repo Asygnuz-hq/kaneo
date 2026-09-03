@@ -1877,7 +1877,10 @@
 				"month": "Month",
 				"quarter": "Quarter",
 				"week": "Week"
-			}
+			},
+			"undatedChildren_many": "+{{count}} subtasks without a date",
+			"undatedChildren_one": "+{{count}} subtask without a date",
+			"undatedChildren_other": "+{{count}} subtasks without a date"
 		},
 		"delete": {
 			"title": "Eliminare l'Attività?",

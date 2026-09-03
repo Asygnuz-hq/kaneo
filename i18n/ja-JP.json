@@ -1880,7 +1880,8 @@
 				"month": "Month",
 				"quarter": "Quarter",
 				"week": "Week"
-			}
+			},
+			"undatedChildren_other": "+{{count}} subtasks without a date"
 		},
 		"delete": {
 			"title": "タスクを削除しますか？",
