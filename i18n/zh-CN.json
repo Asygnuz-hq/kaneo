@@ -11,7 +11,8 @@
 			"remove": "移除",
 			"reset": "重置",
 			"filter": "筛选",
-			"clearAllFilters": "清除全部筛选"
+			"clearAllFilters": "清除全部筛选",
+			"edit": "Edit"
 		},
 		"a11y": {
 			"toggleSidebar": "切换侧边栏"
@@ -1269,6 +1270,36 @@
 			"merged": "已合并",
 			"draft": "草稿",
 			"open": "打开"
+		},
+		"taskTemplates": {
+			"createSuccess": "Task template created",
+			"createTemplate": "New template",
+			"defaultDescriptionLabel": "Default description",
+			"defaultTitleLabel": "Default title",
+			"defaultTitlePlaceholder": "Leave blank to type a title each time",
+			"deleteConfirmDescription": "This won't affect tasks already created from \"{{name}}\". This can't be undone.",
+			"deleteConfirmTitle": "Delete this template?",
+			"deleteError": "Failed to delete the template",
+			"deleteSuccess": "Task template deleted",
+			"editTemplate": "Edit template",
+			"empty": "No task templates yet",
+			"emptyDescription": "Create one to skip retyping the same title, description, priority or labels every time.",
+			"formDescription": "These values pre-fill the create-task form when this template is picked.",
+			"issueTypeLabel": "Type",
+			"labelsLabel": "Labels",
+			"loading": "Loading...",
+			"nameLabel": "Template name",
+			"namePlaceholder": "e.g. Bug report",
+			"nameRequired": "Give the template a name",
+			"noTemplate": "No template",
+			"pageTitle": "Task Templates",
+			"priorityLabel": "Priority",
+			"saveError": "Failed to save the template",
+			"saveTemplate": "Save template",
+			"subtitle": "Reusable starting points for new tasks in this project.",
+			"title": "Task templates",
+			"updateSuccess": "Task template updated",
+			"useTemplate": "Use template"
 		}
 	},
 	"navigation": {

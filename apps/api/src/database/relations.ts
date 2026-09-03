@@ -22,6 +22,7 @@ import {
   taskRelationTable,
   taskReminderSentTable,
   taskTable,
+  taskTemplateTable,
   teamMemberTable,
   teamTable,
   timeEntryTable,
@@ -109,6 +110,7 @@ export const projectTableRelations = relations(
     assets: many(assetTable),
     columns: many(columnTable),
     workflowRules: many(workflowRuleTable),
+    taskTemplates: many(taskTemplateTable),
     githubIntegration: many(githubIntegrationTable),
     integrations: many(integrationTable),
     notificationWorkspaceProjects: many(userNotificationWorkspaceProjectTable),
@@ -200,6 +202,16 @@ export const workflowRuleTableRelations = relations(
     column: one(columnTable, {
       fields: [workflowRuleTable.columnId],
       references: [columnTable.id],
+    }),
+  }),
+);
+
+export const taskTemplateTableRelations = relations(
+  taskTemplateTable,
+  ({ one }) => ({
+    project: one(projectTable, {
+      fields: [taskTemplateTable.projectId],
+      references: [projectTable.id],
     }),
   }),
 );

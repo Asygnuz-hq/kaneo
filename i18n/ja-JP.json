@@ -11,7 +11,8 @@
 			"remove": "削除",
 			"reset": "リセット",
 			"filter": "フィルター",
-			"clearAllFilters": "すべてのフィルターをクリア"
+			"clearAllFilters": "すべてのフィルターをクリア",
+			"edit": "Edit"
 		},
 		"a11y": {
 			"toggleSidebar": "サイドバーを切り替え"
@@ -1269,6 +1270,36 @@
 			"merged": "マージ済み",
 			"draft": "下書き",
 			"open": "オープン"
+		},
+		"taskTemplates": {
+			"createSuccess": "Task template created",
+			"createTemplate": "New template",
+			"defaultDescriptionLabel": "Default description",
+			"defaultTitleLabel": "Default title",
+			"defaultTitlePlaceholder": "Leave blank to type a title each time",
+			"deleteConfirmDescription": "This won't affect tasks already created from \"{{name}}\". This can't be undone.",
+			"deleteConfirmTitle": "Delete this template?",
+			"deleteError": "Failed to delete the template",
+			"deleteSuccess": "Task template deleted",
+			"editTemplate": "Edit template",
+			"empty": "No task templates yet",
+			"emptyDescription": "Create one to skip retyping the same title, description, priority or labels every time.",
+			"formDescription": "These values pre-fill the create-task form when this template is picked.",
+			"issueTypeLabel": "Type",
+			"labelsLabel": "Labels",
+			"loading": "Loading...",
+			"nameLabel": "Template name",
+			"namePlaceholder": "e.g. Bug report",
+			"nameRequired": "Give the template a name",
+			"noTemplate": "No template",
+			"pageTitle": "Task Templates",
+			"priorityLabel": "Priority",
+			"saveError": "Failed to save the template",
+			"saveTemplate": "Save template",
+			"subtitle": "Reusable starting points for new tasks in this project.",
+			"title": "Task templates",
+			"updateSuccess": "Task template updated",
+			"useTemplate": "Use template"
 		}
 	},
 	"navigation": {
