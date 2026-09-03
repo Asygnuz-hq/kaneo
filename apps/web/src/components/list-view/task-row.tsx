@@ -31,6 +31,7 @@ import {
 import { useDeleteTask } from "@/hooks/mutations/task/use-delete-task";
 import useActiveWorkspace from "@/hooks/queries/workspace/use-active-workspace";
 import { useGetActiveWorkspaceUsers } from "@/hooks/queries/workspace-users/use-get-active-workspace-users";
+import { getChecklistProgress } from "@/lib/checklist-progress";
 import { cn } from "@/lib/cn";
 import {
   dueDateStatusColors,
@@ -47,6 +48,7 @@ import useProjectStore from "@/store/project";
 import { useUserPreferencesStore } from "@/store/user-preferences";
 import type Task from "@/types/task";
 import TaskCardContextMenuContent from "../kanban-board/task-card-context-menu/task-card-context-menu-content";
+import { TaskChecklistBadge } from "../kanban-board/task-checklist-badge";
 import { TaskLabels } from "../kanban-board/task-labels";
 import { ContextMenu, ContextMenuTrigger } from "../ui/context-menu";
 
@@ -110,6 +112,11 @@ function TaskRow({
       (link) => link.resourceType === "pull_request",
     );
   }, [task.externalLinks]);
+
+  const checklistProgress = useMemo(
+    () => getChecklistProgress(task.description),
+    [task.description],
+  );
 
   const getPRInfo = (pr: (typeof pullRequests)[number]) => {
     const isMerged = pr.metadata?.merged === true;
@@ -268,6 +275,10 @@ function TaskRow({
                 </span>
                 <div className="flex items-center gap-1">
                   {showLabels && <TaskLabels labels={task.labels ?? []} />}
+
+                  {checklistProgress && (
+                    <TaskChecklistBadge progress={checklistProgress} />
+                  )}
 
                   {pullRequests.length === 1 && (
                     <HoverCard openDelay={200} closeDelay={100}>
