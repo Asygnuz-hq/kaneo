@@ -38,6 +38,27 @@ type GanttSearchParams = {
   taskId?: string;
 };
 
+type GanttZoomLevel = "day" | "week" | "month" | "quarter";
+
+const GANTT_ZOOM_LEVELS: GanttZoomLevel[] = ["day", "week", "month", "quarter"];
+
+// ASYGNUZ: rem por dia en cada nivel de zoom. El piso de 0.5rem en mes/
+// trimestre evita que una barra de 1 dia quede en 0px -- sigue siendo
+// angosta a proposito (es la vista de "panorama", no de detalle diario),
+// pero se puede ver y tocar.
+const ZOOM_DAY_WIDTH_REM_DESKTOP: Record<GanttZoomLevel, number> = {
+  day: 2.75,
+  week: 1.1,
+  month: 0.6,
+  quarter: 0.5,
+};
+const ZOOM_DAY_WIDTH_REM_MOBILE: Record<GanttZoomLevel, number> = {
+  day: 3.125,
+  week: 1.4,
+  month: 0.75,
+  quarter: 0.5,
+};
+
 export const Route = createFileRoute(
   "/_layout/_authenticated/dashboard/workspace/$workspaceId/project/$projectId/gantt",
 )({
@@ -100,7 +121,14 @@ function RouteComponent() {
   };
 
   // Wider day columns on small screens so dragging and reading dates is easier.
-  const dayColumnWidthRem = isMobile ? 3.125 : 2.75;
+  // ASYGNUZ: zoom -- el timeline sigue siendo un grid de dias por debajo
+  // (misma logica de arrastre/redimension basada en indice de dia, sin
+  // tocarla); lo unico que cambia por nivel es que tan ancho se dibuja
+  // cada columna de dia, y que tanto detalle muestra el encabezado.
+  const [zoomLevel, setZoomLevel] = useState<GanttZoomLevel>("day");
+  const dayColumnWidthRem = isMobile
+    ? ZOOM_DAY_WIDTH_REM_MOBILE[zoomLevel]
+    : ZOOM_DAY_WIDTH_REM_DESKTOP[zoomLevel];
   const taskColumnWidthRem = isMobile ? 12 : 14;
   const showTaskRail = !isMobile || isTaskRailOpen;
   const timelineTrackRef = useRef<HTMLDivElement>(null);
@@ -423,6 +451,25 @@ function RouteComponent() {
               />
             </div>
 
+            <div className="flex shrink-0 items-center gap-0.5 rounded-md border border-border bg-muted/40 p-0.5">
+              {GANTT_ZOOM_LEVELS.map((level) => (
+                <button
+                  key={level}
+                  type="button"
+                  aria-pressed={zoomLevel === level}
+                  onClick={() => setZoomLevel(level)}
+                  className={cn(
+                    "min-h-9 touch-manipulation rounded px-2 text-xs font-medium transition-colors sm:min-h-0 sm:px-2 sm:py-1",
+                    zoomLevel === level
+                      ? "bg-background text-foreground shadow-sm"
+                      : "text-muted-foreground hover:text-foreground",
+                  )}
+                >
+                  {t(`tasks:gantt.zoom.${level}`)}
+                </button>
+              ))}
+            </div>
+
             <Button
               variant="outline"
               size="xs"
@@ -491,6 +538,33 @@ function RouteComponent() {
                       index === 0 ||
                       !isSameMonth(day, timeline.days[index - 1] ?? day);
 
+                    // ASYGNUZ (zoom): a month/trimestre cada columna mide unos
+                    // pocos px -- ni el numero de dia ni "MMM" caben adentro.
+                    // Se muestra solo el nombre de mes, en el primer dia de
+                    // cada mes, y se deja desbordar hacia la derecha (mismo
+                    // truco que usan los Gantt comerciales a este zoom): no
+                    // hay nada interactivo debajo con lo que choque.
+                    const isCompact =
+                      zoomLevel === "month" || zoomLevel === "quarter";
+
+                    if (isCompact) {
+                      return (
+                        <div
+                          key={day.toISOString()}
+                          className={cn(
+                            "relative h-9 border-r border-border/40",
+                            isToday(day) && "bg-primary/10",
+                          )}
+                        >
+                          {showMonth ? (
+                            <span className="absolute top-1 left-0.5 whitespace-nowrap text-[10px] font-medium text-muted-foreground">
+                              {format(day, "MMM yyyy")}
+                            </span>
+                          ) : null}
+                        </div>
+                      );
+                    }
+
                     return (
                       <div
                         key={day.toISOString()}
@@ -536,7 +610,12 @@ function RouteComponent() {
                       key={`bg-line-${day.toISOString()}`}
                       className={cn(
                         "h-full min-h-0 border-r border-border/60",
-                        isWeekend(day) && "bg-muted/25",
+                        // A esta escala (mes/trimestre) una franja de fin de
+                        // semana por dia es puro ruido visual -- se omite.
+                        zoomLevel !== "month" &&
+                          zoomLevel !== "quarter" &&
+                          isWeekend(day) &&
+                          "bg-muted/25",
                       )}
                     />
                   ))}

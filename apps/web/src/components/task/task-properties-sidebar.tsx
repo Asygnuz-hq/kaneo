@@ -46,6 +46,7 @@ import TaskMovePopover from "./task-move-popover";
 import TaskPriorityPopover from "./task-priority-popover";
 import TaskStartDatePopover from "./task-start-date-popover";
 import TaskStatusPopover from "./task-status-popover";
+import TaskTimeTracker from "./task-time-tracker";
 
 function slugify(text: string | undefined): string {
   if (!text) return "";
@@ -760,6 +761,15 @@ export default function TaskPropertiesSidebar({
                   </Button>
                 </TaskLabelsPopover>
               )}
+            </div>
+          </div>
+
+          <div className="flex flex-col gap-1 mt-2">
+            <span className="text-xs font-medium text-foreground/70 px-2">
+              {t("tasks:properties.timeTracker", "Time Tracker")}
+            </span>
+            <div className="px-2">
+              {taskId && <TaskTimeTracker taskId={taskId} />}
             </div>
           </div>
         </div>

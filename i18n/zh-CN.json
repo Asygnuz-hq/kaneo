@@ -1864,6 +1864,12 @@
 			"taskAriaLabel": "{{title}}：打开或拖动以移动",
 			"criticalPath": "On the critical path -- delaying this task pushes back the project's finish date",
 			"criticalPathLegend": "Critical path",
+			"zoom": {
+				"day": "Day",
+				"month": "Month",
+				"quarter": "Quarter",
+				"week": "Week"
+			},
 			"undatedChildren_other": "+{{count}} subtasks without a date"
 		},
 		"delete": {
