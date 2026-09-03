@@ -31,6 +31,7 @@ import db, { getDatabase, schema } from "./database";
 import { prepareDatabaseStartup } from "./database/prepare-database-startup";
 import { waitForDatabase } from "./database/wait-for-database";
 import discordIntegration from "./discord-integration";
+import docPage from "./doc-page";
 import { eventContext } from "./events";
 import externalLink from "./external-link";
 import genericWebhookIntegration from "./generic-webhook-integration";
@@ -604,6 +605,7 @@ export function createApp() {
   const timeEntryApi = api.route("/time-entry", timeEntry);
   const labelApi = api.route("/label", label);
   const customFieldApi = api.route("/custom-field", customField);
+  const docPageApi = api.route("/doc-page", docPage);
   const notificationApi = api.route("/notification", notification);
   const notificationPreferencesApi = api.route(
     "/notification-preferences",
@@ -871,6 +873,7 @@ export function createApp() {
     configApi,
     customFieldApi,
     discordIntegrationApi,
+    docPageApi,
     externalLinkApi,
     genericWebhookIntegrationApi,
     githubIntegrationApi,
@@ -993,6 +996,7 @@ const {
   configApi,
   customFieldApi,
   discordIntegrationApi,
+  docPageApi,
   externalLinkApi,
   genericWebhookIntegrationApi,
   githubIntegrationApi,
@@ -1035,6 +1039,7 @@ export type AppType =
   | typeof projectMemberApi
   | typeof clientAccessApi
   | typeof customFieldApi
+  | typeof docPageApi
   | typeof sprintApi
   | typeof taskApi
   | typeof columnApi

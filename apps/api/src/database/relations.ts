@@ -10,6 +10,7 @@ import {
   columnTable,
   commentTable,
   customFieldTable,
+  docPageTable,
   externalLinkTable,
   githubIntegrationTable,
   integrationTable,
@@ -120,6 +121,7 @@ export const projectTableRelations = relations(
     members: many(projectMemberTable),
     sprints: many(sprintTable),
     clientAccess: many(clientProjectAccessTable),
+    docPages: many(docPageTable),
   }),
 );
 
@@ -498,3 +500,27 @@ export const commentTableRelations = relations(commentTable, ({ one }) => ({
     references: [userTable.id],
   }),
 }));
+
+export const docPageTableRelations = relations(
+  docPageTable,
+  ({ one, many }) => ({
+    project: one(projectTable, {
+      fields: [docPageTable.projectId],
+      references: [projectTable.id],
+    }),
+    parent: one(docPageTable, {
+      fields: [docPageTable.parentId],
+      references: [docPageTable.id],
+      relationName: "docPageParent",
+    }),
+    children: many(docPageTable, { relationName: "docPageParent" }),
+    createdBy: one(userTable, {
+      fields: [docPageTable.createdByUserId],
+      references: [userTable.id],
+    }),
+    updatedBy: one(userTable, {
+      fields: [docPageTable.updatedByUserId],
+      references: [userTable.id],
+    }),
+  }),
+);

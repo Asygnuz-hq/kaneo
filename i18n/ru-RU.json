@@ -1315,6 +1315,28 @@
 			},
 			"updateError": "Failed to update custom field",
 			"updateSuccess": "Custom field updated"
+		},
+		"docPageEditor": {
+			"addSubpage": "Add subpage",
+			"contentPlaceholder": "Write in Markdown...",
+			"empty": "No pages yet.",
+			"loading": "Loading pages...",
+			"newPage": "New page",
+			"save": "Save",
+			"selectPrompt": "Select a page, or create one to get started.",
+			"titlePlaceholder": "Page title",
+			"toastCreated": "Page created",
+			"toastCreateError": "Failed to create page",
+			"toastDeleted": "Page deleted",
+			"toastDeleteError": "Failed to delete page",
+			"toastSaved": "Page saved",
+			"toastSaveError": "Failed to save page",
+			"untitled": "Untitled"
+		},
+		"projectDocs": {
+			"pageTitle": "Docs Settings",
+			"subtitle": "A per-project wiki your team can reference from any task.",
+			"title": "Docs"
 		}
 	},
 	"navigation": {

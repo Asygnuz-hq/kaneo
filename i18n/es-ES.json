@@ -1306,6 +1306,28 @@
 			"connect": "Conectar Telegram",
 			"saveChanges": "Guardar cambios",
 			"disconnect": "Desconectar"
+		},
+		"projectDocs": {
+			"pageTitle": "Configuración de Docs",
+			"title": "Docs",
+			"subtitle": "Una wiki por proyecto que tu equipo puede consultar desde cualquier tarea."
+		},
+		"docPageEditor": {
+			"loading": "Cargando páginas...",
+			"empty": "Aún no hay páginas.",
+			"newPage": "Nueva página",
+			"untitled": "Sin título",
+			"addSubpage": "Agregar subpágina",
+			"selectPrompt": "Selecciona una página, o crea una para empezar.",
+			"titlePlaceholder": "Título de la página",
+			"contentPlaceholder": "Escribe en Markdown...",
+			"save": "Guardar",
+			"toastCreated": "Página creada",
+			"toastCreateError": "Error al crear la página",
+			"toastSaved": "Página guardada",
+			"toastSaveError": "Error al guardar la página",
+			"toastDeleted": "Página eliminada",
+			"toastDeleteError": "Error al eliminar la página"
 		}
 	},
 	"navigation": {

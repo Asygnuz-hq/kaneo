@@ -1226,6 +1226,55 @@ export const taskRelationTable = pgTable(
   ],
 );
 
+// A lightweight per-project wiki: pages can nest under a parent page to form
+// a tree, but there's no depth limit or cycle check at the schema level --
+// doc-page/validate-doc-page.ts rejects a parentId that would create a cycle
+// or point outside the page's own project. Deleting a parent promotes its
+// children to root-level (parentId set to null) rather than cascading the
+// delete, so removing a section never silently wipes the pages under it.
+export const docPageTable = pgTable(
+  "doc_page",
+  {
+    id: text("id")
+      .$defaultFn(() => createId())
+      .primaryKey(),
+    projectId: text("project_id")
+      .notNull()
+      .references(() => projectTable.id, {
+        onDelete: "cascade",
+        onUpdate: "cascade",
+      }),
+    parentId: text("parent_id"),
+    title: text("title").notNull(),
+    content: text("content").notNull().default(""),
+    position: integer("position").notNull().default(0),
+    createdByUserId: text("created_by_user_id").references(() => userTable.id, {
+      onDelete: "set null",
+      onUpdate: "cascade",
+    }),
+    updatedByUserId: text("updated_by_user_id").references(() => userTable.id, {
+      onDelete: "set null",
+      onUpdate: "cascade",
+    }),
+    createdAt: timestamp("created_at", { mode: "date" }).defaultNow().notNull(),
+    updatedAt: timestamp("updated_at", { mode: "date" })
+      .defaultNow()
+      .$onUpdate(() => new Date())
+      .notNull(),
+  },
+  (table) => [
+    index("doc_page_projectId_idx").on(table.projectId),
+    index("doc_page_parentId_idx").on(table.parentId),
+    foreignKey({
+      columns: [table.parentId],
+      foreignColumns: [table.id],
+      name: "doc_page_parent_id_fk",
+    })
+      .onDelete("set null")
+      .onUpdate("cascade"),
+  ],
+);
+
 export const apikeyTable = pgTable(
   "apikey",
   {
