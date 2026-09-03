@@ -1871,7 +1871,10 @@
 			"updateDatesError": "Échec de la mise à jour des dates de la tâche",
 			"resizeStart": "Redimensionner la date de début",
 			"resizeDue": "Redimensionner la date d'échéance",
-			"taskAriaLabel": "{{title}} : ouvrir ou déplacer"
+			"taskAriaLabel": "{{title}} : ouvrir ou déplacer",
+			"undatedChildren_many": "+{{count}} subtasks without a date",
+			"undatedChildren_one": "+{{count}} subtask without a date",
+			"undatedChildren_other": "+{{count}} subtasks without a date"
 		},
 		"delete": {
 			"title": "Supprimer la tâche ?",

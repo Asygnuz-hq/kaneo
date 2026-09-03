@@ -1871,7 +1871,10 @@
 			"updateDatesError": "Falha ao atualizar as datas da tarefa",
 			"resizeStart": "Redimensionar data de início",
 			"resizeDue": "Redimensionar data de vencimento",
-			"taskAriaLabel": "{{title}}: abrir ou arrastar para mover"
+			"taskAriaLabel": "{{title}}: abrir ou arrastar para mover",
+			"undatedChildren_many": "+{{count}} subtasks without a date",
+			"undatedChildren_one": "+{{count}} subtask without a date",
+			"undatedChildren_other": "+{{count}} subtasks without a date"
 		},
 		"delete": {
 			"title": "Excluir tarefa?",

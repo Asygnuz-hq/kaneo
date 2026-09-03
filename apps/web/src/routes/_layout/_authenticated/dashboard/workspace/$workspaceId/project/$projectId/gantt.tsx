@@ -203,17 +203,29 @@ function RouteComponent() {
     }
     const rootTasks = parsedTasks.filter((task) => !childIds.has(task.id));
 
-    const result: (ParsedTask & { level: number; childCount: number })[] = [];
+    const result: (ParsedTask & {
+      level: number;
+      childCount: number;
+      undatedChildCount: number;
+    })[] = [];
     const visit = (task: ParsedTask, level: number) => {
-      const kidIds = (childrenOf.get(task.id) ?? []).filter((id) =>
-        scheduledIds.has(id),
-      );
+      const allKidIds = childrenOf.get(task.id) ?? [];
+      const kidIds = allKidIds.filter((id) => scheduledIds.has(id));
       const kids = kidIds
         .map((id) => byId.get(id))
         .filter((t): t is ParsedTask => Boolean(t))
         .sort((a, b) => a.scheduleStart.getTime() - b.scheduleStart.getTime());
 
-      result.push({ ...task, level, childCount: kids.length });
+      // ASYGNUZ: una subtarea sin fecha propia no puede tener una barra en
+      // el Gantt (no hay dónde ubicarla), pero antes desaparecía del todo --
+      // ni rastro de que existiera. Se cuenta aquí para mostrar un aviso en
+      // la fila del padre en vez de esconderla en silencio.
+      result.push({
+        ...task,
+        level,
+        childCount: kids.length,
+        undatedChildCount: allKidIds.length - kidIds.length,
+      });
       if (collapsedTaskIds.has(task.id)) return;
       for (const kid of kids) visit(kid, level + 1);
     };
@@ -239,7 +251,12 @@ function RouteComponent() {
           task.status.toLowerCase().includes(normalizedQuery)
         );
       })
-      .map((task) => ({ ...task, level: 0, childCount: 0 }));
+      .map((task) => ({
+        ...task,
+        level: 0,
+        childCount: 0,
+        undatedChildCount: 0,
+      }));
   }, [orderedTasks, parsedTasks, project?.slug, searchQuery]);
 
   const timeline = useMemo(() => {
@@ -597,6 +614,13 @@ function RouteComponent() {
                                   ? ` • ${task.assigneeName}`
                                   : ""}
                               </p>
+                              {task.undatedChildCount > 0 ? (
+                                <p className="w-full truncate text-[11px] leading-tight text-warning-foreground">
+                                  {t("tasks:gantt.undatedChildren", {
+                                    count: task.undatedChildCount,
+                                  })}
+                                </p>
+                              ) : null}
                             </div>
                           </div>
                         ) : null}
