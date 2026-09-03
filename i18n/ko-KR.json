@@ -11,7 +11,8 @@
 			"remove": "제거",
 			"reset": "재설정",
 			"filter": "필터",
-			"clearAllFilters": "모든 필터 지우기"
+			"clearAllFilters": "모든 필터 지우기",
+			"add": "Add"
 		},
 		"a11y": {
 			"toggleSidebar": "사이드바 토글"
@@ -1269,6 +1270,40 @@
 			"updateError": "라벨 업데이트에 실패했습니다",
 			"deleteError": "라벨 삭제에 실패했습니다",
 			"nameRequired": "라벨 이름은 필수입니다"
+		},
+		"workspaceCustomFields": {
+			"addOption": "Add an option",
+			"cardDescription": "Manage fields that can be set on any task.",
+			"createDescription": "The type can't be changed after creation, so pick carefully.",
+			"createError": "Failed to create custom field",
+			"createField": "Create Field",
+			"createSuccess": "Custom field created",
+			"deleteConfirmDescription": "Every task's value for this field is deleted too. This action cannot be undone.",
+			"deleteConfirmTitle": "Delete this field?",
+			"deleteError": "Failed to delete custom field",
+			"deleteField": "Delete",
+			"deleteSuccess": "Custom field deleted",
+			"editField": "Edit Field",
+			"empty": "No custom fields yet. Create your first one to get started.",
+			"nameLabel": "Field name",
+			"namePlaceholder": "e.g. Client priority",
+			"nameRequired": "Field name is required",
+			"optionsLabel": "Options",
+			"optionsRequired": "Add at least one option",
+			"pageTitle": "Custom Field Settings",
+			"saveField": "Save",
+			"subtitle": "Extend tasks with fields specific to your team, available across every project in this workspace.",
+			"title": "Custom Fields",
+			"typeLabel": "Type",
+			"types": {
+				"checkbox": "Checkbox",
+				"date": "Date",
+				"number": "Number",
+				"select": "Select",
+				"text": "Text"
+			},
+			"updateError": "Failed to update custom field",
+			"updateSuccess": "Custom field updated"
 		}
 	},
 	"navigation": {
@@ -1730,9 +1765,9 @@
 			"start": "시작",
 			"startDate": "시작일",
 			"noDate": "날짜 없음",
-			"milestone": "Milestone",
-			"milestoneError": "Failed to update the milestone flag",
-			"milestoneHint": "Mark as a milestone -- shows as a diamond on the Gantt instead of a bar"
+			"customFields": "Custom fields",
+			"customFieldSaveError": "Failed to save value",
+			"customFieldUnset": "Not set"
 		},
 		"move": {
 			"title": "작업 이동",
@@ -1878,8 +1913,15 @@
 			"resizeStart": "시작일 크기 조정",
 			"resizeDue": "마감일 크기 조정",
 			"taskAriaLabel": "{{title}}: 열거나 드래그하여 이동",
-			"undatedChildren_other": "+{{count}} subtasks without a date",
-			"milestoneAriaLabel": "{{title}} (milestone): open or drag to move"
+			"criticalPath": "On the critical path -- delaying this task pushes back the project's finish date",
+			"criticalPathLegend": "Critical path",
+			"zoom": {
+				"day": "Day",
+				"month": "Month",
+				"quarter": "Quarter",
+				"week": "Week"
+			},
+			"undatedChildren_other": "+{{count}} subtasks without a date"
 		},
 		"delete": {
 			"title": "작업을 삭제하시겠습니까?",

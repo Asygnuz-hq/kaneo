@@ -3,6 +3,7 @@
 		"appName": "Kaneo",
 		"actions": {
 			"cancel": "Cancel",
+			"add": "Add",
 			"close": "Close",
 			"clearAll": "Clear all",
 			"delete": "Delete",
@@ -796,6 +797,40 @@
 			"updateError": "Failed to update label",
 			"deleteError": "Failed to delete label",
 			"nameRequired": "Label name is required"
+		},
+		"workspaceCustomFields": {
+			"pageTitle": "Custom Field Settings",
+			"title": "Custom Fields",
+			"subtitle": "Extend tasks with fields specific to your team, available across every project in this workspace.",
+			"cardDescription": "Manage fields that can be set on any task.",
+			"createField": "Create Field",
+			"editField": "Edit Field",
+			"deleteField": "Delete",
+			"saveField": "Save",
+			"nameLabel": "Field name",
+			"namePlaceholder": "e.g. Client priority",
+			"typeLabel": "Type",
+			"optionsLabel": "Options",
+			"addOption": "Add an option",
+			"optionsRequired": "Add at least one option",
+			"createDescription": "The type can't be changed after creation, so pick carefully.",
+			"deleteConfirmTitle": "Delete this field?",
+			"deleteConfirmDescription": "Every task's value for this field is deleted too. This action cannot be undone.",
+			"empty": "No custom fields yet. Create your first one to get started.",
+			"createSuccess": "Custom field created",
+			"updateSuccess": "Custom field updated",
+			"deleteSuccess": "Custom field deleted",
+			"createError": "Failed to create custom field",
+			"updateError": "Failed to update custom field",
+			"deleteError": "Failed to delete custom field",
+			"nameRequired": "Field name is required",
+			"types": {
+				"text": "Text",
+				"number": "Number",
+				"date": "Date",
+				"select": "Select",
+				"checkbox": "Checkbox"
+			}
 		},
 		"projectGeneral": {
 			"pageTitle": "Project Settings",
@@ -1730,6 +1765,9 @@
 		"properties": {
 			"title": "Properties",
 			"labels": "Labels",
+			"customFields": "Custom fields",
+			"customFieldUnset": "Not set",
+			"customFieldSaveError": "Failed to save value",
 			"copyTaskLink": "Copy task link",
 			"copyTaskBranch": "Copy task branch",
 			"start": "Start",
@@ -1883,7 +1921,14 @@
 			"resizeStart": "Resize start date",
 			"resizeDue": "Resize due date",
 			"taskAriaLabel": "{{title}}: open or drag to move",
-			"milestoneAriaLabel": "{{title}} (milestone): open or drag to move",
+			"criticalPath": "On the critical path -- delaying this task pushes back the project's finish date",
+			"criticalPathLegend": "Critical path",
+			"zoom": {
+				"day": "Day",
+				"week": "Week",
+				"month": "Month",
+				"quarter": "Quarter"
+			},
 			"undatedChildren_one": "+{{count}} subtask without a date",
 			"undatedChildren_other": "+{{count}} subtasks without a date"
 		},
