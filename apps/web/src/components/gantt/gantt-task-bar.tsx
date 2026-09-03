@@ -23,6 +23,7 @@ type GanttTaskBarProps = {
   };
   pixelsPerDay: number;
   isMobile?: boolean;
+  isCritical?: boolean;
   onOpenTask: () => void;
 };
 
@@ -75,6 +76,7 @@ export function GanttTaskBar({
   timeline,
   pixelsPerDay,
   isMobile = false,
+  isCritical = false,
   onOpenTask,
 }: GanttTaskBarProps) {
   const { t } = useTranslation();
@@ -309,7 +311,13 @@ export function GanttTaskBar({
     >
       <div
         style={{ gridColumn: `${lineStart} / ${lineEnd}` }}
-        className="group pointer-events-auto relative mx-1 flex min-h-[44px] min-w-0 items-stretch overflow-hidden rounded-md border border-primary/25 bg-background text-left text-sm font-medium leading-none text-foreground shadow-sm transition-colors hover:border-primary/40 sm:h-11 sm:min-h-0"
+        title={isCritical ? t("tasks:gantt.criticalPath") : undefined}
+        className={cn(
+          "group pointer-events-auto relative mx-1 flex min-h-[44px] min-w-0 items-stretch overflow-hidden rounded-md border bg-background text-left text-sm font-medium leading-none text-foreground shadow-sm transition-colors sm:h-11 sm:min-h-0",
+          isCritical
+            ? "border-destructive/70 hover:border-destructive"
+            : "border-primary/25 hover:border-primary/40",
+        )}
       >
         <span
           aria-hidden="true"

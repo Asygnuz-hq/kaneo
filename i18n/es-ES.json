@@ -1860,7 +1860,9 @@
 			"updateDatesError": "Error al actualizar las fechas de la tarea",
 			"resizeStart": "Cambiar la fecha de comienzo",
 			"resizeDue": "Cambiar la fecha de vencimiento",
-			"taskAriaLabel": "{{title}}: abrir o arrastrar para mover"
+			"taskAriaLabel": "{{title}}: abrir o arrastrar para mover",
+			"criticalPath": "On the critical path -- delaying this task pushes back the project's finish date",
+			"criticalPathLegend": "Critical path"
 		},
 		"delete": {
 			"title": "¿Eliminar tarea?",

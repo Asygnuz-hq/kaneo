@@ -1892,7 +1892,9 @@
 			"updateDatesError": "Не удалось обновить даты задачи",
 			"resizeStart": "Изменить дату начала",
 			"resizeDue": "Изменить срок выполнения",
-			"taskAriaLabel": "{{title}}: откройте или перетащите для перемещения"
+			"taskAriaLabel": "{{title}}: откройте или перетащите для перемещения",
+			"criticalPath": "On the critical path -- delaying this task pushes back the project's finish date",
+			"criticalPathLegend": "Critical path"
 		},
 		"delete": {
 			"title": "Удалить задачу?",

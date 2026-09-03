@@ -1861,7 +1861,9 @@
 			"updateDatesError": "Không thể cập nhật ngày của công việc",
 			"resizeStart": "Thay đổi kích thước ngày bắt đầu",
 			"resizeDue": "Thay đổi kích thước ngày đến hạn",
-			"taskAriaLabel": "{{title}}: mở hoặc kéo để di chuyển"
+			"taskAriaLabel": "{{title}}: mở hoặc kéo để di chuyển",
+			"criticalPath": "On the critical path -- delaying this task pushes back the project's finish date",
+			"criticalPathLegend": "Critical path"
 		},
 		"delete": {
 			"title": "Xóa công việc?",

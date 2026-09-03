@@ -29,6 +29,7 @@ import useGetProjectBlockingRelations from "@/hooks/queries/task-relation/use-ge
 import useGetProjectSubtaskRelations from "@/hooks/queries/task-relation/use-get-project-subtask-relations";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { cn } from "@/lib/cn";
+import { computeCriticalPath } from "@/lib/gantt/critical-path";
 import { getStatusLabel } from "@/lib/i18n/domain";
 import { getIssueTypeIcon } from "@/lib/task-type";
 import { useUserPreferencesStore } from "@/store/user-preferences";
@@ -219,6 +220,16 @@ function RouteComponent() {
       .map((task) => ({ ...task, level: 0, childCount: 0 }));
   }, [orderedTasks, parsedTasks, project?.slug, searchQuery]);
 
+  // ASYGNUZ: ruta crítica -- se calcula sobre TODAS las tareas con fecha y
+  // TODAS las relaciones "blocks" del proyecto, no solo las que están
+  // visibles ahora mismo. Es un hecho del proyecto completo: buscar o
+  // colapsar una rama no debería cambiar cuáles tareas son críticas, solo
+  // cuáles de ellas se ven resaltadas en este momento.
+  const criticalPath = useMemo(
+    () => computeCriticalPath(parsedTasks, blockingRelations ?? []),
+    [parsedTasks, blockingRelations],
+  );
+
   const timeline = useMemo(() => {
     if (parsedTasks.length === 0) return null;
 
@@ -318,6 +329,7 @@ function RouteComponent() {
           y1: sourceRect.top + sourceRect.height / 2 - bodyRect.top,
           x2: targetRect.left - bodyRect.left,
           y2: targetRect.top + targetRect.height / 2 - bodyRect.top,
+          isCritical: criticalPath.criticalEdgeIds.has(rel.id),
         });
       }
       setDependencyLines(lines);
@@ -331,7 +343,7 @@ function RouteComponent() {
     const observer = new ResizeObserver(measure);
     observer.observe(body);
     return () => observer.disconnect();
-  }, [scheduledTasks, blockingRelations]);
+  }, [scheduledTasks, blockingRelations, criticalPath]);
 
   return (
     <ProjectLayout
@@ -350,6 +362,15 @@ function RouteComponent() {
               <h1 className="text-sm font-semibold text-foreground">
                 {t("tasks:gantt.title")}
               </h1>
+              {criticalPath.criticalTaskIds.size > 0 ? (
+                <div className="flex items-center gap-1.5 text-[11px] text-muted-foreground">
+                  <span
+                    aria-hidden="true"
+                    className="inline-block h-2 w-2 rounded-sm border-2 border-destructive"
+                  />
+                  {t("tasks:gantt.criticalPathLegend")}
+                </div>
+              ) : null}
             </div>
 
             <div className="relative w-full max-w-sm">
@@ -590,6 +611,9 @@ function RouteComponent() {
                             timeline={timeline}
                             pixelsPerDay={pixelsPerDay}
                             isMobile={isMobile}
+                            isCritical={criticalPath.criticalTaskIds.has(
+                              task.id,
+                            )}
                             onOpenTask={() =>
                               navigate({
                                 to: ".",

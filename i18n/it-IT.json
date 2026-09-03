@@ -1871,7 +1871,9 @@
 			"updateDatesError": "Aggiornamento date attività fallito",
 			"resizeStart": "Ridimensiona data inizio",
 			"resizeDue": "Ridimensiona data scadenza",
-			"taskAriaLabel": "{{title}}: apri o trascina per spostare"
+			"taskAriaLabel": "{{title}}: apri o trascina per spostare",
+			"criticalPath": "On the critical path -- delaying this task pushes back the project's finish date",
+			"criticalPathLegend": "Critical path"
 		},
 		"delete": {
 			"title": "Eliminare l'Attività?",

@@ -1861,7 +1861,9 @@
 			"updateDatesError": "Gagal memperbarui tanggal tugas",
 			"resizeStart": "Ubah ukuran tanggal mulai",
 			"resizeDue": "Ubah ukuran tenggat",
-			"taskAriaLabel": "{{title}}: buka atau seret untuk memindahkan"
+			"taskAriaLabel": "{{title}}: buka atau seret untuk memindahkan",
+			"criticalPath": "On the critical path -- delaying this task pushes back the project's finish date",
+			"criticalPathLegend": "Critical path"
 		},
 		"delete": {
 			"title": "Hapus Tugas?",

@@ -1855,7 +1855,9 @@
 			"updateDatesError": "Bijwerken taakdatums mislukt",
 			"resizeStart": "Startdatum wijzigen",
 			"resizeDue": "Einddatum wijzigen",
-			"taskAriaLabel": "{{title}}: openen of slepen om te verplaatsen"
+			"taskAriaLabel": "{{title}}: openen of slepen om te verplaatsen",
+			"criticalPath": "On the critical path -- delaying this task pushes back the project's finish date",
+			"criticalPathLegend": "Critical path"
 		},
 		"delete": {
 			"title": "Taak verwijderen?",

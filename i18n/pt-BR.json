@@ -1871,7 +1871,9 @@
 			"updateDatesError": "Falha ao atualizar as datas da tarefa",
 			"resizeStart": "Redimensionar data de início",
 			"resizeDue": "Redimensionar data de vencimento",
-			"taskAriaLabel": "{{title}}: abrir ou arrastar para mover"
+			"taskAriaLabel": "{{title}}: abrir ou arrastar para mover",
+			"criticalPath": "On the critical path -- delaying this task pushes back the project's finish date",
+			"criticalPathLegend": "Critical path"
 		},
 		"delete": {
 			"title": "Excluir tarefa?",

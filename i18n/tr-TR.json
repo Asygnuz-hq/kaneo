@@ -1866,7 +1866,9 @@
 			"updateDatesError": "Talep tarihleri güncellenemedi",
 			"resizeStart": "Başlangıç tarihini yeniden boyutlandır",
 			"resizeDue": "Bitiş tarihini yeniden boyutlandır",
-			"taskAriaLabel": "{{title}}: açmak veya taşımak için sürükleyin"
+			"taskAriaLabel": "{{title}}: açmak veya taşımak için sürükleyin",
+			"criticalPath": "On the critical path -- delaying this task pushes back the project's finish date",
+			"criticalPathLegend": "Critical path"
 		},
 		"delete": {
 			"title": "Talep Silinsin mi?",
