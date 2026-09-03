@@ -1905,6 +1905,8 @@
 			"resizeStart": "Startdatum anpassen",
 			"resizeDue": "Fälligkeitsdatum anpassen",
 			"taskAriaLabel": "{{title}}: öffnen oder ziehen zum Verschieben",
+			"criticalPath": "On the critical path -- delaying this task pushes back the project's finish date",
+			"criticalPathLegend": "Critical path",
 			"zoom": {
 				"day": "Day",
 				"month": "Month",

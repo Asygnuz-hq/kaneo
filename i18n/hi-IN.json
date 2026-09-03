@@ -1905,6 +1905,8 @@
 			"resizeStart": "शुरू तारीख बदलें",
 			"resizeDue": "नियत तारीख बदलें",
 			"taskAriaLabel": "{{title}}: खोलें या ले जाने के लिए खींचें",
+			"criticalPath": "On the critical path -- delaying this task pushes back the project's finish date",
+			"criticalPathLegend": "Critical path",
 			"zoom": {
 				"day": "Day",
 				"month": "Month",

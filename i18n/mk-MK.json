@@ -1905,6 +1905,8 @@
 			"resizeStart": "Промени почетен датум",
 			"resizeDue": "Промени краен рок",
 			"taskAriaLabel": "{{title}}: отвори или повлечи за преместување",
+			"criticalPath": "On the critical path -- delaying this task pushes back the project's finish date",
+			"criticalPathLegend": "Critical path",
 			"zoom": {
 				"day": "Day",
 				"month": "Month",

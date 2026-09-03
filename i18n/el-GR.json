@@ -1905,6 +1905,8 @@
 			"resizeStart": "Αλλαγή μεγέθους ημερομηνίας έναρξης",
 			"resizeDue": "Αλλαγή μεγέθους ημερομηνίας λήξης",
 			"taskAriaLabel": "{{title}}: άνοιγμα ή σύρσιμο για μετακίνηση",
+			"criticalPath": "On the critical path -- delaying this task pushes back the project's finish date",
+			"criticalPathLegend": "Critical path",
 			"zoom": {
 				"day": "Day",
 				"month": "Month",

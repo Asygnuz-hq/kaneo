@@ -1910,6 +1910,8 @@
 			"resizeStart": "Redimensionar data de início",
 			"resizeDue": "Redimensionar data de vencimento",
 			"taskAriaLabel": "{{title}}: abrir ou arrastar para mover",
+			"criticalPath": "On the critical path -- delaying this task pushes back the project's finish date",
+			"criticalPathLegend": "Critical path",
 			"zoom": {
 				"day": "Day",
 				"month": "Month",

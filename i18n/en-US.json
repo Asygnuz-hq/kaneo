@@ -1918,6 +1918,8 @@
 			"resizeStart": "Resize start date",
 			"resizeDue": "Resize due date",
 			"taskAriaLabel": "{{title}}: open or drag to move",
+			"criticalPath": "On the critical path -- delaying this task pushes back the project's finish date",
+			"criticalPathLegend": "Critical path",
 			"zoom": {
 				"day": "Day",
 				"week": "Week",
