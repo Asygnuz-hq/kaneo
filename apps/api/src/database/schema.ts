@@ -822,6 +822,85 @@ export const labelTable = pgTable(
   ],
 );
 
+// ASYGNUZ: Campos Personalizados. Definidos a nivel de workspace (no de
+// proyecto) para que un campo como "Prioridad del cliente" esté disponible
+// en todos los proyectos del workspace de una vez. `options` solo aplica al
+// tipo "select" -- JSON-encoded string array; null para el resto de tipos.
+export const customFieldTable = pgTable(
+  "custom_field",
+  {
+    id: text("id")
+      .$defaultFn(() => createId())
+      .primaryKey(),
+    workspaceId: text("workspace_id")
+      .notNull()
+      .references(() => workspaceTable.id, {
+        onDelete: "cascade",
+        onUpdate: "cascade",
+      }),
+    name: text("name").notNull(),
+    // "text" | "number" | "date" | "select" | "checkbox" -- see
+    // custom-field/validate-custom-field.ts for the source of truth.
+    type: text("type").notNull(),
+    options: text("options"),
+    position: integer("position").notNull().default(0),
+    createdAt: timestamp("created_at", { mode: "date" }).defaultNow().notNull(),
+    updatedAt: timestamp("updated_at", { mode: "date" })
+      .defaultNow()
+      .$onUpdate(() => new Date())
+      .notNull(),
+  },
+  (table) => [
+    index("custom_field_workspaceId_idx").on(table.workspaceId),
+    unique("custom_field_workspace_id_name_unique").on(
+      table.workspaceId,
+      table.name,
+    ),
+  ],
+);
+
+// One row per (task, custom field) that actually has a value set -- a task
+// with nothing entered for a field simply has no row here, rather than a
+// row with a null value. `value` is stored as plain text regardless of the
+// field's type (a number or a checkbox becomes "true"/"false" as a string,
+// a date an ISO string) -- see custom-field/coerce-value.ts for the
+// parse/format boundary. Deliberately generic so adding a 6th field type
+// later doesn't need a new column.
+export const taskCustomFieldValueTable = pgTable(
+  "task_custom_field_value",
+  {
+    id: text("id")
+      .$defaultFn(() => createId())
+      .primaryKey(),
+    taskId: text("task_id")
+      .notNull()
+      .references(() => taskTable.id, {
+        onDelete: "cascade",
+        onUpdate: "cascade",
+      }),
+    customFieldId: text("custom_field_id")
+      .notNull()
+      .references(() => customFieldTable.id, {
+        onDelete: "cascade",
+        onUpdate: "cascade",
+      }),
+    value: text("value"),
+    createdAt: timestamp("created_at", { mode: "date" }).defaultNow().notNull(),
+    updatedAt: timestamp("updated_at", { mode: "date" })
+      .defaultNow()
+      .$onUpdate(() => new Date())
+      .notNull(),
+  },
+  (table) => [
+    unique("task_custom_field_value_task_id_custom_field_id_unique").on(
+      table.taskId,
+      table.customFieldId,
+    ),
+    index("task_custom_field_value_taskId_idx").on(table.taskId),
+    index("task_custom_field_value_customFieldId_idx").on(table.customFieldId),
+  ],
+);
+
 export const notificationTable = pgTable(
   "notification",
   {

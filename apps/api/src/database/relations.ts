@@ -9,6 +9,7 @@ import {
   clientSessionTable,
   columnTable,
   commentTable,
+  customFieldTable,
   externalLinkTable,
   githubIntegrationTable,
   integrationTable,
@@ -19,6 +20,7 @@ import {
   projectTable,
   sessionTable,
   sprintTable,
+  taskCustomFieldValueTable,
   taskRelationTable,
   taskReminderSentTable,
   taskTable,
@@ -81,6 +83,8 @@ export const workspaceTableRelations = relations(
     assets: many(assetTable),
     invitations: many(invitationTable),
     notificationWorkspaceRules: many(userNotificationWorkspaceRuleTable),
+    // ASYGNUZ
+    customFields: many(customFieldTable),
   }),
 );
 
@@ -230,6 +234,8 @@ export const taskTableRelations = relations(taskTable, ({ one, many }) => ({
   sourceRelations: many(taskRelationTable, { relationName: "sourceTask" }),
   targetRelations: many(taskRelationTable, { relationName: "targetTask" }),
   remindersSent: many(taskReminderSentTable),
+  // ASYGNUZ
+  customFieldValues: many(taskCustomFieldValueTable),
 }));
 
 export const timeEntryTableRelations = relations(timeEntryTable, ({ one }) => ({
@@ -283,6 +289,32 @@ export const labelTableRelations = relations(labelTable, ({ one }) => ({
     references: [taskTable.id],
   }),
 }));
+
+// ASYGNUZ: Campos Personalizados.
+export const customFieldTableRelations = relations(
+  customFieldTable,
+  ({ one, many }) => ({
+    workspace: one(workspaceTable, {
+      fields: [customFieldTable.workspaceId],
+      references: [workspaceTable.id],
+    }),
+    values: many(taskCustomFieldValueTable),
+  }),
+);
+
+export const taskCustomFieldValueTableRelations = relations(
+  taskCustomFieldValueTable,
+  ({ one }) => ({
+    task: one(taskTable, {
+      fields: [taskCustomFieldValueTable.taskId],
+      references: [taskTable.id],
+    }),
+    customField: one(customFieldTable, {
+      fields: [taskCustomFieldValueTable.customFieldId],
+      references: [customFieldTable.id],
+    }),
+  }),
+);
 
 export const notificationTableRelations = relations(
   notificationTable,
