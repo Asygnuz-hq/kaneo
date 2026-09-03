@@ -3,6 +3,7 @@ import { ExternalLink, Pencil, Trash2 } from "lucide-react";
 import { useCallback, useState } from "react";
 import { useTranslation } from "react-i18next";
 import CommentEditor from "@/components/activity/comment-editor";
+import { CommentReactions } from "@/components/activity/comment-reactions";
 import { GithubIcon } from "@/components/icons/github-icon";
 import { useAuth } from "@/components/providers/auth-provider/hooks/use-auth";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -37,6 +38,7 @@ type CommentCardProps = {
   createdAt: string;
   externalSource?: string | null;
   externalUrl?: string | null;
+  reactions?: { emoji: string; count: number; reactedByMe: boolean }[];
 };
 
 export default function CommentCard({
@@ -47,6 +49,7 @@ export default function CommentCard({
   createdAt,
   externalSource,
   externalUrl,
+  reactions = [],
 }: CommentCardProps) {
   const { t } = useTranslation();
   const { user: currentUser } = useAuth();
@@ -255,6 +258,16 @@ export default function CommentCard({
             onCancelShortcut={isEditing ? handleCancel : undefined}
           />
         </div>
+
+        {!isEditing && (
+          <div className="px-3 pb-2.5">
+            <CommentReactions
+              activityId={commentId}
+              taskId={taskId}
+              reactions={reactions}
+            />
+          </div>
+        )}
 
         {isEditing && (
           <div className="flex items-center justify-end gap-2 border-border/70 border-t bg-card/60 px-3 py-2">

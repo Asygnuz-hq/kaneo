@@ -1555,6 +1555,9 @@
 				"mermaid": {
 					"renderFailed": "Mermaid डायग्राम प्रस्तुत नहीं किया जा सका"
 				}
+			},
+			"reactions": {
+				"addReaction": "Add reaction"
 			}
 		}
 	},
