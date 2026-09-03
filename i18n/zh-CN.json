@@ -11,7 +11,8 @@
 			"remove": "移除",
 			"reset": "重置",
 			"filter": "筛选",
-			"clearAllFilters": "清除全部筛选"
+			"clearAllFilters": "清除全部筛选",
+			"add": "Add"
 		},
 		"a11y": {
 			"toggleSidebar": "切换侧边栏"
@@ -1269,6 +1270,40 @@
 			"merged": "已合并",
 			"draft": "草稿",
 			"open": "打开"
+		},
+		"workspaceCustomFields": {
+			"addOption": "Add an option",
+			"cardDescription": "Manage fields that can be set on any task.",
+			"createDescription": "The type can't be changed after creation, so pick carefully.",
+			"createError": "Failed to create custom field",
+			"createField": "Create Field",
+			"createSuccess": "Custom field created",
+			"deleteConfirmDescription": "Every task's value for this field is deleted too. This action cannot be undone.",
+			"deleteConfirmTitle": "Delete this field?",
+			"deleteError": "Failed to delete custom field",
+			"deleteField": "Delete",
+			"deleteSuccess": "Custom field deleted",
+			"editField": "Edit Field",
+			"empty": "No custom fields yet. Create your first one to get started.",
+			"nameLabel": "Field name",
+			"namePlaceholder": "e.g. Client priority",
+			"nameRequired": "Field name is required",
+			"optionsLabel": "Options",
+			"optionsRequired": "Add at least one option",
+			"pageTitle": "Custom Field Settings",
+			"saveField": "Save",
+			"subtitle": "Extend tasks with fields specific to your team, available across every project in this workspace.",
+			"title": "Custom Fields",
+			"typeLabel": "Type",
+			"types": {
+				"checkbox": "Checkbox",
+				"date": "Date",
+				"number": "Number",
+				"select": "Select",
+				"text": "Text"
+			},
+			"updateError": "Failed to update custom field",
+			"updateSuccess": "Custom field updated"
 		}
 	},
 	"navigation": {
@@ -1729,7 +1764,10 @@
 			"copyTaskBranch": "复制任务分支",
 			"start": "开始",
 			"startDate": "开始日期",
-			"noDate": "无日期"
+			"noDate": "无日期",
+			"customFields": "Custom fields",
+			"customFieldSaveError": "Failed to save value",
+			"customFieldUnset": "Not set"
 		},
 		"move": {
 			"title": "移动任务",
@@ -1861,7 +1899,14 @@
 			"updateDatesError": "更新任务日期失败",
 			"resizeStart": "调整开始日期",
 			"resizeDue": "调整截止日期",
-			"taskAriaLabel": "{{title}}：打开或拖动以移动"
+			"taskAriaLabel": "{{title}}：打开或拖动以移动",
+			"zoom": {
+				"day": "Day",
+				"month": "Month",
+				"quarter": "Quarter",
+				"week": "Week"
+			},
+			"undatedChildren_other": "+{{count}} subtasks without a date"
 		},
 		"delete": {
 			"title": "删除任务？",

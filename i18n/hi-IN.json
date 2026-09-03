@@ -11,7 +11,8 @@
 			"remove": "निकालें",
 			"reset": "रीसेट करें",
 			"filter": "फ़िल्टर",
-			"clearAllFilters": "सभी फ़िल्टर साफ़ करें"
+			"clearAllFilters": "सभी फ़िल्टर साफ़ करें",
+			"add": "Add"
 		},
 		"a11y": {
 			"toggleSidebar": "साइडबार टॉगल करें"
@@ -1270,6 +1271,40 @@
 			"merged": "मर्ज किया",
 			"draft": "ड्राफ़्ट",
 			"open": "खुला"
+		},
+		"workspaceCustomFields": {
+			"addOption": "Add an option",
+			"cardDescription": "Manage fields that can be set on any task.",
+			"createDescription": "The type can't be changed after creation, so pick carefully.",
+			"createError": "Failed to create custom field",
+			"createField": "Create Field",
+			"createSuccess": "Custom field created",
+			"deleteConfirmDescription": "Every task's value for this field is deleted too. This action cannot be undone.",
+			"deleteConfirmTitle": "Delete this field?",
+			"deleteError": "Failed to delete custom field",
+			"deleteField": "Delete",
+			"deleteSuccess": "Custom field deleted",
+			"editField": "Edit Field",
+			"empty": "No custom fields yet. Create your first one to get started.",
+			"nameLabel": "Field name",
+			"namePlaceholder": "e.g. Client priority",
+			"nameRequired": "Field name is required",
+			"optionsLabel": "Options",
+			"optionsRequired": "Add at least one option",
+			"pageTitle": "Custom Field Settings",
+			"saveField": "Save",
+			"subtitle": "Extend tasks with fields specific to your team, available across every project in this workspace.",
+			"title": "Custom Fields",
+			"typeLabel": "Type",
+			"types": {
+				"checkbox": "Checkbox",
+				"date": "Date",
+				"number": "Number",
+				"select": "Select",
+				"text": "Text"
+			},
+			"updateError": "Failed to update custom field",
+			"updateSuccess": "Custom field updated"
 		}
 	},
 	"navigation": {
@@ -1734,7 +1769,10 @@
 			"copyTaskBranch": "कार्य शाखा कॉपी करें",
 			"start": "शुरू",
 			"startDate": "शुरू की तारीख",
-			"noDate": "कोई तारीख नहीं"
+			"noDate": "कोई तारीख नहीं",
+			"customFields": "Custom fields",
+			"customFieldSaveError": "Failed to save value",
+			"customFieldUnset": "Not set"
 		},
 		"move": {
 			"title": "कार्य ले जाएँ",
@@ -1866,7 +1904,15 @@
 			"updateDatesError": "कार्य की तारीखें अपडेट करने में विफल",
 			"resizeStart": "शुरू तारीख बदलें",
 			"resizeDue": "नियत तारीख बदलें",
-			"taskAriaLabel": "{{title}}: खोलें या ले जाने के लिए खींचें"
+			"taskAriaLabel": "{{title}}: खोलें या ले जाने के लिए खींचें",
+			"zoom": {
+				"day": "Day",
+				"month": "Month",
+				"quarter": "Quarter",
+				"week": "Week"
+			},
+			"undatedChildren_one": "+{{count}} subtask without a date",
+			"undatedChildren_other": "+{{count}} subtasks without a date"
 		},
 		"delete": {
 			"title": "कार्य हटाएँ?",

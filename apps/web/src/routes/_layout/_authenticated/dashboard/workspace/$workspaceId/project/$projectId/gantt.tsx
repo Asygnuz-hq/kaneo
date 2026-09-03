@@ -15,12 +15,17 @@ import { ChevronLeft, ChevronRight, Search } from "lucide-react";
 import { useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 import ProjectLayout from "@/components/common/project-layout";
+import {
+  type DependencyLine,
+  GanttDependencyOverlay,
+} from "@/components/gantt/gantt-dependency-overlay";
 import { GanttTaskBar } from "@/components/gantt/gantt-task-bar";
 import PageTitle from "@/components/page-title";
 import TaskDetailsSheet from "@/components/task/task-details-sheet";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useGetTasks } from "@/hooks/queries/task/use-get-tasks";
+import useGetProjectBlockingRelations from "@/hooks/queries/task-relation/use-get-project-blocking-relations";
 import useGetProjectSubtaskRelations from "@/hooks/queries/task-relation/use-get-project-subtask-relations";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { cn } from "@/lib/cn";
@@ -30,6 +35,27 @@ import { useUserPreferencesStore } from "@/store/user-preferences";
 
 type GanttSearchParams = {
   taskId?: string;
+};
+
+type GanttZoomLevel = "day" | "week" | "month" | "quarter";
+
+const GANTT_ZOOM_LEVELS: GanttZoomLevel[] = ["day", "week", "month", "quarter"];
+
+// ASYGNUZ: rem por dia en cada nivel de zoom. El piso de 0.5rem en mes/
+// trimestre evita que una barra de 1 dia quede en 0px -- sigue siendo
+// angosta a proposito (es la vista de "panorama", no de detalle diario),
+// pero se puede ver y tocar.
+const ZOOM_DAY_WIDTH_REM_DESKTOP: Record<GanttZoomLevel, number> = {
+  day: 2.75,
+  week: 1.1,
+  month: 0.6,
+  quarter: 0.5,
+};
+const ZOOM_DAY_WIDTH_REM_MOBILE: Record<GanttZoomLevel, number> = {
+  day: 3.125,
+  week: 1.4,
+  month: 0.75,
+  quarter: 0.5,
 };
 
 export const Route = createFileRoute(
@@ -64,6 +90,11 @@ function RouteComponent() {
   const { data: subtaskRelations } = useGetProjectSubtaskRelations(
     project?.id ?? "",
   );
+  // ASYGNUZ: flechas de dependencia -- "blocks" es un dato distinto del
+  // árbol de subtareas de arriba, se pide aparte.
+  const { data: blockingRelations } = useGetProjectBlockingRelations(
+    project?.id ?? "",
+  );
   const childrenOf = useMemo(() => {
     const map = new Map<string, string[]>();
     for (const rel of subtaskRelations ?? []) {
@@ -89,11 +120,32 @@ function RouteComponent() {
   };
 
   // Wider day columns on small screens so dragging and reading dates is easier.
-  const dayColumnWidthRem = isMobile ? 3.125 : 2.75;
+  // ASYGNUZ: zoom -- el timeline sigue siendo un grid de dias por debajo
+  // (misma logica de arrastre/redimension basada en indice de dia, sin
+  // tocarla); lo unico que cambia por nivel es que tan ancho se dibuja
+  // cada columna de dia, y que tanto detalle muestra el encabezado.
+  const [zoomLevel, setZoomLevel] = useState<GanttZoomLevel>("day");
+  const dayColumnWidthRem = isMobile
+    ? ZOOM_DAY_WIDTH_REM_MOBILE[zoomLevel]
+    : ZOOM_DAY_WIDTH_REM_DESKTOP[zoomLevel];
   const taskColumnWidthRem = isMobile ? 12 : 14;
   const showTaskRail = !isMobile || isTaskRailOpen;
   const timelineTrackRef = useRef<HTMLDivElement>(null);
   const [pixelsPerDay, setPixelsPerDay] = useState(44);
+
+  // ASYGNUZ: flechas de dependencia -- el contenedor del cuerpo del Gantt
+  // (mismo origen de coordenadas que usa el fondo de la cuadrícula) más un
+  // ref por barra visible, para medir posiciones reales en vez de asumir
+  // una altura de fila fija (el alto de fila puede variar entre mobile y
+  // desktop según el contenido de la columna de tareas).
+  const timelineBodyRef = useRef<HTMLDivElement>(null);
+  const barRefs = useRef<Map<string, HTMLDivElement>>(new Map());
+  const setBarRef = (taskId: string) => (el: HTMLDivElement | null) => {
+    if (el) barRefs.current.set(taskId, el);
+    else barRefs.current.delete(taskId);
+  };
+  const [dependencyLines, setDependencyLines] = useState<DependencyLine[]>([]);
+  const [overlaySize, setOverlaySize] = useState({ width: 0, height: 0 });
 
   useEffect(() => {
     if (!isMobile) {
@@ -111,6 +163,29 @@ function RouteComponent() {
     ],
     [project],
   );
+
+  // ASYGNUZ: % de avance en la barra -- no hay un campo de "progreso" en el
+  // modelo de datos, así que se deriva de en qué columna vive la tarea. Se
+  // usa la posición real de la columna (no se asume "to-do/in-progress/
+  // in-review/done" a mano), así que funciona igual con columnas
+  // personalizadas. isFinal siempre vale 100%, sin importar su posición.
+  const columnProgress = useMemo(() => {
+    const columns = project?.columns ?? [];
+    const map = new Map<string, number>();
+    const totalColumns = columns.length;
+    columns.forEach((column, index) => {
+      if (column.isFinal) {
+        map.set(column.id, 100);
+        return;
+      }
+      const pct =
+        totalColumns > 1 ? Math.round((index / (totalColumns - 1)) * 100) : 0;
+      // Que una columna no-final nunca reclame el 100% -- ese numero es
+      // exclusivo de isFinal.
+      map.set(column.id, Math.min(pct, 95));
+    });
+    return map;
+  }, [project?.columns]);
 
   const parsedTasks = useMemo(() => {
     return allTasks
@@ -156,17 +231,29 @@ function RouteComponent() {
     }
     const rootTasks = parsedTasks.filter((task) => !childIds.has(task.id));
 
-    const result: (ParsedTask & { level: number; childCount: number })[] = [];
+    const result: (ParsedTask & {
+      level: number;
+      childCount: number;
+      undatedChildCount: number;
+    })[] = [];
     const visit = (task: ParsedTask, level: number) => {
-      const kidIds = (childrenOf.get(task.id) ?? []).filter((id) =>
-        scheduledIds.has(id),
-      );
+      const allKidIds = childrenOf.get(task.id) ?? [];
+      const kidIds = allKidIds.filter((id) => scheduledIds.has(id));
       const kids = kidIds
         .map((id) => byId.get(id))
         .filter((t): t is ParsedTask => Boolean(t))
         .sort((a, b) => a.scheduleStart.getTime() - b.scheduleStart.getTime());
 
-      result.push({ ...task, level, childCount: kids.length });
+      // ASYGNUZ: una subtarea sin fecha propia no puede tener una barra en
+      // el Gantt (no hay dónde ubicarla), pero antes desaparecía del todo --
+      // ni rastro de que existiera. Se cuenta aquí para mostrar un aviso en
+      // la fila del padre en vez de esconderla en silencio.
+      result.push({
+        ...task,
+        level,
+        childCount: kids.length,
+        undatedChildCount: allKidIds.length - kidIds.length,
+      });
       if (collapsedTaskIds.has(task.id)) return;
       for (const kid of kids) visit(kid, level + 1);
     };
@@ -192,7 +279,12 @@ function RouteComponent() {
           task.status.toLowerCase().includes(normalizedQuery)
         );
       })
-      .map((task) => ({ ...task, level: 0, childCount: 0 }));
+      .map((task) => ({
+        ...task,
+        level: 0,
+        childCount: 0,
+        undatedChildCount: 0,
+      }));
   }, [orderedTasks, parsedTasks, project?.slug, searchQuery]);
 
   const timeline = useMemo(() => {
@@ -242,6 +334,73 @@ function RouteComponent() {
     return () => observer.disconnect();
   }, [timeline]);
 
+  // ASYGNUZ: recalcula las flechas de dependencia a partir de las posiciones
+  // REALES en pantalla de cada barra (no de una altura de fila asumida) --
+  // se vuelve a medir cuando cambian las tareas visibles, el orden, el zoom
+  // (pixelsPerDay) o el tamaño del contenedor.
+  useLayoutEffect(() => {
+    const body = timelineBodyRef.current;
+    if (!body || (blockingRelations?.length ?? 0) === 0) {
+      setDependencyLines([]);
+      setOverlaySize({ width: 0, height: 0 });
+      return;
+    }
+
+    const visibleIds = new Set(scheduledTasks.map((task) => task.id));
+
+    const measure = () => {
+      const bodyRect = body.getBoundingClientRect();
+      setOverlaySize({ width: body.scrollWidth, height: body.scrollHeight });
+
+      const lines: DependencyLine[] = [];
+      for (const rel of blockingRelations ?? []) {
+        if (
+          !visibleIds.has(rel.sourceTaskId) ||
+          !visibleIds.has(rel.targetTaskId)
+        ) {
+          continue;
+        }
+        const sourceEl = barRefs.current.get(rel.sourceTaskId);
+        const targetEl = barRefs.current.get(rel.targetTaskId);
+        if (!sourceEl || !targetEl) continue;
+
+        const sourceRect = sourceEl.getBoundingClientRect();
+        const targetRect = targetEl.getBoundingClientRect();
+        // A barra sin fechas en rango (fuera de la ventana visible del
+        // timeline) mide 0x0 -- no dibujar una flecha desde/hacia la nada.
+        if (
+          sourceRect.width === 0 ||
+          sourceRect.height === 0 ||
+          targetRect.width === 0 ||
+          targetRect.height === 0
+        ) {
+          continue;
+        }
+
+        // getBoundingClientRect is viewport-relative for both, so the
+        // subtraction below already cancels out any scrolling of the
+        // ancestor scroll container -- no need to add its scrollLeft/Top.
+        lines.push({
+          id: rel.id,
+          x1: sourceRect.right - bodyRect.left,
+          y1: sourceRect.top + sourceRect.height / 2 - bodyRect.top,
+          x2: targetRect.left - bodyRect.left,
+          y2: targetRect.top + targetRect.height / 2 - bodyRect.top,
+        });
+      }
+      setDependencyLines(lines);
+    };
+
+    measure();
+    // A ResizeObserver on `body` alone is enough: it fires whenever the
+    // container's own rendered width/height changes, which is exactly when
+    // pixelsPerDay would have changed too (both are driven by the same
+    // window/sidebar resize) -- no need to also list pixelsPerDay here.
+    const observer = new ResizeObserver(measure);
+    observer.observe(body);
+    return () => observer.disconnect();
+  }, [scheduledTasks, blockingRelations]);
+
   return (
     <ProjectLayout
       projectId={projectId}
@@ -269,6 +428,25 @@ function RouteComponent() {
                 placeholder={t("tasks:gantt.searchPlaceholder")}
                 className="h-9 min-h-11 touch-manipulation sm:h-8 sm:min-h-0 [&_[data-slot=input]]:pl-8 [&_[data-slot=input]]:text-xs"
               />
+            </div>
+
+            <div className="flex shrink-0 items-center gap-0.5 rounded-md border border-border bg-muted/40 p-0.5">
+              {GANTT_ZOOM_LEVELS.map((level) => (
+                <button
+                  key={level}
+                  type="button"
+                  aria-pressed={zoomLevel === level}
+                  onClick={() => setZoomLevel(level)}
+                  className={cn(
+                    "min-h-9 touch-manipulation rounded px-2 text-xs font-medium transition-colors sm:min-h-0 sm:px-2 sm:py-1",
+                    zoomLevel === level
+                      ? "bg-background text-foreground shadow-sm"
+                      : "text-muted-foreground hover:text-foreground",
+                  )}
+                >
+                  {t(`tasks:gantt.zoom.${level}`)}
+                </button>
+              ))}
             </div>
 
             <Button
@@ -339,6 +517,33 @@ function RouteComponent() {
                       index === 0 ||
                       !isSameMonth(day, timeline.days[index - 1] ?? day);
 
+                    // ASYGNUZ (zoom): a month/trimestre cada columna mide unos
+                    // pocos px -- ni el numero de dia ni "MMM" caben adentro.
+                    // Se muestra solo el nombre de mes, en el primer dia de
+                    // cada mes, y se deja desbordar hacia la derecha (mismo
+                    // truco que usan los Gantt comerciales a este zoom): no
+                    // hay nada interactivo debajo con lo que choque.
+                    const isCompact =
+                      zoomLevel === "month" || zoomLevel === "quarter";
+
+                    if (isCompact) {
+                      return (
+                        <div
+                          key={day.toISOString()}
+                          className={cn(
+                            "relative h-9 border-r border-border/40",
+                            isToday(day) && "bg-primary/10",
+                          )}
+                        >
+                          {showMonth ? (
+                            <span className="absolute top-1 left-0.5 whitespace-nowrap text-[10px] font-medium text-muted-foreground">
+                              {format(day, "MMM yyyy")}
+                            </span>
+                          ) : null}
+                        </div>
+                      );
+                    }
+
                     return (
                       <div
                         key={day.toISOString()}
@@ -365,7 +570,7 @@ function RouteComponent() {
                 </div>
               </div>
 
-              <div className="relative">
+              <div ref={timelineBodyRef} className="relative">
                 <div
                   ref={timelineTrackRef}
                   className="absolute inset-y-0 z-0 grid"
@@ -384,7 +589,12 @@ function RouteComponent() {
                       key={`bg-line-${day.toISOString()}`}
                       className={cn(
                         "h-full min-h-0 border-r border-border/60",
-                        isWeekend(day) && "bg-muted/25",
+                        // A esta escala (mes/trimestre) una franja de fin de
+                        // semana por dia es puro ruido visual -- se omite.
+                        zoomLevel !== "month" &&
+                          zoomLevel !== "quarter" &&
+                          isWeekend(day) &&
+                          "bg-muted/25",
                       )}
                     />
                   ))}
@@ -483,11 +693,19 @@ function RouteComponent() {
                                   ? ` • ${task.assigneeName}`
                                   : ""}
                               </p>
+                              {task.undatedChildCount > 0 ? (
+                                <p className="w-full truncate text-[11px] leading-tight text-warning-foreground">
+                                  {t("tasks:gantt.undatedChildren", {
+                                    count: task.undatedChildCount,
+                                  })}
+                                </p>
+                              ) : null}
                             </div>
                           </div>
                         ) : null}
 
                         <div
+                          ref={setBarRef(task.id)}
                           className="relative min-h-11 shrink-0 select-none"
                           style={{
                             minWidth: `${timeline.timelineMinWidthRem}rem`,
@@ -498,6 +716,7 @@ function RouteComponent() {
                             timeline={timeline}
                             pixelsPerDay={pixelsPerDay}
                             isMobile={isMobile}
+                            progressPct={columnProgress.get(task.status) ?? 0}
                             onOpenTask={() =>
                               navigate({
                                 to: ".",
@@ -511,6 +730,12 @@ function RouteComponent() {
                     );
                   })}
                 </div>
+
+                <GanttDependencyOverlay
+                  lines={dependencyLines}
+                  width={overlaySize.width}
+                  height={overlaySize.height}
+                />
               </div>
             </div>
           </div>

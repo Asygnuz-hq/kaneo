@@ -23,6 +23,9 @@ type GanttTaskBarProps = {
   };
   pixelsPerDay: number;
   isMobile?: boolean;
+  // 0-100. No hay un campo de "progreso" en el modelo de datos; se deriva
+  // de en qué columna vive la tarea (ver columnProgress en gantt.tsx).
+  progressPct?: number;
   onOpenTask: () => void;
 };
 
@@ -50,11 +53,32 @@ function toIsoDay(d: Date) {
   return startOfDay(d).toISOString();
 }
 
+// ASYGNUZ: franja de color a la izquierda de la barra según prioridad --
+// mismos tokens semánticos que ya usa el ícono de prioridad en
+// lib/priority.tsx (destructive/warning/info), no colores nuevos. Un
+// elemento propio en vez de border-l-* para no pelear en especificidad
+// contra el "border border-primary/25" que ya trae la barra.
+function getPriorityAccentClass(priority: string | null) {
+  switch (priority) {
+    case "urgent":
+      return "bg-destructive";
+    case "high":
+      return "bg-warning";
+    case "medium":
+      return "bg-warning/50";
+    case "low":
+      return "bg-info/70";
+    default:
+      return "bg-transparent";
+  }
+}
+
 export function GanttTaskBar({
   task,
   timeline,
   pixelsPerDay,
   isMobile = false,
+  progressPct = 0,
   onOpenTask,
 }: GanttTaskBarProps) {
   const { t } = useTranslation();
@@ -291,6 +315,13 @@ export function GanttTaskBar({
         style={{ gridColumn: `${lineStart} / ${lineEnd}` }}
         className="group pointer-events-auto relative mx-1 flex min-h-[44px] min-w-0 items-stretch overflow-hidden rounded-md border border-primary/25 bg-background text-left text-sm font-medium leading-none text-foreground shadow-sm transition-colors hover:border-primary/40 sm:h-11 sm:min-h-0"
       >
+        <span
+          aria-hidden="true"
+          className={cn(
+            "absolute inset-y-0 left-0 z-20 w-1",
+            getPriorityAccentClass(task.priority),
+          )}
+        />
         <button
           type="button"
           aria-label={t("tasks:gantt.resizeStart")}
@@ -314,6 +345,13 @@ export function GanttTaskBar({
           }}
         >
           <div className="absolute inset-0 z-0 bg-primary/12 transition-colors group-hover:bg-primary/18" />
+          {progressPct > 0 ? (
+            <div
+              aria-hidden="true"
+              className="absolute inset-y-0 left-0 z-[1] bg-primary/25 transition-[width] group-hover:bg-primary/32"
+              style={{ width: `${Math.min(progressPct, 100)}%` }}
+            />
+          ) : null}
           <span className="relative z-10 block truncate">{task.title}</span>
         </button>
         <button

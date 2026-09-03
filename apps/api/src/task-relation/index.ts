@@ -15,9 +15,11 @@ import { validateWorkspaceAccess } from "../utils/validate-workspace-access";
 import { workspaceAccess } from "../utils/workspace-access-middleware";
 import createTaskRelation from "./controllers/create-task-relation";
 import deleteTaskRelation from "./controllers/delete-task-relation";
+import getProjectBlockingRelations from "./controllers/get-project-blocking-relations";
 import getProjectSubtaskRelations from "./controllers/get-project-subtask-relations";
 import getTaskRelations from "./controllers/get-task-relations";
 import {
+  projectBlockingRelationListSchema,
   projectSubtaskRelationListSchema,
   taskRelationSchema,
   taskRelationWithTasksListSchema,
@@ -140,6 +142,30 @@ const getProjectSubtaskRelationsRoute = createRoute({
   },
 });
 
+// ASYGNUZ: bulk variant for the Gantt view's dependency arrows -- one call
+// per project instead of one getTaskRelations call per task.
+const getProjectBlockingRelationsRoute = createRoute({
+  method: "get",
+  operationId: "getProjectBlockingRelations",
+  path: "/project/{projectId}/blocking",
+  tags: ["Task Relations"],
+  summary: "Get project blocking relations",
+  description:
+    "Get every 'blocks' relation whose source task lives in this project, in one call (ASYGNUZ, for the Gantt view's dependency arrows). sourceTaskId blocks targetTaskId.",
+  middleware: [workspaceAccess.fromProject("projectId")] as const,
+  request: { params: projectIdParam },
+  responses: {
+    200: jsonResponse(
+      "Blocking relations for the project",
+      projectBlockingRelationListSchema,
+    ),
+    400: errorResponse(
+      "Unknown project, or its workspace could not be determined",
+    ),
+    403: errorResponse("No access to the project's workspace"),
+  },
+});
+
 const createTaskRelationRoute = createRoute({
   method: "post",
   operationId: "createTaskRelation",
@@ -194,6 +220,12 @@ const taskRelation = apiRouter<BaseVariables & { workspaceId: string }>()
   .openapi(getProjectSubtaskRelationsRoute, async (c) =>
     c.json(
       await getProjectSubtaskRelations(c.req.valid("param").projectId),
+      200,
+    ),
+  )
+  .openapi(getProjectBlockingRelationsRoute, async (c) =>
+    c.json(
+      await getProjectBlockingRelations(c.req.valid("param").projectId),
       200,
     ),
   )
