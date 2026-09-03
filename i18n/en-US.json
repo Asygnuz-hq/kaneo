@@ -4,6 +4,7 @@
 		"actions": {
 			"cancel": "Cancel",
 			"close": "Close",
+			"edit": "Edit",
 			"clearAll": "Clear all",
 			"delete": "Delete",
 			"deleting": "Deleting...",
@@ -1262,6 +1263,55 @@
 				"issue_opened": "Issue Opened",
 				"issue_closed": "Issue Closed"
 			}
+		},
+		"automationRules": {
+			"title": "Automation rules",
+			"subtitle": "When something happens to a task in this project, do something else automatically.",
+			"description": "Rules run in the order they were created. An inactive rule is skipped.",
+			"loading": "Loading...",
+			"empty": "No automation rules yet",
+			"emptyDescription": "Create one to react automatically to changes on tasks in this project.",
+			"createRule": "New rule",
+			"editRule": "Edit rule",
+			"formDescription": "Choose what to watch for, and what should happen when it does.",
+			"nameLabel": "Name",
+			"namePlaceholder": "e.g. Move to Done when finished",
+			"nameRequired": "Give the rule a name",
+			"triggerLabel": "When...",
+			"actionLabel": "Then...",
+			"triggers": {
+				"task": {
+					"created": "A task is created",
+					"status_changed": "A task's status changes",
+					"priority_changed": "A task's priority changes",
+					"assignee_changed": "A task's assignee changes",
+					"label_assigned": "A label is assigned to a task"
+				}
+			},
+			"actions": {
+				"move_to_column": "Move the task to a column",
+				"set_priority": "Set the task's priority",
+				"assign_user": "Assign the task to",
+				"add_label": "Add a label to the task"
+			},
+			"toStatusLabel": "Only when moved to",
+			"toPriorityLabel": "Only when set to",
+			"triggerLabelLabel": "Only for label",
+			"anyValue": "Any",
+			"columnLabel": "Column",
+			"priorityLabel": "Priority",
+			"userLabel": "Assignee",
+			"actionLabelLabel": "Label",
+			"selectPlaceholder": "Select...",
+			"saveRule": "Save rule",
+			"summary": "IF {{trigger}} THEN {{action}}",
+			"createSuccess": "Automation rule created",
+			"updateSuccess": "Automation rule updated",
+			"deleteSuccess": "Automation rule deleted",
+			"saveError": "Failed to save the rule",
+			"deleteError": "Failed to delete the rule",
+			"deleteConfirmTitle": "Delete this rule?",
+			"deleteConfirmDescription": "This will stop \"{{name}}\" from running. This can't be undone."
 		},
 		"externalLinks": {
 			"resources": "Resources",

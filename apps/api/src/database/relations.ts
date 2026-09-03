@@ -4,6 +4,7 @@ import {
   activityTable,
   apikeyTable,
   assetTable,
+  automationRuleTable,
   clientAccountTable,
   clientProjectAccessTable,
   clientSessionTable,
@@ -109,6 +110,7 @@ export const projectTableRelations = relations(
     assets: many(assetTable),
     columns: many(columnTable),
     workflowRules: many(workflowRuleTable),
+    automationRules: many(automationRuleTable),
     githubIntegration: many(githubIntegrationTable),
     integrations: many(integrationTable),
     notificationWorkspaceProjects: many(userNotificationWorkspaceProjectTable),
@@ -200,6 +202,16 @@ export const workflowRuleTableRelations = relations(
     column: one(columnTable, {
       fields: [workflowRuleTable.columnId],
       references: [columnTable.id],
+    }),
+  }),
+);
+
+export const automationRuleTableRelations = relations(
+  automationRuleTable,
+  ({ one }) => ({
+    project: one(projectTable, {
+      fields: [automationRuleTable.projectId],
+      references: [projectTable.id],
     }),
   }),
 );
