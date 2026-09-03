@@ -1856,6 +1856,12 @@
 			"resizeStart": "Startdatum wijzigen",
 			"resizeDue": "Einddatum wijzigen",
 			"taskAriaLabel": "{{title}}: openen of slepen om te verplaatsen",
+			"zoom": {
+				"day": "Day",
+				"month": "Month",
+				"quarter": "Quarter",
+				"week": "Week"
+			},
 			"undatedChildren_one": "+{{count}} subtask without a date",
 			"undatedChildren_other": "+{{count}} subtasks without a date"
 		},

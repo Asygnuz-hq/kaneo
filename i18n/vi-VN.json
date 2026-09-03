@@ -1862,6 +1862,12 @@
 			"resizeStart": "Thay đổi kích thước ngày bắt đầu",
 			"resizeDue": "Thay đổi kích thước ngày đến hạn",
 			"taskAriaLabel": "{{title}}: mở hoặc kéo để di chuyển",
+			"zoom": {
+				"day": "Day",
+				"month": "Month",
+				"quarter": "Quarter",
+				"week": "Week"
+			},
 			"undatedChildren_other": "+{{count}} subtasks without a date"
 		},
 		"delete": {

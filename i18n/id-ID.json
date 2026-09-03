@@ -1862,6 +1862,12 @@
 			"resizeStart": "Ubah ukuran tanggal mulai",
 			"resizeDue": "Ubah ukuran tenggat",
 			"taskAriaLabel": "{{title}}: buka atau seret untuk memindahkan",
+			"zoom": {
+				"day": "Day",
+				"month": "Month",
+				"quarter": "Quarter",
+				"week": "Week"
+			},
 			"undatedChildren_other": "+{{count}} subtasks without a date"
 		},
 		"delete": {

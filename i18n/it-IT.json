@@ -1872,6 +1872,12 @@
 			"resizeStart": "Ridimensiona data inizio",
 			"resizeDue": "Ridimensiona data scadenza",
 			"taskAriaLabel": "{{title}}: apri o trascina per spostare",
+			"zoom": {
+				"day": "Day",
+				"month": "Month",
+				"quarter": "Quarter",
+				"week": "Week"
+			},
 			"undatedChildren_many": "+{{count}} subtasks without a date",
 			"undatedChildren_one": "+{{count}} subtask without a date",
 			"undatedChildren_other": "+{{count}} subtasks without a date"

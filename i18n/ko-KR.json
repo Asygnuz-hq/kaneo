@@ -1875,6 +1875,12 @@
 			"resizeStart": "시작일 크기 조정",
 			"resizeDue": "마감일 크기 조정",
 			"taskAriaLabel": "{{title}}: 열거나 드래그하여 이동",
+			"zoom": {
+				"day": "Day",
+				"month": "Month",
+				"quarter": "Quarter",
+				"week": "Week"
+			},
 			"undatedChildren_other": "+{{count}} subtasks without a date"
 		},
 		"delete": {
