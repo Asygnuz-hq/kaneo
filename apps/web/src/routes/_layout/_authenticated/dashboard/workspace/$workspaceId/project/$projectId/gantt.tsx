@@ -136,6 +136,29 @@ function RouteComponent() {
     [project],
   );
 
+  // ASYGNUZ: % de avance en la barra -- no hay un campo de "progreso" en el
+  // modelo de datos, así que se deriva de en qué columna vive la tarea. Se
+  // usa la posición real de la columna (no se asume "to-do/in-progress/
+  // in-review/done" a mano), así que funciona igual con columnas
+  // personalizadas. isFinal siempre vale 100%, sin importar su posición.
+  const columnProgress = useMemo(() => {
+    const columns = project?.columns ?? [];
+    const map = new Map<string, number>();
+    const totalColumns = columns.length;
+    columns.forEach((column, index) => {
+      if (column.isFinal) {
+        map.set(column.id, 100);
+        return;
+      }
+      const pct =
+        totalColumns > 1 ? Math.round((index / (totalColumns - 1)) * 100) : 0;
+      // Que una columna no-final nunca reclame el 100% -- ese numero es
+      // exclusivo de isFinal.
+      map.set(column.id, Math.min(pct, 95));
+    });
+    return map;
+  }, [project?.columns]);
+
   const parsedTasks = useMemo(() => {
     return allTasks
       .map((task) => {
@@ -590,6 +613,7 @@ function RouteComponent() {
                             timeline={timeline}
                             pixelsPerDay={pixelsPerDay}
                             isMobile={isMobile}
+                            progressPct={columnProgress.get(task.status) ?? 0}
                             onOpenTask={() =>
                               navigate({
                                 to: ".",
