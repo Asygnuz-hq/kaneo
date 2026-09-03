@@ -1384,7 +1384,8 @@
 			"projectsTitle": "Proyectos",
 			"settingsTitle": "Ajustes",
 			"backToWorkspace": "Volver al espacio de trabajo",
-			"settingsWorkspaceTab": "Espacio de trabajo"
+			"settingsWorkspaceTab": "Espacio de trabajo",
+			"projectMetrics": "Métricas"
 		},
 		"projectSettings": {
 			"projectLabel": "Proyecto"
@@ -2250,5 +2251,19 @@
 		"branding": {
 			"poweredBy": "Powered by"
 		}
+	},
+	"metrics": {
+		"pageTitle": "Métricas · {{name}}",
+		"loading": "Cargando...",
+		"empty": "Todavía no hay nada que mostrar",
+		"totalTasks": "Tareas totales",
+		"completedTasks": "Completadas",
+		"overdueTasks": "Vencidas",
+		"byStatus": "Por estado",
+		"byPriority": "Por prioridad",
+		"workload": "Carga de trabajo",
+		"workloadDescription": "Tareas abiertas y totales por responsable, de mayor a menor carga.",
+		"unassigned": "Sin asignar",
+		"openOfTotal": "{{open}} abiertas / {{total}} totales"
 	}
 }

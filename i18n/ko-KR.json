@@ -1382,7 +1382,8 @@
 			"projectsTitle": "프로젝트",
 			"settingsTitle": "설정",
 			"backToWorkspace": "워크스페이스로 돌아가기",
-			"settingsWorkspaceTab": "워크스페이스"
+			"settingsWorkspaceTab": "워크스페이스",
+			"projectMetrics": "Metrics"
 		},
 		"projectSettings": {
 			"projectLabel": "프로젝트"
@@ -2234,5 +2235,19 @@
 		"branding": {
 			"poweredBy": "제공"
 		}
+	},
+	"metrics": {
+		"byPriority": "By priority",
+		"byStatus": "By status",
+		"completedTasks": "Completed",
+		"empty": "Nothing to show yet",
+		"loading": "Loading...",
+		"openOfTotal": "{{open}} open / {{total}} total",
+		"overdueTasks": "Overdue",
+		"pageTitle": "Metrics · {{name}}",
+		"totalTasks": "Total tasks",
+		"unassigned": "Unassigned",
+		"workload": "Workload",
+		"workloadDescription": "Open and total tasks per assignee, busiest first."
 	}
 }

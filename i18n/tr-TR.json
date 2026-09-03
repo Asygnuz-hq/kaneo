@@ -1383,7 +1383,8 @@
 			"projectsTitle": "Projeler",
 			"settingsTitle": "Ayarlar",
 			"backToWorkspace": "Çalışma Alanına Dön",
-			"settingsWorkspaceTab": "Çalışma Alanı"
+			"settingsWorkspaceTab": "Çalışma Alanı",
+			"projectMetrics": "Metrics"
 		},
 		"projectSettings": {
 			"projectLabel": "Proje"
@@ -2242,5 +2243,19 @@
 		"branding": {
 			"poweredBy": "Tarafından desteklenmektedir"
 		}
+	},
+	"metrics": {
+		"byPriority": "By priority",
+		"byStatus": "By status",
+		"completedTasks": "Completed",
+		"empty": "Nothing to show yet",
+		"loading": "Loading...",
+		"openOfTotal": "{{open}} open / {{total}} total",
+		"overdueTasks": "Overdue",
+		"pageTitle": "Metrics · {{name}}",
+		"totalTasks": "Total tasks",
+		"unassigned": "Unassigned",
+		"workload": "Workload",
+		"workloadDescription": "Open and total tasks per assignee, busiest first."
 	}
 }

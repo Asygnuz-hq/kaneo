@@ -1383,7 +1383,8 @@
 			"projectsTitle": "Projecten",
 			"settingsTitle": "Instellingen",
 			"backToWorkspace": "Terug naar werkruimte",
-			"settingsWorkspaceTab": "Werkruimte"
+			"settingsWorkspaceTab": "Werkruimte",
+			"projectMetrics": "Metrics"
 		},
 		"projectSettings": {
 			"projectLabel": "Project"
@@ -2242,5 +2243,19 @@
 		"branding": {
 			"poweredBy": "Mogelijk gemaakt door"
 		}
+	},
+	"metrics": {
+		"byPriority": "By priority",
+		"byStatus": "By status",
+		"completedTasks": "Completed",
+		"empty": "Nothing to show yet",
+		"loading": "Loading...",
+		"openOfTotal": "{{open}} open / {{total}} total",
+		"overdueTasks": "Overdue",
+		"pageTitle": "Metrics · {{name}}",
+		"totalTasks": "Total tasks",
+		"unassigned": "Unassigned",
+		"workload": "Workload",
+		"workloadDescription": "Open and total tasks per assignee, busiest first."
 	}
 }

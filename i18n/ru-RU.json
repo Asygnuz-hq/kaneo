@@ -1393,7 +1393,8 @@
 			"projectsTitle": "Проекты",
 			"settingsTitle": "Настройки",
 			"backToWorkspace": "Вернуться к рабочей области",
-			"settingsWorkspaceTab": "Рабочая область"
+			"settingsWorkspaceTab": "Рабочая область",
+			"projectMetrics": "Metrics"
 		},
 		"projectSettings": {
 			"projectLabel": "Проект"
@@ -2314,5 +2315,19 @@
 		"branding": {
 			"poweredBy": "Работает на"
 		}
+	},
+	"metrics": {
+		"byPriority": "By priority",
+		"byStatus": "By status",
+		"completedTasks": "Completed",
+		"empty": "Nothing to show yet",
+		"loading": "Loading...",
+		"openOfTotal": "{{open}} open / {{total}} total",
+		"overdueTasks": "Overdue",
+		"pageTitle": "Metrics · {{name}}",
+		"totalTasks": "Total tasks",
+		"unassigned": "Unassigned",
+		"workload": "Workload",
+		"workloadDescription": "Open and total tasks per assignee, busiest first."
 	}
 }

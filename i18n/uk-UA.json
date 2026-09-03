@@ -1385,7 +1385,8 @@
 			"projectsTitle": "Проєкти",
 			"settingsTitle": "Налаштування",
 			"backToWorkspace": "Повернутися до робочого простору",
-			"settingsWorkspaceTab": "Робочий простір"
+			"settingsWorkspaceTab": "Робочий простір",
+			"projectMetrics": "Metrics"
 		},
 		"projectSettings": {
 			"projectLabel": "Проєкт"
@@ -2258,5 +2259,19 @@
 		"branding": {
 			"poweredBy": "Працює на"
 		}
+	},
+	"metrics": {
+		"byPriority": "By priority",
+		"byStatus": "By status",
+		"completedTasks": "Completed",
+		"empty": "Nothing to show yet",
+		"loading": "Loading...",
+		"openOfTotal": "{{open}} open / {{total}} total",
+		"overdueTasks": "Overdue",
+		"pageTitle": "Metrics · {{name}}",
+		"totalTasks": "Total tasks",
+		"unassigned": "Unassigned",
+		"workload": "Workload",
+		"workloadDescription": "Open and total tasks per assignee, busiest first."
 	}
 }

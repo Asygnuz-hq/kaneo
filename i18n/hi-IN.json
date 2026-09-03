@@ -1383,7 +1383,8 @@
 			"projectsTitle": "प्रोजेक्ट",
 			"settingsTitle": "सेटिंग",
 			"backToWorkspace": "वर्कस्पेस पर वापस जाएँ",
-			"settingsWorkspaceTab": "वर्कस्पेस"
+			"settingsWorkspaceTab": "वर्कस्पेस",
+			"projectMetrics": "Metrics"
 		},
 		"projectSettings": {
 			"projectLabel": "प्रोजेक्ट"
@@ -2242,5 +2243,19 @@
 		"branding": {
 			"poweredBy": "द्वारा संचालित"
 		}
+	},
+	"metrics": {
+		"byPriority": "By priority",
+		"byStatus": "By status",
+		"completedTasks": "Completed",
+		"empty": "Nothing to show yet",
+		"loading": "Loading...",
+		"openOfTotal": "{{open}} open / {{total}} total",
+		"overdueTasks": "Overdue",
+		"pageTitle": "Metrics · {{name}}",
+		"totalTasks": "Total tasks",
+		"unassigned": "Unassigned",
+		"workload": "Workload",
+		"workloadDescription": "Open and total tasks per assignee, busiest first."
 	}
 }
