@@ -12,7 +12,8 @@
 			"reset": "Επαναφορά",
 			"filter": "Φίλτρο",
 			"clearAllFilters": "Εκκαθάριση όλων των φίλτρων",
-			"add": "Add"
+			"add": "Add",
+			"edit": "Edit"
 		},
 		"a11y": {
 			"toggleSidebar": "Εναλλαγή πλαϊνής μπάρας"
@@ -1305,6 +1306,46 @@
 			},
 			"updateError": "Failed to update custom field",
 			"updateSuccess": "Custom field updated"
+		},
+		"goals": {
+			"createGoal": "New goal",
+			"createSuccess": "Goal created",
+			"deleteConfirmDescription": "Linked tasks stay as they are -- only the goal \"{{title}}\" is removed. This can't be undone.",
+			"deleteConfirmTitle": "Delete this goal?",
+			"deleteError": "Failed to delete the goal",
+			"deleteSuccess": "Goal deleted",
+			"descriptionLabel": "Description",
+			"editGoal": "Edit goal",
+			"empty": "No goals yet",
+			"emptyDescription": "Create one and link tasks to it to track progress toward an objective.",
+			"formDescription": "Progress is computed from the tasks you link to this goal -- it isn't set by hand.",
+			"linkTask": "Add",
+			"loading": "Loading...",
+			"manageTasks": "Manage tasks",
+			"manageTasksDescription": "Link tasks from this project to track this goal's progress.",
+			"manageTasksTitle": "Tasks for \"{{title}}\"",
+			"noLinkedTasks": "No tasks linked yet",
+			"pageTitle": "Goals",
+			"saveError": "Failed to save the goal",
+			"saveGoal": "Save",
+			"selectTaskPlaceholder": "Select a task...",
+			"statuses": {
+				"at-risk": "At risk",
+				"done": "Done",
+				"off-track": "Off track",
+				"on-track": "On track"
+			},
+			"statusLabel": "Status",
+			"subtitle": "Objectives for this project, with progress tracked from the tasks linked to each one.",
+			"targetDate": "Target: {{date}}",
+			"targetDateLabel": "Target date",
+			"taskProgress": "{{completed}}/{{total}} tasks",
+			"title": "Goals",
+			"titleLabel": "Title",
+			"titlePlaceholder": "e.g. Ship v2",
+			"titleRequired": "Give the goal a title",
+			"unlink": "Remove",
+			"updateSuccess": "Goal updated"
 		}
 	},
 	"navigation": {

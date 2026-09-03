@@ -12,6 +12,8 @@ import {
   customFieldTable,
   externalLinkTable,
   githubIntegrationTable,
+  goalTable,
+  goalTaskTable,
   integrationTable,
   invitationTable,
   labelTable,
@@ -113,6 +115,7 @@ export const projectTableRelations = relations(
     assets: many(assetTable),
     columns: many(columnTable),
     workflowRules: many(workflowRuleTable),
+    goals: many(goalTable),
     githubIntegration: many(githubIntegrationTable),
     integrations: many(integrationTable),
     notificationWorkspaceProjects: many(userNotificationWorkspaceProjectTable),
@@ -208,6 +211,25 @@ export const workflowRuleTableRelations = relations(
   }),
 );
 
+export const goalTableRelations = relations(goalTable, ({ one, many }) => ({
+  project: one(projectTable, {
+    fields: [goalTable.projectId],
+    references: [projectTable.id],
+  }),
+  goalTasks: many(goalTaskTable),
+}));
+
+export const goalTaskTableRelations = relations(goalTaskTable, ({ one }) => ({
+  goal: one(goalTable, {
+    fields: [goalTaskTable.goalId],
+    references: [goalTable.id],
+  }),
+  task: one(taskTable, {
+    fields: [goalTaskTable.taskId],
+    references: [taskTable.id],
+  }),
+}));
+
 export const taskTableRelations = relations(taskTable, ({ one, many }) => ({
   project: one(projectTable, {
     fields: [taskTable.projectId],
@@ -231,6 +253,7 @@ export const taskTableRelations = relations(taskTable, ({ one, many }) => ({
   assets: many(assetTable),
   labels: many(labelTable),
   externalLinks: many(externalLinkTable),
+  goalTasks: many(goalTaskTable),
   sourceRelations: many(taskRelationTable, { relationName: "sourceTask" }),
   targetRelations: many(taskRelationTable, { relationName: "targetTask" }),
   remindersSent: many(taskReminderSentTable),

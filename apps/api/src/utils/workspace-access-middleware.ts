@@ -21,7 +21,8 @@ type WorkspaceIdSource =
         | "column"
         | "workflowRule"
         | "sprint"
-        | "customField";
+        | "customField"
+        | "goal";
       idKey: string;
     }
   | {
@@ -162,7 +163,8 @@ async function lookupAccessContext(
     | "column"
     | "workflowRule"
     | "sprint"
-    | "customField",
+    | "customField"
+    | "goal",
   id: string,
 ): Promise<{ workspaceId: string; projectId: string | null } | null> {
   try {
@@ -356,6 +358,24 @@ async function lookupAccessContext(
           : null;
       }
 
+      case "goal": {
+        const [goal] = await db
+          .select({
+            workspaceId: schema.projectTable.workspaceId,
+            projectId: schema.projectTable.id,
+          })
+          .from(schema.goalTable)
+          .innerJoin(
+            schema.projectTable,
+            eq(schema.goalTable.projectId, schema.projectTable.id),
+          )
+          .where(eq(schema.goalTable.id, id))
+          .limit(1);
+        return goal
+          ? { workspaceId: goal.workspaceId, projectId: goal.projectId }
+          : null;
+      }
+
       default:
         return null;
     }
@@ -459,6 +479,14 @@ export const workspaceAccess = {
     workspaceAccessMiddleware({
       sources: [
         { type: "lookup", resource: "customField", idKey },
+        { type: "query", key: "workspaceId" },
+      ],
+    }),
+
+  fromGoal: (idKey = "id") =>
+    workspaceAccessMiddleware({
+      sources: [
+        { type: "lookup", resource: "goal", idKey },
         { type: "query", key: "workspaceId" },
       ],
     }),
