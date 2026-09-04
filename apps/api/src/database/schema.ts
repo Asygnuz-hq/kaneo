@@ -543,6 +543,47 @@ export const workflowRuleTable = pgTable(
   ],
 );
 
+// A reusable "blank task, already filled in" per project -- picked from the
+// create-task modal to skip retyping the same title/description/priority/
+// labels combo every time (e.g. "Bug report", "Weekly sync").
+export const taskTemplateTable = pgTable(
+  "task_template",
+  {
+    id: text("id")
+      .$defaultFn(() => createId())
+      .primaryKey(),
+    projectId: text("project_id")
+      .notNull()
+      .references(() => projectTable.id, {
+        onDelete: "cascade",
+        onUpdate: "cascade",
+      }),
+    name: text("name").notNull(),
+    title: text("title").notNull().default(""),
+    description: text("description").notNull().default(""),
+    priority: text("priority").notNull().default("no-priority"),
+    issueType: text("issue_type").notNull().default("task"),
+    // JSON string array of label ids to attach when a task is created from
+    // this template -- same "generic text column, no join table" choice as
+    // custom_field.options, since it's never queried by label, only read
+    // whole alongside its template.
+    labelIds: text("label_ids").notNull().default("[]"),
+    position: integer("position").notNull().default(0),
+    createdAt: timestamp("created_at", { mode: "date" }).defaultNow().notNull(),
+    updatedAt: timestamp("updated_at", { mode: "date" })
+      .defaultNow()
+      .$onUpdate(() => new Date())
+      .notNull(),
+  },
+  (table) => [
+    index("task_template_projectId_idx").on(table.projectId),
+    unique("task_template_project_id_name_unique").on(
+      table.projectId,
+      table.name,
+    ),
+  ],
+);
+
 // Generalized "if this happens on a task in this project, do that" engine.
 // Deliberately a separate table from workflow_rule above: workflow_rule is
 // consumed directly (not via the event bus) by the GitHub/Gitea plugin

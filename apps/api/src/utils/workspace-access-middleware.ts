@@ -20,6 +20,7 @@ type WorkspaceIdSource =
         | "comment"
         | "column"
         | "workflowRule"
+        | "taskTemplate"
         | "automationRule"
         | "sprint"
         | "customField";
@@ -162,6 +163,7 @@ async function lookupAccessContext(
     | "comment"
     | "column"
     | "workflowRule"
+    | "taskTemplate"
     | "automationRule"
     | "sprint"
     | "customField",
@@ -327,6 +329,27 @@ async function lookupAccessContext(
           : null;
       }
 
+      case "taskTemplate": {
+        const [taskTemplate] = await db
+          .select({
+            workspaceId: schema.projectTable.workspaceId,
+            projectId: schema.projectTable.id,
+          })
+          .from(schema.taskTemplateTable)
+          .innerJoin(
+            schema.projectTable,
+            eq(schema.taskTemplateTable.projectId, schema.projectTable.id),
+          )
+          .where(eq(schema.taskTemplateTable.id, id))
+          .limit(1);
+        return taskTemplate
+          ? {
+              workspaceId: taskTemplate.workspaceId,
+              projectId: taskTemplate.projectId,
+            }
+          : null;
+      }
+
       case "automationRule": {
         const [automationRule] = await db
           .select({
@@ -468,6 +491,14 @@ export const workspaceAccess = {
     workspaceAccessMiddleware({
       sources: [
         { type: "lookup", resource: "workflowRule", idKey },
+        { type: "query", key: "workspaceId" },
+      ],
+    }),
+
+  fromTaskTemplate: (idKey = "id") =>
+    workspaceAccessMiddleware({
+      sources: [
+        { type: "lookup", resource: "taskTemplate", idKey },
         { type: "query", key: "workspaceId" },
       ],
     }),
