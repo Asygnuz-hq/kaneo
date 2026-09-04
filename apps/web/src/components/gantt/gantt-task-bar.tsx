@@ -27,6 +27,13 @@ type GanttTaskBarProps = {
   // 0-100. No hay un campo de "progreso" en el modelo de datos; se deriva
   // de en qué columna vive la tarea (ver columnProgress en gantt.tsx).
   progressPct?: number;
+  // ASYGNUZ: gantt.tsx mide con esto la posición real de la barra para
+  // dibujar las flechas de dependencia. Tiene que apuntar al elemento
+  // posicionado por gridColumn (el ancho real del día/rango de la tarea),
+  // nunca al contenedor de la fila completa -- ese abarca todo el ancho
+  // del timeline sin importar la fecha, lo que dibujaba flechas que salían
+  // del borde del gráfico en vez del borde real de la barra.
+  barRef?: (el: HTMLDivElement | null) => void;
   onOpenTask: () => void;
 };
 
@@ -81,6 +88,7 @@ export function GanttTaskBar({
   isMobile = false,
   isCritical = false,
   progressPct = 0,
+  barRef,
   onOpenTask,
 }: GanttTaskBarProps) {
   const { t } = useTranslation();
@@ -318,6 +326,7 @@ export function GanttTaskBar({
         style={{ gridTemplateColumns: timeline.gridTemplateColumns }}
       >
         <div
+          ref={barRef}
           style={{ gridColumn: `${lineStart} / ${lineEnd}` }}
           className="group pointer-events-auto relative flex h-full min-h-[44px] items-center justify-center sm:min-h-0"
         >
@@ -365,6 +374,7 @@ export function GanttTaskBar({
       }}
     >
       <div
+        ref={barRef}
         style={{ gridColumn: `${lineStart} / ${lineEnd}` }}
         title={isCritical ? t("tasks:gantt.criticalPath") : undefined}
         className={cn(

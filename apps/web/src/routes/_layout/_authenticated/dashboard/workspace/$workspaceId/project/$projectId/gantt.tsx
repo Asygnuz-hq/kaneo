@@ -726,7 +726,6 @@ function RouteComponent() {
                         ) : null}
 
                         <div
-                          ref={setBarRef(task.id)}
                           className="relative min-h-11 shrink-0 select-none"
                           style={{
                             minWidth: `${timeline.timelineMinWidthRem}rem`,
@@ -741,6 +740,7 @@ function RouteComponent() {
                               task.id,
                             )}
                             progressPct={columnProgress.get(task.status) ?? 0}
+                            barRef={setBarRef(task.id)}
                             onOpenTask={() =>
                               navigate({
                                 to: ".",
