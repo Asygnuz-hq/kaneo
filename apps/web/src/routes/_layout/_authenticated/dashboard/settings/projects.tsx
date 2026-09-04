@@ -6,6 +6,7 @@ import {
   useNavigate,
 } from "@tanstack/react-router";
 import {
+  BookOpen,
   Eye,
   FileText,
   GitBranch,
@@ -68,6 +69,11 @@ function RouteComponent() {
       title: t("settings:projectWorkflow.title"),
       icon: GitBranch,
       segment: "workflow",
+    },
+    {
+      title: t("settings:projectDocs.title"),
+      icon: BookOpen,
+      segment: "docs",
     },
     {
       title: t("settings:goals.title"),

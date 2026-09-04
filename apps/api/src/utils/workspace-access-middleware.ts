@@ -24,6 +24,7 @@ type WorkspaceIdSource =
         | "automationRule"
         | "sprint"
         | "customField"
+        | "docPage"
         | "goal"
         | "recurringTask";
       idKey: string;
@@ -169,6 +170,7 @@ async function lookupAccessContext(
     | "automationRule"
     | "sprint"
     | "customField"
+    | "docPage"
     | "goal"
     | "recurringTask",
   id: string,
@@ -406,6 +408,24 @@ async function lookupAccessContext(
           : null;
       }
 
+      case "docPage": {
+        const [docPage] = await db
+          .select({
+            workspaceId: schema.projectTable.workspaceId,
+            projectId: schema.projectTable.id,
+          })
+          .from(schema.docPageTable)
+          .innerJoin(
+            schema.projectTable,
+            eq(schema.docPageTable.projectId, schema.projectTable.id),
+          )
+          .where(eq(schema.docPageTable.id, id))
+          .limit(1);
+        return docPage
+          ? { workspaceId: docPage.workspaceId, projectId: docPage.projectId }
+          : null;
+      }
+
       case "goal": {
         const [goal] = await db
           .select({
@@ -564,6 +584,14 @@ export const workspaceAccess = {
     workspaceAccessMiddleware({
       sources: [
         { type: "lookup", resource: "customField", idKey },
+        { type: "query", key: "workspaceId" },
+      ],
+    }),
+
+  fromDocPage: (idKey = "id") =>
+    workspaceAccessMiddleware({
+      sources: [
+        { type: "lookup", resource: "docPage", idKey },
         { type: "query", key: "workspaceId" },
       ],
     }),

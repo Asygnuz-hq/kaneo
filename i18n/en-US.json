@@ -1463,6 +1463,28 @@
 			"merged": "Merged",
 			"draft": "Draft",
 			"open": "Open"
+		},
+		"projectDocs": {
+			"pageTitle": "Docs Settings",
+			"title": "Docs",
+			"subtitle": "A per-project wiki your team can reference from any task."
+		},
+		"docPageEditor": {
+			"loading": "Loading pages...",
+			"empty": "No pages yet.",
+			"newPage": "New page",
+			"untitled": "Untitled",
+			"addSubpage": "Add subpage",
+			"selectPrompt": "Select a page, or create one to get started.",
+			"titlePlaceholder": "Page title",
+			"contentPlaceholder": "Write in Markdown...",
+			"save": "Save",
+			"toastCreated": "Page created",
+			"toastCreateError": "Failed to create page",
+			"toastSaved": "Page saved",
+			"toastSaveError": "Failed to save page",
+			"toastDeleted": "Page deleted",
+			"toastDeleteError": "Failed to delete page"
 		}
 	},
 	"navigation": {
