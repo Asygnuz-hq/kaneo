@@ -8,6 +8,7 @@ import {
   integer,
   jsonb,
   pgTable,
+  primaryKey,
   text,
   timestamp,
   unique,
@@ -614,6 +615,11 @@ export const taskTable = pgTable(
     }),
     startDate: timestamp("start_date", { mode: "date" }),
     dueDate: timestamp("due_date", { mode: "date" }),
+    // ASYGNUZ: hito del Gantt -- se dibuja como un rombo en dueDate en vez
+    // de una barra. No agrega una entidad nueva, es una tarea normal con
+    // esta bandera; startDate/dueDate se siguen usando igual (se fuerzan
+    // iguales al marcarla como hito).
+    isMilestone: boolean("is_milestone").default(false).notNull(),
     // ASYGNUZ: Service Desk fase 2 -- set solo cuando la tarea nació como
     // ticket enviado por un cliente del portal (client-portal), no cuando la
     // crea alguien del equipo. Null en todos los demás casos.
@@ -635,6 +641,30 @@ export const taskTable = pgTable(
     index("task_sprintId_idx").on(table.sprintId),
     index("task_requestedByClientId_idx").on(table.requestedByClientId),
     unique("task_project_number_unique").on(table.projectId, table.number),
+  ],
+);
+
+export const taskAssigneeTable = pgTable(
+  "task_assignee",
+  {
+    taskId: text("task_id")
+      .notNull()
+      .references(() => taskTable.id, {
+        onDelete: "cascade",
+        onUpdate: "cascade",
+      }),
+    userId: text("user_id")
+      .notNull()
+      .references(() => userTable.id, {
+        onDelete: "cascade",
+        onUpdate: "cascade",
+      }),
+    createdAt: timestamp("created_at", { mode: "date" }).defaultNow().notNull(),
+  },
+  (table) => [
+    primaryKey({ columns: [table.taskId, table.userId] }),
+    index("task_assignee_taskId_idx").on(table.taskId),
+    index("task_assignee_userId_idx").on(table.userId),
   ],
 );
 
@@ -856,6 +886,85 @@ export const labelTable = pgTable(
     uniqueIndex("label_workspace_name_unique")
       .on(table.workspaceId, table.name)
       .where(sql`${table.taskId} is null`),
+  ],
+);
+
+// ASYGNUZ: Campos Personalizados. Definidos a nivel de workspace (no de
+// proyecto) para que un campo como "Prioridad del cliente" esté disponible
+// en todos los proyectos del workspace de una vez. `options` solo aplica al
+// tipo "select" -- JSON-encoded string array; null para el resto de tipos.
+export const customFieldTable = pgTable(
+  "custom_field",
+  {
+    id: text("id")
+      .$defaultFn(() => createId())
+      .primaryKey(),
+    workspaceId: text("workspace_id")
+      .notNull()
+      .references(() => workspaceTable.id, {
+        onDelete: "cascade",
+        onUpdate: "cascade",
+      }),
+    name: text("name").notNull(),
+    // "text" | "number" | "date" | "select" | "checkbox" -- see
+    // custom-field/validate-custom-field.ts for the source of truth.
+    type: text("type").notNull(),
+    options: text("options"),
+    position: integer("position").notNull().default(0),
+    createdAt: timestamp("created_at", { mode: "date" }).defaultNow().notNull(),
+    updatedAt: timestamp("updated_at", { mode: "date" })
+      .defaultNow()
+      .$onUpdate(() => new Date())
+      .notNull(),
+  },
+  (table) => [
+    index("custom_field_workspaceId_idx").on(table.workspaceId),
+    unique("custom_field_workspace_id_name_unique").on(
+      table.workspaceId,
+      table.name,
+    ),
+  ],
+);
+
+// One row per (task, custom field) that actually has a value set -- a task
+// with nothing entered for a field simply has no row here, rather than a
+// row with a null value. `value` is stored as plain text regardless of the
+// field's type (a number or a checkbox becomes "true"/"false" as a string,
+// a date an ISO string) -- see custom-field/coerce-value.ts for the
+// parse/format boundary. Deliberately generic so adding a 6th field type
+// later doesn't need a new column.
+export const taskCustomFieldValueTable = pgTable(
+  "task_custom_field_value",
+  {
+    id: text("id")
+      .$defaultFn(() => createId())
+      .primaryKey(),
+    taskId: text("task_id")
+      .notNull()
+      .references(() => taskTable.id, {
+        onDelete: "cascade",
+        onUpdate: "cascade",
+      }),
+    customFieldId: text("custom_field_id")
+      .notNull()
+      .references(() => customFieldTable.id, {
+        onDelete: "cascade",
+        onUpdate: "cascade",
+      }),
+    value: text("value"),
+    createdAt: timestamp("created_at", { mode: "date" }).defaultNow().notNull(),
+    updatedAt: timestamp("updated_at", { mode: "date" })
+      .defaultNow()
+      .$onUpdate(() => new Date())
+      .notNull(),
+  },
+  (table) => [
+    unique("task_custom_field_value_task_id_custom_field_id_unique").on(
+      table.taskId,
+      table.customFieldId,
+    ),
+    index("task_custom_field_value_taskId_idx").on(table.taskId),
+    index("task_custom_field_value_customFieldId_idx").on(table.customFieldId),
   ],
 );
 
@@ -1154,6 +1263,42 @@ export const commentTable = pgTable(
   (table) => [
     index("comment_task_idx").on(table.taskId),
     index("comment_user_idx").on(table.userId),
+  ],
+);
+
+// ASYGNUZ: reacción emoji de un usuario sobre un comentario. Los comentarios
+// se guardan de verdad como filas de `activity` (type="comment"), no en
+// `commentTable` de arriba (esa tabla quedó sin uso tras consolidar todo en
+// el feed de actividad) -- por eso esta referencia a activityTable, no a
+// commentTable.
+export const activityReactionTable = pgTable(
+  "activity_reaction",
+  {
+    id: text("id")
+      .$defaultFn(() => createId())
+      .primaryKey(),
+    activityId: text("activity_id")
+      .notNull()
+      .references(() => activityTable.id, {
+        onDelete: "cascade",
+        onUpdate: "cascade",
+      }),
+    userId: text("user_id")
+      .notNull()
+      .references(() => userTable.id, {
+        onDelete: "cascade",
+        onUpdate: "cascade",
+      }),
+    emoji: text("emoji").notNull(),
+    createdAt: timestamp("created_at", { mode: "date" }).defaultNow().notNull(),
+  },
+  (table) => [
+    index("activity_reaction_activity_idx").on(table.activityId),
+    unique("activity_reaction_activity_user_emoji_unique").on(
+      table.activityId,
+      table.userId,
+      table.emoji,
+    ),
   ],
 );
 

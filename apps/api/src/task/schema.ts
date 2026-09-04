@@ -10,6 +10,11 @@ const pagingNumber = (min: number, max: number) =>
 
 export const taskParam = z.object({ id: z.string() });
 
+export const taskAssigneeParam = z.object({
+  id: z.string(),
+  userId: z.string(),
+});
+
 export const projectIdParam = z.object({ projectId: z.string() });
 
 const priority = z.enum(VALID_PRIORITIES);
@@ -71,6 +76,7 @@ export const updateTaskBody = z.object({
   projectId: z.string(),
   position: z.number(),
   userId: z.string().optional(),
+  isMilestone: z.boolean().optional(),
 });
 
 export const moveTaskBody = z.object({
@@ -96,6 +102,8 @@ export const importTasksBody = z.object({
 
 export const updateStatusBody = z.object({ status: z.string() });
 export const updatePriorityBody = z.object({ priority });
+
+export const updateMilestoneBody = z.object({ isMilestone: z.boolean() });
 export const updateIssueTypeBody = z.object({ issueType });
 export const updateAssigneeBody = z.object({
   userId: z.string().nullable().openapi({ description: "Null unassigns." }),

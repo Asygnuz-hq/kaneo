@@ -21,7 +21,8 @@ type WorkspaceIdSource =
         | "column"
         | "workflowRule"
         | "automationRule"
-        | "sprint";
+        | "sprint"
+        | "customField";
       idKey: string;
     }
   | {
@@ -162,7 +163,8 @@ async function lookupAccessContext(
     | "column"
     | "workflowRule"
     | "automationRule"
-    | "sprint",
+    | "sprint"
+    | "customField",
   id: string,
 ): Promise<{ workspaceId: string; projectId: string | null } | null> {
   try {
@@ -364,6 +366,19 @@ async function lookupAccessContext(
           : null;
       }
 
+      // ASYGNUZ: custom field definitions are workspace-scoped, same as
+      // labels -- no projectId to restrict against.
+      case "customField": {
+        const [customField] = await db
+          .select({ workspaceId: schema.customFieldTable.workspaceId })
+          .from(schema.customFieldTable)
+          .where(eq(schema.customFieldTable.id, id))
+          .limit(1);
+        return customField?.workspaceId
+          ? { workspaceId: customField.workspaceId, projectId: null }
+          : null;
+      }
+
       default:
         return null;
     }
@@ -469,5 +484,13 @@ export const workspaceAccess = {
   fromSprint: (idKey = "id") =>
     workspaceAccessMiddleware({
       sources: [{ type: "lookup", resource: "sprint", idKey }],
+    }),
+
+  fromCustomField: (idKey = "id") =>
+    workspaceAccessMiddleware({
+      sources: [
+        { type: "lookup", resource: "customField", idKey },
+        { type: "query", key: "workspaceId" },
+      ],
     }),
 };

@@ -1,6 +1,7 @@
 import { relations } from "drizzle-orm";
 import {
   accountTable,
+  activityReactionTable,
   activityTable,
   apikeyTable,
   assetTable,
@@ -10,6 +11,7 @@ import {
   clientSessionTable,
   columnTable,
   commentTable,
+  customFieldTable,
   externalLinkTable,
   githubIntegrationTable,
   integrationTable,
@@ -20,6 +22,8 @@ import {
   projectTable,
   sessionTable,
   sprintTable,
+  taskAssigneeTable,
+  taskCustomFieldValueTable,
   taskRelationTable,
   taskReminderSentTable,
   taskTable,
@@ -43,6 +47,7 @@ export const userTableRelations = relations(userTable, ({ many, one }) => ({
   teamMembers: many(teamMemberTable),
   workspaceMemberships: many(workspaceUserTable),
   assignedTasks: many(taskTable),
+  taskAssignments: many(taskAssigneeTable),
   timeEntries: many(timeEntryTable),
   activities: many(activityTable),
   comments: many(commentTable),
@@ -82,6 +87,8 @@ export const workspaceTableRelations = relations(
     assets: many(assetTable),
     invitations: many(invitationTable),
     notificationWorkspaceRules: many(userNotificationWorkspaceRuleTable),
+    // ASYGNUZ
+    customFields: many(customFieldTable),
   }),
 );
 
@@ -225,6 +232,7 @@ export const taskTableRelations = relations(taskTable, ({ one, many }) => ({
     fields: [taskTable.userId],
     references: [userTable.id],
   }),
+  assignees: many(taskAssigneeTable),
   column: one(columnTable, {
     fields: [taskTable.columnId],
     references: [columnTable.id],
@@ -242,7 +250,23 @@ export const taskTableRelations = relations(taskTable, ({ one, many }) => ({
   sourceRelations: many(taskRelationTable, { relationName: "sourceTask" }),
   targetRelations: many(taskRelationTable, { relationName: "targetTask" }),
   remindersSent: many(taskReminderSentTable),
+  // ASYGNUZ
+  customFieldValues: many(taskCustomFieldValueTable),
 }));
+
+export const taskAssigneeTableRelations = relations(
+  taskAssigneeTable,
+  ({ one }) => ({
+    task: one(taskTable, {
+      fields: [taskAssigneeTable.taskId],
+      references: [taskTable.id],
+    }),
+    user: one(userTable, {
+      fields: [taskAssigneeTable.userId],
+      references: [userTable.id],
+    }),
+  }),
+);
 
 export const timeEntryTableRelations = relations(timeEntryTable, ({ one }) => ({
   task: one(taskTable, {
@@ -265,6 +289,20 @@ export const activityTableRelations = relations(activityTable, ({ one }) => ({
     references: [userTable.id],
   }),
 }));
+
+export const activityReactionTableRelations = relations(
+  activityReactionTable,
+  ({ one }) => ({
+    activity: one(activityTable, {
+      fields: [activityReactionTable.activityId],
+      references: [activityTable.id],
+    }),
+    user: one(userTable, {
+      fields: [activityReactionTable.userId],
+      references: [userTable.id],
+    }),
+  }),
+);
 
 export const assetTableRelations = relations(assetTable, ({ one }) => ({
   workspace: one(workspaceTable, {
@@ -295,6 +333,32 @@ export const labelTableRelations = relations(labelTable, ({ one }) => ({
     references: [taskTable.id],
   }),
 }));
+
+// ASYGNUZ: Campos Personalizados.
+export const customFieldTableRelations = relations(
+  customFieldTable,
+  ({ one, many }) => ({
+    workspace: one(workspaceTable, {
+      fields: [customFieldTable.workspaceId],
+      references: [workspaceTable.id],
+    }),
+    values: many(taskCustomFieldValueTable),
+  }),
+);
+
+export const taskCustomFieldValueTableRelations = relations(
+  taskCustomFieldValueTable,
+  ({ one }) => ({
+    task: one(taskTable, {
+      fields: [taskCustomFieldValueTable.taskId],
+      references: [taskTable.id],
+    }),
+    customField: one(customFieldTable, {
+      fields: [taskCustomFieldValueTable.customFieldId],
+      references: [customFieldTable.id],
+    }),
+  }),
+);
 
 export const notificationTableRelations = relations(
   notificationTable,
