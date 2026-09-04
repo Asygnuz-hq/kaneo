@@ -12,6 +12,7 @@
 			"reset": "Atur ulang",
 			"filter": "Filter",
 			"clearAllFilters": "Hapus semua filter",
+			"edit": "Edit",
 			"add": "Add"
 		},
 		"a11y": {
@@ -1270,6 +1271,55 @@
 			"updateError": "Gagal memperbarui label",
 			"deleteError": "Gagal menghapus label",
 			"nameRequired": "Nama label wajib diisi"
+		},
+		"automationRules": {
+			"actionLabel": "Then...",
+			"actionLabelLabel": "Label",
+			"actions": {
+				"add_label": "Add a label to the task",
+				"assign_user": "Assign the task to",
+				"move_to_column": "Move the task to a column",
+				"set_priority": "Set the task's priority"
+			},
+			"anyValue": "Any",
+			"columnLabel": "Column",
+			"createRule": "New rule",
+			"createSuccess": "Automation rule created",
+			"deleteConfirmDescription": "This will stop \"{{name}}\" from running. This can't be undone.",
+			"deleteConfirmTitle": "Delete this rule?",
+			"deleteError": "Failed to delete the rule",
+			"deleteSuccess": "Automation rule deleted",
+			"description": "Rules run in the order they were created. An inactive rule is skipped.",
+			"editRule": "Edit rule",
+			"empty": "No automation rules yet",
+			"emptyDescription": "Create one to react automatically to changes on tasks in this project.",
+			"formDescription": "Choose what to watch for, and what should happen when it does.",
+			"loading": "Loading...",
+			"nameLabel": "Name",
+			"namePlaceholder": "e.g. Move to Done when finished",
+			"nameRequired": "Give the rule a name",
+			"priorityLabel": "Priority",
+			"saveError": "Failed to save the rule",
+			"saveRule": "Save rule",
+			"selectPlaceholder": "Select...",
+			"subtitle": "When something happens to a task in this project, do something else automatically.",
+			"summary": "IF {{trigger}} THEN {{action}}",
+			"title": "Automation rules",
+			"toPriorityLabel": "Only when set to",
+			"toStatusLabel": "Only when moved to",
+			"triggerLabel": "When...",
+			"triggerLabelLabel": "Only for label",
+			"triggers": {
+				"task": {
+					"assignee_changed": "A task's assignee changes",
+					"created": "A task is created",
+					"label_assigned": "A label is assigned to a task",
+					"priority_changed": "A task's priority changes",
+					"status_changed": "A task's status changes"
+				}
+			},
+			"updateSuccess": "Automation rule updated",
+			"userLabel": "Assignee"
 		},
 		"workspaceCustomFields": {
 			"addOption": "Add an option",

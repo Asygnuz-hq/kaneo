@@ -543,6 +543,43 @@ export const workflowRuleTable = pgTable(
   ],
 );
 
+// Generalized "if this happens on a task in this project, do that" engine.
+// Deliberately a separate table from workflow_rule above: workflow_rule is
+// consumed directly (not via the event bus) by the GitHub/Gitea plugin
+// webhook handlers with its exact narrow shape, so it's left untouched.
+// This table instead subscribes to the project's own internal task events
+// (see automation/engine.ts) -- triggerType/actionType are open string
+// columns (validated in automation/validate-automation-rule.ts, not by a DB
+// constraint) so new trigger/action kinds can be added without a migration.
+export const automationRuleTable = pgTable(
+  "automation_rule",
+  {
+    id: text("id")
+      .$defaultFn(() => createId())
+      .primaryKey(),
+    projectId: text("project_id")
+      .notNull()
+      .references(() => projectTable.id, {
+        onDelete: "cascade",
+        onUpdate: "cascade",
+      }),
+    name: text("name").notNull(),
+    isActive: boolean("is_active").notNull().default(true),
+    triggerType: text("trigger_type").notNull(),
+    // JSON string, shape depends on triggerType -- e.g. {"toStatus":"done"}
+    triggerConfig: text("trigger_config").notNull().default("{}"),
+    actionType: text("action_type").notNull(),
+    // JSON string, shape depends on actionType -- e.g. {"columnId":"..."}
+    actionConfig: text("action_config").notNull().default("{}"),
+    createdAt: timestamp("created_at", { mode: "date" }).defaultNow().notNull(),
+    updatedAt: timestamp("updated_at", { mode: "date" })
+      .defaultNow()
+      .$onUpdate(() => new Date())
+      .notNull(),
+  },
+  (table) => [index("automation_rule_projectId_idx").on(table.projectId)],
+);
+
 export const taskTable = pgTable(
   "task",
   {

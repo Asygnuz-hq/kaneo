@@ -5,6 +5,7 @@
 			"cancel": "Cancelar",
 			"add": "Agregar",
 			"close": "Cerrar",
+			"edit": "Editar",
 			"clearAll": "Limpiar todo",
 			"delete": "Borrar",
 			"deleting": "Borrando...",
@@ -876,6 +877,55 @@
 			},
 			"giteaHeading": "Gitea",
 			"giteaHint": "Cuando ocurre un evento de webhook de Gitea, mueve la tarea vinculada a una columna."
+		},
+		"automationRules": {
+			"title": "Reglas de automatización",
+			"subtitle": "Cuando algo le pase a una tarea de este proyecto, haz otra cosa automáticamente.",
+			"description": "Las reglas corren en el orden en que se crearon. Una regla inactiva se salta.",
+			"loading": "Cargando...",
+			"empty": "Todavía no hay reglas de automatización",
+			"emptyDescription": "Crea una para reaccionar automáticamente a cambios en las tareas de este proyecto.",
+			"createRule": "Nueva regla",
+			"editRule": "Editar regla",
+			"formDescription": "Elige qué vigilar y qué debe pasar cuando ocurra.",
+			"nameLabel": "Nombre",
+			"namePlaceholder": "ej. Mover a Terminado al finalizar",
+			"nameRequired": "Ponle un nombre a la regla",
+			"triggerLabel": "Cuando...",
+			"actionLabel": "Entonces...",
+			"triggers": {
+				"task": {
+					"created": "Se crea una tarea",
+					"status_changed": "Cambia el estado de una tarea",
+					"priority_changed": "Cambia la prioridad de una tarea",
+					"assignee_changed": "Cambia el responsable de una tarea",
+					"label_assigned": "Se asigna una etiqueta a una tarea"
+				}
+			},
+			"actions": {
+				"move_to_column": "Mover la tarea a una columna",
+				"set_priority": "Cambiar la prioridad de la tarea",
+				"assign_user": "Asignar la tarea a",
+				"add_label": "Agregar una etiqueta a la tarea"
+			},
+			"toStatusLabel": "Solo cuando se mueva a",
+			"toPriorityLabel": "Solo cuando se ponga en",
+			"triggerLabelLabel": "Solo para la etiqueta",
+			"anyValue": "Cualquiera",
+			"columnLabel": "Columna",
+			"priorityLabel": "Prioridad",
+			"userLabel": "Responsable",
+			"actionLabelLabel": "Etiqueta",
+			"selectPlaceholder": "Selecciona...",
+			"saveRule": "Guardar regla",
+			"summary": "SI {{trigger}} ENTONCES {{action}}",
+			"createSuccess": "Regla de automatización creada",
+			"updateSuccess": "Regla de automatización actualizada",
+			"deleteSuccess": "Regla de automatización eliminada",
+			"saveError": "No se pudo guardar la regla",
+			"deleteError": "No se pudo eliminar la regla",
+			"deleteConfirmTitle": "¿Eliminar esta regla?",
+			"deleteConfirmDescription": "Esto detendrá \"{{name}}\". No se puede deshacer."
 		},
 		"externalLinks": {
 			"resources": "Recursos",
