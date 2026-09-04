@@ -1272,6 +1272,85 @@
 			"deleteError": "Gagal menghapus label",
 			"nameRequired": "Nama label wajib diisi"
 		},
+		"taskTemplates": {
+			"createSuccess": "Task template created",
+			"createTemplate": "New template",
+			"defaultDescriptionLabel": "Default description",
+			"defaultTitleLabel": "Default title",
+			"defaultTitlePlaceholder": "Leave blank to type a title each time",
+			"deleteConfirmDescription": "This won't affect tasks already created from \"{{name}}\". This can't be undone.",
+			"deleteConfirmTitle": "Delete this template?",
+			"deleteError": "Failed to delete the template",
+			"deleteSuccess": "Task template deleted",
+			"editTemplate": "Edit template",
+			"empty": "No task templates yet",
+			"emptyDescription": "Create one to skip retyping the same title, description, priority or labels every time.",
+			"formDescription": "These values pre-fill the create-task form when this template is picked.",
+			"issueTypeLabel": "Type",
+			"labelsLabel": "Labels",
+			"loading": "Loading...",
+			"nameLabel": "Template name",
+			"namePlaceholder": "e.g. Bug report",
+			"nameRequired": "Give the template a name",
+			"noTemplate": "No template",
+			"pageTitle": "Task Templates",
+			"priorityLabel": "Priority",
+			"saveError": "Failed to save the template",
+			"saveTemplate": "Save template",
+			"subtitle": "Reusable starting points for new tasks in this project.",
+			"title": "Task templates",
+			"updateSuccess": "Task template updated",
+			"useTemplate": "Use template"
+		},
+		"automationRules": {
+			"actionLabel": "Then...",
+			"actionLabelLabel": "Label",
+			"actions": {
+				"add_label": "Add a label to the task",
+				"assign_user": "Assign the task to",
+				"move_to_column": "Move the task to a column",
+				"set_priority": "Set the task's priority"
+			},
+			"anyValue": "Any",
+			"columnLabel": "Column",
+			"createRule": "New rule",
+			"createSuccess": "Automation rule created",
+			"deleteConfirmDescription": "This will stop \"{{name}}\" from running. This can't be undone.",
+			"deleteConfirmTitle": "Delete this rule?",
+			"deleteError": "Failed to delete the rule",
+			"deleteSuccess": "Automation rule deleted",
+			"description": "Rules run in the order they were created. An inactive rule is skipped.",
+			"editRule": "Edit rule",
+			"empty": "No automation rules yet",
+			"emptyDescription": "Create one to react automatically to changes on tasks in this project.",
+			"formDescription": "Choose what to watch for, and what should happen when it does.",
+			"loading": "Loading...",
+			"nameLabel": "Name",
+			"namePlaceholder": "e.g. Move to Done when finished",
+			"nameRequired": "Give the rule a name",
+			"priorityLabel": "Priority",
+			"saveError": "Failed to save the rule",
+			"saveRule": "Save rule",
+			"selectPlaceholder": "Select...",
+			"subtitle": "When something happens to a task in this project, do something else automatically.",
+			"summary": "IF {{trigger}} THEN {{action}}",
+			"title": "Automation rules",
+			"toPriorityLabel": "Only when set to",
+			"toStatusLabel": "Only when moved to",
+			"triggerLabel": "When...",
+			"triggerLabelLabel": "Only for label",
+			"triggers": {
+				"task": {
+					"assignee_changed": "A task's assignee changes",
+					"created": "A task is created",
+					"label_assigned": "A label is assigned to a task",
+					"priority_changed": "A task's priority changes",
+					"status_changed": "A task's status changes"
+				}
+			},
+			"updateSuccess": "Automation rule updated",
+			"userLabel": "Assignee"
+		},
 		"workspaceCustomFields": {
 			"addOption": "Add an option",
 			"cardDescription": "Manage fields that can be set on any task.",
@@ -1345,6 +1424,44 @@
 			"titleRequired": "Give the goal a title",
 			"unlink": "Remove",
 			"updateSuccess": "Goal updated"
+		},
+		"recurringTasks": {
+			"assigneeLabel": "Assignee",
+			"createSuccess": "Recurring task created",
+			"createTask": "New recurring task",
+			"deleteConfirmDescription": "Tasks \"{{name}}\" already created stay as they are. This can't be undone.",
+			"deleteConfirmTitle": "Delete this recurring task?",
+			"deleteError": "Failed to delete the recurring task",
+			"deleteSuccess": "Recurring task deleted",
+			"editTask": "Edit recurring task",
+			"empty": "No recurring tasks yet",
+			"emptyDescription": "Create one to have a task appear automatically on a schedule -- a weekly sync, a daily standup note, a monthly report.",
+			"formDescription": "A new task is created from this template every time it's due.",
+			"frequencies": {
+				"daily": "Daily",
+				"monthly": "Monthly",
+				"weekly": "Weekly"
+			},
+			"frequencyLabel": "Repeats",
+			"issueTypeLabel": "Type",
+			"labelsLabel": "Labels",
+			"loading": "Loading...",
+			"nameLabel": "Name",
+			"namePlaceholder": "e.g. Weekly sync",
+			"nameRequired": "Give it a name and a task title",
+			"nextRun": "Next: {{date}}",
+			"nextRunLabel": "Next run",
+			"pageTitle": "Recurring Tasks",
+			"priorityLabel": "Priority",
+			"saveError": "Failed to save the recurring task",
+			"saveTask": "Save",
+			"startAtLabel": "Starting",
+			"subtitle": "Tasks that create themselves on a schedule.",
+			"taskDescriptionLabel": "Task description",
+			"taskTitleLabel": "Task title",
+			"title": "Recurring tasks",
+			"unassigned": "Unassigned",
+			"updateSuccess": "Recurring task updated"
 		}
 	},
 	"navigation": {
@@ -1626,6 +1743,9 @@
 				"mermaid": {
 					"renderFailed": "Diagram Mermaid tidak dapat dirender"
 				}
+			},
+			"reactions": {
+				"addReaction": "Add reaction"
 			}
 		}
 	},
@@ -1808,7 +1928,10 @@
 			"noDate": "Tanpa tanggal",
 			"customFields": "Custom fields",
 			"customFieldSaveError": "Failed to save value",
-			"customFieldUnset": "Not set"
+			"customFieldUnset": "Not set",
+			"milestone": "Milestone",
+			"milestoneError": "Failed to update the milestone flag",
+			"milestoneHint": "Mark as a milestone -- shows as a diamond on the Gantt instead of a bar"
 		},
 		"move": {
 			"title": "Pindahkan tugas",
@@ -1949,7 +2072,8 @@
 				"quarter": "Quarter",
 				"week": "Week"
 			},
-			"undatedChildren_other": "+{{count}} subtasks without a date"
+			"undatedChildren_other": "+{{count}} subtasks without a date",
+			"milestoneAriaLabel": "{{title}} (milestone): open or drag to move"
 		},
 		"delete": {
 			"title": "Hapus Tugas?",

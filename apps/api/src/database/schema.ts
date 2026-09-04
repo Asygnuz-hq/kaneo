@@ -8,6 +8,7 @@ import {
   integer,
   jsonb,
   pgTable,
+  primaryKey,
   text,
   timestamp,
   unique,
@@ -605,6 +606,131 @@ export const goalTaskTable = pgTable(
   ],
 );
 
+// A "blank task, already filled in, on a schedule" per project -- the
+// scheduler cron (scheduler/recurring-tasks.ts) scans for due rows and
+// creates a real task from the template, then advances nextRunAt.
+export const recurringTaskTable = pgTable(
+  "recurring_task",
+  {
+    id: text("id")
+      .$defaultFn(() => createId())
+      .primaryKey(),
+    projectId: text("project_id")
+      .notNull()
+      .references(() => projectTable.id, {
+        onDelete: "cascade",
+        onUpdate: "cascade",
+      }),
+    name: text("name").notNull(),
+    title: text("title").notNull(),
+    description: text("description").notNull().default(""),
+    priority: text("priority").notNull().default("no-priority"),
+    issueType: text("issue_type").notNull().default("task"),
+    // JSON string array, same "generic text column" choice as
+    // task_template.label_ids.
+    labelIds: text("label_ids").notNull().default("[]"),
+    assigneeId: text("assignee_id").references(() => userTable.id, {
+      onDelete: "set null",
+      onUpdate: "cascade",
+    }),
+    frequency: text("frequency").notNull(), // "daily" | "weekly" | "monthly"
+    isActive: boolean("is_active").notNull().default(true),
+    nextRunAt: timestamp("next_run_at", { mode: "date" }).notNull(),
+    lastRunAt: timestamp("last_run_at", { mode: "date" }),
+    createdAt: timestamp("created_at", { mode: "date" }).defaultNow().notNull(),
+    updatedAt: timestamp("updated_at", { mode: "date" })
+      .defaultNow()
+      .$onUpdate(() => new Date())
+      .notNull(),
+  },
+  (table) => [
+    index("recurring_task_projectId_idx").on(table.projectId),
+    index("recurring_task_nextRunAt_idx").on(table.nextRunAt),
+    unique("recurring_task_project_id_name_unique").on(
+      table.projectId,
+      table.name,
+    ),
+  ],
+);
+
+// A reusable "blank task, already filled in" per project -- picked from the
+// create-task modal to skip retyping the same title/description/priority/
+// labels combo every time (e.g. "Bug report", "Weekly sync").
+export const taskTemplateTable = pgTable(
+  "task_template",
+  {
+    id: text("id")
+      .$defaultFn(() => createId())
+      .primaryKey(),
+    projectId: text("project_id")
+      .notNull()
+      .references(() => projectTable.id, {
+        onDelete: "cascade",
+        onUpdate: "cascade",
+      }),
+    name: text("name").notNull(),
+    title: text("title").notNull().default(""),
+    description: text("description").notNull().default(""),
+    priority: text("priority").notNull().default("no-priority"),
+    issueType: text("issue_type").notNull().default("task"),
+    // JSON string array of label ids to attach when a task is created from
+    // this template -- same "generic text column, no join table" choice as
+    // custom_field.options, since it's never queried by label, only read
+    // whole alongside its template.
+    labelIds: text("label_ids").notNull().default("[]"),
+    position: integer("position").notNull().default(0),
+    createdAt: timestamp("created_at", { mode: "date" }).defaultNow().notNull(),
+    updatedAt: timestamp("updated_at", { mode: "date" })
+      .defaultNow()
+      .$onUpdate(() => new Date())
+      .notNull(),
+  },
+  (table) => [
+    index("task_template_projectId_idx").on(table.projectId),
+    unique("task_template_project_id_name_unique").on(
+      table.projectId,
+      table.name,
+    ),
+  ],
+);
+
+// Generalized "if this happens on a task in this project, do that" engine.
+// Deliberately a separate table from workflow_rule above: workflow_rule is
+// consumed directly (not via the event bus) by the GitHub/Gitea plugin
+// webhook handlers with its exact narrow shape, so it's left untouched.
+// This table instead subscribes to the project's own internal task events
+// (see automation/engine.ts) -- triggerType/actionType are open string
+// columns (validated in automation/validate-automation-rule.ts, not by a DB
+// constraint) so new trigger/action kinds can be added without a migration.
+export const automationRuleTable = pgTable(
+  "automation_rule",
+  {
+    id: text("id")
+      .$defaultFn(() => createId())
+      .primaryKey(),
+    projectId: text("project_id")
+      .notNull()
+      .references(() => projectTable.id, {
+        onDelete: "cascade",
+        onUpdate: "cascade",
+      }),
+    name: text("name").notNull(),
+    isActive: boolean("is_active").notNull().default(true),
+    triggerType: text("trigger_type").notNull(),
+    // JSON string, shape depends on triggerType -- e.g. {"toStatus":"done"}
+    triggerConfig: text("trigger_config").notNull().default("{}"),
+    actionType: text("action_type").notNull(),
+    // JSON string, shape depends on actionType -- e.g. {"columnId":"..."}
+    actionConfig: text("action_config").notNull().default("{}"),
+    createdAt: timestamp("created_at", { mode: "date" }).defaultNow().notNull(),
+    updatedAt: timestamp("updated_at", { mode: "date" })
+      .defaultNow()
+      .$onUpdate(() => new Date())
+      .notNull(),
+  },
+  (table) => [index("automation_rule_projectId_idx").on(table.projectId)],
+);
+
 export const taskTable = pgTable(
   "task",
   {
@@ -640,6 +766,11 @@ export const taskTable = pgTable(
     }),
     startDate: timestamp("start_date", { mode: "date" }),
     dueDate: timestamp("due_date", { mode: "date" }),
+    // ASYGNUZ: hito del Gantt -- se dibuja como un rombo en dueDate en vez
+    // de una barra. No agrega una entidad nueva, es una tarea normal con
+    // esta bandera; startDate/dueDate se siguen usando igual (se fuerzan
+    // iguales al marcarla como hito).
+    isMilestone: boolean("is_milestone").default(false).notNull(),
     // ASYGNUZ: Service Desk fase 2 -- set solo cuando la tarea nació como
     // ticket enviado por un cliente del portal (client-portal), no cuando la
     // crea alguien del equipo. Null en todos los demás casos.
@@ -661,6 +792,30 @@ export const taskTable = pgTable(
     index("task_sprintId_idx").on(table.sprintId),
     index("task_requestedByClientId_idx").on(table.requestedByClientId),
     unique("task_project_number_unique").on(table.projectId, table.number),
+  ],
+);
+
+export const taskAssigneeTable = pgTable(
+  "task_assignee",
+  {
+    taskId: text("task_id")
+      .notNull()
+      .references(() => taskTable.id, {
+        onDelete: "cascade",
+        onUpdate: "cascade",
+      }),
+    userId: text("user_id")
+      .notNull()
+      .references(() => userTable.id, {
+        onDelete: "cascade",
+        onUpdate: "cascade",
+      }),
+    createdAt: timestamp("created_at", { mode: "date" }).defaultNow().notNull(),
+  },
+  (table) => [
+    primaryKey({ columns: [table.taskId, table.userId] }),
+    index("task_assignee_taskId_idx").on(table.taskId),
+    index("task_assignee_userId_idx").on(table.userId),
   ],
 );
 
@@ -1259,6 +1414,42 @@ export const commentTable = pgTable(
   (table) => [
     index("comment_task_idx").on(table.taskId),
     index("comment_user_idx").on(table.userId),
+  ],
+);
+
+// ASYGNUZ: reacción emoji de un usuario sobre un comentario. Los comentarios
+// se guardan de verdad como filas de `activity` (type="comment"), no en
+// `commentTable` de arriba (esa tabla quedó sin uso tras consolidar todo en
+// el feed de actividad) -- por eso esta referencia a activityTable, no a
+// commentTable.
+export const activityReactionTable = pgTable(
+  "activity_reaction",
+  {
+    id: text("id")
+      .$defaultFn(() => createId())
+      .primaryKey(),
+    activityId: text("activity_id")
+      .notNull()
+      .references(() => activityTable.id, {
+        onDelete: "cascade",
+        onUpdate: "cascade",
+      }),
+    userId: text("user_id")
+      .notNull()
+      .references(() => userTable.id, {
+        onDelete: "cascade",
+        onUpdate: "cascade",
+      }),
+    emoji: text("emoji").notNull(),
+    createdAt: timestamp("created_at", { mode: "date" }).defaultNow().notNull(),
+  },
+  (table) => [
+    index("activity_reaction_activity_idx").on(table.activityId),
+    unique("activity_reaction_activity_user_emoji_unique").on(
+      table.activityId,
+      table.userId,
+      table.emoji,
+    ),
   ],
 );
 

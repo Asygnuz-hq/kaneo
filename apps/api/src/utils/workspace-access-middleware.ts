@@ -20,9 +20,12 @@ type WorkspaceIdSource =
         | "comment"
         | "column"
         | "workflowRule"
+        | "taskTemplate"
+        | "automationRule"
         | "sprint"
         | "customField"
-        | "goal";
+        | "goal"
+        | "recurringTask";
       idKey: string;
     }
   | {
@@ -162,9 +165,12 @@ async function lookupAccessContext(
     | "comment"
     | "column"
     | "workflowRule"
+    | "taskTemplate"
+    | "automationRule"
     | "sprint"
     | "customField"
-    | "goal",
+    | "goal"
+    | "recurringTask",
   id: string,
 ): Promise<{ workspaceId: string; projectId: string | null } | null> {
   try {
@@ -327,6 +333,48 @@ async function lookupAccessContext(
           : null;
       }
 
+      case "taskTemplate": {
+        const [taskTemplate] = await db
+          .select({
+            workspaceId: schema.projectTable.workspaceId,
+            projectId: schema.projectTable.id,
+          })
+          .from(schema.taskTemplateTable)
+          .innerJoin(
+            schema.projectTable,
+            eq(schema.taskTemplateTable.projectId, schema.projectTable.id),
+          )
+          .where(eq(schema.taskTemplateTable.id, id))
+          .limit(1);
+        return taskTemplate
+          ? {
+              workspaceId: taskTemplate.workspaceId,
+              projectId: taskTemplate.projectId,
+            }
+          : null;
+      }
+
+      case "automationRule": {
+        const [automationRule] = await db
+          .select({
+            workspaceId: schema.projectTable.workspaceId,
+            projectId: schema.projectTable.id,
+          })
+          .from(schema.automationRuleTable)
+          .innerJoin(
+            schema.projectTable,
+            eq(schema.automationRuleTable.projectId, schema.projectTable.id),
+          )
+          .where(eq(schema.automationRuleTable.id, id))
+          .limit(1);
+        return automationRule
+          ? {
+              workspaceId: automationRule.workspaceId,
+              projectId: automationRule.projectId,
+            }
+          : null;
+      }
+
       case "sprint": {
         const [sprint] = await db
           .select({
@@ -373,6 +421,27 @@ async function lookupAccessContext(
           .limit(1);
         return goal
           ? { workspaceId: goal.workspaceId, projectId: goal.projectId }
+          : null;
+      }
+
+      case "recurringTask": {
+        const [recurringTask] = await db
+          .select({
+            workspaceId: schema.projectTable.workspaceId,
+            projectId: schema.projectTable.id,
+          })
+          .from(schema.recurringTaskTable)
+          .innerJoin(
+            schema.projectTable,
+            eq(schema.recurringTaskTable.projectId, schema.projectTable.id),
+          )
+          .where(eq(schema.recurringTaskTable.id, id))
+          .limit(1);
+        return recurringTask
+          ? {
+              workspaceId: recurringTask.workspaceId,
+              projectId: recurringTask.projectId,
+            }
           : null;
       }
 
@@ -469,6 +538,22 @@ export const workspaceAccess = {
       ],
     }),
 
+  fromTaskTemplate: (idKey = "id") =>
+    workspaceAccessMiddleware({
+      sources: [
+        { type: "lookup", resource: "taskTemplate", idKey },
+        { type: "query", key: "workspaceId" },
+      ],
+    }),
+
+  fromAutomationRule: (idKey = "id") =>
+    workspaceAccessMiddleware({
+      sources: [
+        { type: "lookup", resource: "automationRule", idKey },
+        { type: "query", key: "workspaceId" },
+      ],
+    }),
+
   // ASYGNUZ
   fromSprint: (idKey = "id") =>
     workspaceAccessMiddleware({
@@ -487,6 +572,14 @@ export const workspaceAccess = {
     workspaceAccessMiddleware({
       sources: [
         { type: "lookup", resource: "goal", idKey },
+        { type: "query", key: "workspaceId" },
+      ],
+    }),
+
+  fromRecurringTask: (idKey = "id") =>
+    workspaceAccessMiddleware({
+      sources: [
+        { type: "lookup", resource: "recurringTask", idKey },
         { type: "query", key: "workspaceId" },
       ],
     }),
