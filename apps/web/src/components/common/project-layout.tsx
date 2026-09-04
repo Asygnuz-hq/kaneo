@@ -2,6 +2,7 @@ import { useLocation, useNavigate } from "@tanstack/react-router";
 import {
   CalendarDays,
   CalendarRange,
+  Gauge,
   SquareKanban,
   SquircleDashed,
   Users,
@@ -33,7 +34,7 @@ type ProjectLayoutProps = {
   headerActions?: ReactNode;
   children: ReactNode;
   showViewSwitcher?: boolean;
-  activeView?: "backlog" | "board" | "calendar" | "gantt";
+  activeView?: "backlog" | "board" | "calendar" | "gantt" | "metrics";
 };
 
 export default function ProjectLayout({
@@ -61,7 +62,9 @@ export default function ProjectLayout({
         ? "calendar"
         : location.pathname.includes("/gantt")
           ? "gantt"
-          : "board");
+          : location.pathname.includes("/metrics")
+            ? "metrics"
+            : "board");
 
   const handleNavigateToBacklog = () => {
     navigate({
@@ -91,6 +94,13 @@ export default function ProjectLayout({
     });
   };
 
+  const handleNavigateToMetrics = () => {
+    navigate({
+      to: "/dashboard/workspace/$workspaceId/project/$projectId/metrics",
+      params: { workspaceId, projectId },
+    });
+  };
+
   // ASYGNUZ: Service Desk client management. Not part of the view switcher
   // above (that's for the four task views a project can be seen through) --
   // this is a settings-style destination, so it lives as its own icon
@@ -111,7 +121,9 @@ export default function ProjectLayout({
             ? "/dashboard/workspace/$workspaceId/project/$projectId/calendar"
             : resolvedView === "gantt"
               ? "/dashboard/workspace/$workspaceId/project/$projectId/gantt"
-              : "/dashboard/workspace/$workspaceId/project/$projectId/board",
+              : resolvedView === "metrics"
+                ? "/dashboard/workspace/$workspaceId/project/$projectId/metrics"
+                : "/dashboard/workspace/$workspaceId/project/$projectId/board",
       params: {
         workspaceId,
         projectId: nextProjectId,
@@ -166,6 +178,7 @@ export default function ProjectLayout({
                 onSelectBoard={handleNavigateToBoard}
                 onSelectCalendar={handleNavigateToCalendar}
                 onSelectGantt={handleNavigateToGantt}
+                onSelectMetrics={handleNavigateToMetrics}
                 onSelectProject={handleProjectSwitch}
                 onAddProject={() => setIsCreateProjectModalOpen(true)}
               />
@@ -220,6 +233,18 @@ export default function ProjectLayout({
                 >
                   <CalendarDays className="size-3.5" />
                   Gantt
+                </Button>
+                <Button
+                  variant={resolvedView === "metrics" ? "secondary" : "ghost"}
+                  size="xs"
+                  onClick={handleNavigateToMetrics}
+                  className={cn(
+                    "h-6 gap-1.5 rounded-md px-2 text-xs",
+                    resolvedView !== "metrics" && "text-muted-foreground",
+                  )}
+                >
+                  <Gauge className="size-3.5" />
+                  {t("navigation:page.projectMetrics")}
                 </Button>
               </div>
             )}

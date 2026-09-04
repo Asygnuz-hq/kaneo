@@ -1540,7 +1540,8 @@
 			"projectsTitle": "プロジェクト",
 			"settingsTitle": "設定",
 			"backToWorkspace": "ワークスペースに戻る",
-			"settingsWorkspaceTab": "ワークスペース"
+			"settingsWorkspaceTab": "ワークスペース",
+			"projectMetrics": "Metrics"
 		},
 		"projectSettings": {
 			"projectLabel": "プロジェクト"
@@ -2399,5 +2400,19 @@
 		"branding": {
 			"poweredBy": "Powered by"
 		}
+	},
+	"metrics": {
+		"byPriority": "By priority",
+		"byStatus": "By status",
+		"completedTasks": "Completed",
+		"empty": "Nothing to show yet",
+		"loading": "Loading...",
+		"openOfTotal": "{{open}} open / {{total}} total",
+		"overdueTasks": "Overdue",
+		"pageTitle": "Metrics · {{name}}",
+		"totalTasks": "Total tasks",
+		"unassigned": "Unassigned",
+		"workload": "Workload",
+		"workloadDescription": "Open and total tasks per assignee, busiest first."
 	}
 }

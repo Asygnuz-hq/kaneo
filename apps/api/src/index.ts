@@ -55,6 +55,7 @@ import { migrateGitHubIntegration } from "./plugins/github/migration";
 import project from "./project";
 import { getPublicProject } from "./project/controllers/get-public-project";
 import projectMember from "./project-member";
+import projectMetrics from "./project-metrics";
 import recurringTask from "./recurring-task";
 import { initializeScheduler, shutdownScheduler } from "./scheduler";
 import search from "./search";
@@ -594,6 +595,7 @@ export function createApp() {
   const billingApi = api.route("/billing", billing);
   const projectApi = api.route("/project", project);
   const projectMemberApi = api.route("/project-member", projectMember);
+  const projectMetricsApi = api.route("/project-metrics", projectMetrics);
   const recurringTaskApi = api.route("/recurring-task", recurringTask);
   const clientAccessApi = api.route("/client-access", clientAccess);
   // ASYGNUZ: client-auth/client-portal are plain Hono routers with their own
@@ -892,6 +894,7 @@ export function createApp() {
     notificationPreferencesApi,
     projectApi,
     projectMemberApi,
+    projectMetricsApi,
     publicProjectApi,
     recurringTaskApi,
     searchApi,
@@ -1019,6 +1022,7 @@ const {
   notificationPreferencesApi,
   projectApi,
   projectMemberApi,
+  projectMetricsApi,
   publicProjectApi,
   recurringTaskApi,
   searchApi,
@@ -1051,6 +1055,7 @@ export type AppType =
   | typeof configApi
   | typeof projectApi
   | typeof projectMemberApi
+  | typeof projectMetricsApi
   | typeof recurringTaskApi
   | typeof clientAccessApi
   | typeof customFieldApi
