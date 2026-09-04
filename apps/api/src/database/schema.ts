@@ -543,6 +543,69 @@ export const workflowRuleTable = pgTable(
   ],
 );
 
+// A project-level objective. Progress is never stored -- it's always
+// computed from the linked tasks in goal_task (completed / total), the same
+// "derive from task rows on read" choice project-metrics makes.
+export const goalTable = pgTable(
+  "goal",
+  {
+    id: text("id")
+      .$defaultFn(() => createId())
+      .primaryKey(),
+    projectId: text("project_id")
+      .notNull()
+      .references(() => projectTable.id, {
+        onDelete: "cascade",
+        onUpdate: "cascade",
+      }),
+    title: text("title").notNull(),
+    description: text("description").notNull().default(""),
+    // "on-track" | "at-risk" | "off-track" | "done" -- a human call on
+    // health, independent of the computed task-completion percentage.
+    status: text("status").notNull().default("on-track"),
+    targetDate: timestamp("target_date", { mode: "date" }),
+    position: integer("position").notNull().default(0),
+    createdAt: timestamp("created_at", { mode: "date" }).defaultNow().notNull(),
+    updatedAt: timestamp("updated_at", { mode: "date" })
+      .defaultNow()
+      .$onUpdate(() => new Date())
+      .notNull(),
+  },
+  (table) => [
+    index("goal_projectId_idx").on(table.projectId),
+    unique("goal_project_id_title_unique").on(table.projectId, table.title),
+  ],
+);
+
+// Many-to-many: a task can support more than one goal, a goal usually links
+// several tasks.
+export const goalTaskTable = pgTable(
+  "goal_task",
+  {
+    id: text("id")
+      .$defaultFn(() => createId())
+      .primaryKey(),
+    goalId: text("goal_id")
+      .notNull()
+      .references(() => goalTable.id, {
+        onDelete: "cascade",
+        onUpdate: "cascade",
+      }),
+    taskId: text("task_id")
+      .notNull()
+      .references(() => taskTable.id, {
+        onDelete: "cascade",
+        onUpdate: "cascade",
+      }),
+    createdAt: timestamp("created_at", { mode: "date" }).defaultNow().notNull(),
+  },
+  (table) => [
+    index("goal_task_goalId_idx").on(table.goalId),
+    index("goal_task_taskId_idx").on(table.taskId),
+    unique("goal_task_goal_id_task_id_unique").on(table.goalId, table.taskId),
+  ],
+);
+
 // A "blank task, already filled in, on a schedule" per project -- the
 // scheduler cron (scheduler/recurring-tasks.ts) scans for due rows and
 // creates a real task from the template, then advances nextRunAt.

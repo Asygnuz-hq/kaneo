@@ -40,6 +40,7 @@ import giteaIntegration, { handleGiteaWebhookRoute } from "./gitea-integration";
 import githubIntegration, {
   handleGithubWebhookRoute,
 } from "./github-integration";
+import goal from "./goal";
 import getInstanceStatus from "./instance/controllers/get-instance-status";
 import invitation from "./invitation";
 import label from "./label";
@@ -620,6 +621,7 @@ export function createApp() {
     githubIntegration,
   );
   const giteaIntegrationApi = api.route("/gitea-integration", giteaIntegration);
+  const goalApi = api.route("/goal", goal);
   const genericWebhookIntegrationApi = api.route(
     "/generic-webhook-integration",
     genericWebhookIntegration,
@@ -882,6 +884,7 @@ export function createApp() {
     genericWebhookIntegrationApi,
     githubIntegrationApi,
     giteaIntegrationApi,
+    goalApi,
     invitationApi,
     invitationPublicApi,
     labelApi,
@@ -1008,6 +1011,7 @@ const {
   genericWebhookIntegrationApi,
   githubIntegrationApi,
   giteaIntegrationApi,
+  goalApi,
   invitationApi,
   invitationPublicApi,
   labelApi,
@@ -1062,6 +1066,7 @@ export type AppType =
   | typeof searchApi
   | typeof githubIntegrationApi
   | typeof giteaIntegrationApi
+  | typeof goalApi
   | typeof genericWebhookIntegrationApi
   | typeof discordIntegrationApi
   | typeof slackIntegrationApi
