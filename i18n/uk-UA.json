@@ -1782,7 +1782,10 @@
 			"noDate": "Немає дати",
 			"customFields": "Custom fields",
 			"customFieldSaveError": "Failed to save value",
-			"customFieldUnset": "Not set"
+			"customFieldUnset": "Not set",
+			"milestone": "Milestone",
+			"milestoneError": "Failed to update the milestone flag",
+			"milestoneHint": "Mark as a milestone -- shows as a diamond on the Gantt instead of a bar"
 		},
 		"move": {
 			"title": "Перемістити завдання",
@@ -1926,7 +1929,8 @@
 			"undatedChildren_few": "+{{count}} subtasks without a date",
 			"undatedChildren_many": "+{{count}} subtasks without a date",
 			"undatedChildren_one": "+{{count}} subtask without a date",
-			"undatedChildren_other": "+{{count}} subtasks without a date"
+			"undatedChildren_other": "+{{count}} subtasks without a date",
+			"milestoneAriaLabel": "{{title}} (milestone): open or drag to move"
 		},
 		"delete": {
 			"title": "Видалити завдання?",

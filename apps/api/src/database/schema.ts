@@ -578,6 +578,11 @@ export const taskTable = pgTable(
     }),
     startDate: timestamp("start_date", { mode: "date" }),
     dueDate: timestamp("due_date", { mode: "date" }),
+    // ASYGNUZ: hito del Gantt -- se dibuja como un rombo en dueDate en vez
+    // de una barra. No agrega una entidad nueva, es una tarea normal con
+    // esta bandera; startDate/dueDate se siguen usando igual (se fuerzan
+    // iguales al marcarla como hito).
+    isMilestone: boolean("is_milestone").default(false).notNull(),
     // ASYGNUZ: Service Desk fase 2 -- set solo cuando la tarea nació como
     // ticket enviado por un cliente del portal (client-portal), no cuando la
     // crea alguien del equipo. Null en todos los demás casos.

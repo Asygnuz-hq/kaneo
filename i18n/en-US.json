@@ -1772,7 +1772,10 @@
 			"copyTaskBranch": "Copy task branch",
 			"start": "Start",
 			"startDate": "Start date",
-			"noDate": "No date"
+			"noDate": "No date",
+			"milestone": "Milestone",
+			"milestoneHint": "Mark as a milestone -- shows as a diamond on the Gantt instead of a bar",
+			"milestoneError": "Failed to update the milestone flag"
 		},
 		"move": {
 			"title": "Move task",
@@ -1927,7 +1930,8 @@
 				"quarter": "Quarter"
 			},
 			"undatedChildren_one": "+{{count}} subtask without a date",
-			"undatedChildren_other": "+{{count}} subtasks without a date"
+			"undatedChildren_other": "+{{count}} subtasks without a date",
+			"milestoneAriaLabel": "{{title}} (milestone): open or drag to move"
 		},
 		"delete": {
 			"title": "Delete Task?",

@@ -29,6 +29,7 @@ export const taskSchema = z
     }),
     startDate: nullableResponseTimestamp,
     dueDate: nullableResponseTimestamp,
+    isMilestone: z.boolean(),
     createdAt: responseTimestamp,
   })
   .openapi("Task");
@@ -85,6 +86,10 @@ export const boardTaskSchema = z
     }),
     startDate: nullableResponseTimestamp,
     dueDate: nullableResponseTimestamp,
+    isMilestone: z.boolean().openapi({
+      description:
+        "Renders as a diamond marker at dueDate in the Gantt view instead of a bar.",
+    }),
     position: z.number().nullable(),
     createdAt: responseTimestamp,
     userId: z.string().nullable(),
