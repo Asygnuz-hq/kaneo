@@ -38,6 +38,15 @@ export const taskWithAssigneeSchema = taskSchema
   .extend({
     assigneeName: z.string().nullable(),
     assigneeId: z.string().nullable(),
+    assignees: z
+      .array(
+        z.object({
+          id: z.string(),
+          name: z.string().nullable(),
+          image: z.string().nullable(),
+        }),
+      )
+      .optional(),
   })
   .openapi("TaskWithAssignee");
 
@@ -87,6 +96,15 @@ export const boardTaskSchema = z
     assigneeName: z.string().nullable(),
     assigneeId: z.string().nullable(),
     assigneeImage: z.string().nullable(),
+    assignees: z
+      .array(
+        z.object({
+          id: z.string(),
+          name: z.string().nullable(),
+          image: z.string().nullable(),
+        }),
+      )
+      .optional(),
     projectId: z.string(),
     labels: z.array(taskLabelSchema),
     externalLinks: z.array(taskExternalLinkSchema),
