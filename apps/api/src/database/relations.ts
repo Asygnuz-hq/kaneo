@@ -13,6 +13,7 @@ import {
   commentTable,
   customFieldTable,
   docPageTable,
+  externalContactTable,
   externalLinkTable,
   githubIntegrationTable,
   goalTable,
@@ -28,6 +29,7 @@ import {
   sprintTable,
   taskAssigneeTable,
   taskCustomFieldValueTable,
+  taskExternalAssigneeTable,
   taskRelationTable,
   taskReminderSentTable,
   taskTable,
@@ -317,6 +319,31 @@ export const taskAssigneeTableRelations = relations(
     user: one(userTable, {
       fields: [taskAssigneeTable.userId],
       references: [userTable.id],
+    }),
+  }),
+);
+
+export const externalContactTableRelations = relations(
+  externalContactTable,
+  ({ one, many }) => ({
+    workspace: one(workspaceTable, {
+      fields: [externalContactTable.workspaceId],
+      references: [workspaceTable.id],
+    }),
+    taskAssignments: many(taskExternalAssigneeTable),
+  }),
+);
+
+export const taskExternalAssigneeTableRelations = relations(
+  taskExternalAssigneeTable,
+  ({ one }) => ({
+    task: one(taskTable, {
+      fields: [taskExternalAssigneeTable.taskId],
+      references: [taskTable.id],
+    }),
+    externalContact: one(externalContactTable, {
+      fields: [taskExternalAssigneeTable.externalContactId],
+      references: [externalContactTable.id],
     }),
   }),
 );

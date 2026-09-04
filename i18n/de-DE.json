@@ -1975,7 +1975,10 @@
 		"popover": {
 			"assignee": {
 				"unassigned": "Nicht zugewiesen",
-				"updateError": "Aufgabenzuweisung konnte nicht aktualisiert werden"
+				"updateError": "Aufgabenzuweisung konnte nicht aktualisiert werden",
+				"addExternalContactPlaceholder": "Add external contact…",
+				"createExternalContactError": "Failed to create external contact",
+				"externalContacts": "External contacts"
 			},
 			"status": {
 				"updateError": "Aufgabenstatus konnte nicht aktualisiert werden"

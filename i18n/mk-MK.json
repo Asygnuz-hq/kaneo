@@ -1975,7 +1975,10 @@
 		"popover": {
 			"assignee": {
 				"unassigned": "Недоделен",
-				"updateError": "Неуспешно ажурирање на доделеност на задача"
+				"updateError": "Неуспешно ажурирање на доделеност на задача",
+				"addExternalContactPlaceholder": "Add external contact…",
+				"createExternalContactError": "Failed to create external contact",
+				"externalContacts": "External contacts"
 			},
 			"status": {
 				"updateError": "Неуспешно ажурирање на статус на задача"

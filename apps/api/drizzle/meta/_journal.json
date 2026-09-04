@@ -414,6 +414,13 @@
 			"when": 1788499996863,
 			"tag": "0058_flawless_master_mold",
 			"breakpoints": true
+		},
+		{
+			"idx": 59,
+			"version": "7",
+			"when": 1788559352714,
+			"tag": "0059_nappy_silverclaw",
+			"breakpoints": true
 		}
 	]
 }

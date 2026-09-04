@@ -35,6 +35,7 @@ import { waitForDatabase } from "./database/wait-for-database";
 import discordIntegration from "./discord-integration";
 import docPage from "./doc-page";
 import { eventContext } from "./events";
+import externalContact from "./external-contact";
 import externalLink from "./external-link";
 import genericWebhookIntegration from "./generic-webhook-integration";
 import giteaIntegration, { handleGiteaWebhookRoute } from "./gitea-integration";
@@ -642,6 +643,7 @@ export function createApp() {
   const taskRelationApi = api.route("/task-relation", taskRelation);
   const taskTemplateApi = api.route("/task-template", taskTemplate);
   const externalLinkApi = api.route("/external-link", externalLink);
+  const externalContactApi = api.route("/external-contact", externalContact);
   const workflowRuleApi = api.route("/workflow-rule", workflowRule);
   const automationApi = api.route("/automation", automation);
   const invitationApi = api.route("/invitation", invitation);
@@ -886,6 +888,7 @@ export function createApp() {
     discordIntegrationApi,
     docPageApi,
     externalLinkApi,
+    externalContactApi,
     genericWebhookIntegrationApi,
     githubIntegrationApi,
     giteaIntegrationApi,
@@ -1015,6 +1018,7 @@ const {
   discordIntegrationApi,
   docPageApi,
   externalLinkApi,
+  externalContactApi,
   genericWebhookIntegrationApi,
   githubIntegrationApi,
   giteaIntegrationApi,
@@ -1084,6 +1088,7 @@ export type AppType =
   | typeof taskRelationApi
   | typeof taskTemplateApi
   | typeof externalLinkApi
+  | typeof externalContactApi
   | typeof workflowRuleApi
   | typeof automationApi
   | typeof invitationApi

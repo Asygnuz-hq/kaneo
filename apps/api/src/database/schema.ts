@@ -819,6 +819,61 @@ export const taskAssigneeTable = pgTable(
   ],
 );
 
+// ASYGNUZ: alguien sin cuenta de Kaneo a quien igual se le puede identificar
+// como responsable de una tarea -- solo un nombre por workspace, para que
+// quien sí tiene acceso a Kaneo pueda ver "esto es de fulano" sin tener que
+// invitarlo ni que la persona use la herramienta. Convive con los
+// responsables reales (task_assignee), no los reemplaza.
+export const externalContactTable = pgTable(
+  "external_contact",
+  {
+    id: text("id")
+      .$defaultFn(() => createId())
+      .primaryKey(),
+    workspaceId: text("workspace_id")
+      .notNull()
+      .references(() => workspaceTable.id, {
+        onDelete: "cascade",
+        onUpdate: "cascade",
+      }),
+    name: text("name").notNull(),
+    createdAt: timestamp("created_at", { mode: "date" }).defaultNow().notNull(),
+  },
+  (table) => [
+    index("external_contact_workspaceId_idx").on(table.workspaceId),
+    unique("external_contact_workspace_id_name_unique").on(
+      table.workspaceId,
+      table.name,
+    ),
+  ],
+);
+
+export const taskExternalAssigneeTable = pgTable(
+  "task_external_assignee",
+  {
+    taskId: text("task_id")
+      .notNull()
+      .references(() => taskTable.id, {
+        onDelete: "cascade",
+        onUpdate: "cascade",
+      }),
+    externalContactId: text("external_contact_id")
+      .notNull()
+      .references(() => externalContactTable.id, {
+        onDelete: "cascade",
+        onUpdate: "cascade",
+      }),
+    createdAt: timestamp("created_at", { mode: "date" }).defaultNow().notNull(),
+  },
+  (table) => [
+    primaryKey({ columns: [table.taskId, table.externalContactId] }),
+    index("task_external_assignee_taskId_idx").on(table.taskId),
+    index("task_external_assignee_externalContactId_idx").on(
+      table.externalContactId,
+    ),
+  ],
+);
+
 export const billingReminderSentTable = pgTable(
   "billing_reminder_sent",
   {

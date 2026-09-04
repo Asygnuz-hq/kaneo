@@ -1975,7 +1975,10 @@
 		"popover": {
 			"assignee": {
 				"unassigned": "Χωρίς ανάθεση",
-				"updateError": "Αποτυχία ενημέρωσης ανάθεσης εργασίας"
+				"updateError": "Αποτυχία ενημέρωσης ανάθεσης εργασίας",
+				"addExternalContactPlaceholder": "Add external contact…",
+				"createExternalContactError": "Failed to create external contact",
+				"externalContacts": "External contacts"
 			},
 			"status": {
 				"updateError": "Αποτυχία ενημέρωσης κατάστασης εργασίας"

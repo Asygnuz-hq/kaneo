@@ -29,6 +29,7 @@ import {
 } from "../utils/validate-dates";
 import { workspaceAccess } from "../utils/workspace-access-middleware";
 import addTaskAssignee from "./controllers/add-assignee";
+import addTaskExternalAssignee from "./controllers/add-external-assignee";
 import bulkUpdateTasks from "./controllers/bulk-update-tasks";
 import createTask from "./controllers/create-task";
 import deleteTask from "./controllers/delete-task";
@@ -38,6 +39,7 @@ import getTasks from "./controllers/get-tasks";
 import importTasks from "./controllers/import-tasks";
 import moveTask from "./controllers/move-task";
 import removeTaskAssignee from "./controllers/remove-assignee";
+import removeTaskExternalAssignee from "./controllers/remove-external-assignee";
 import {
   requireBulkTaskEntitlement,
   requireBulkTaskPermission,
@@ -73,6 +75,7 @@ import {
   moveTaskBody,
   projectIdParam,
   taskAssigneeParam,
+  taskExternalAssigneeParam,
   taskParam,
   updateAssigneeBody,
   updateDescriptionBody,
@@ -512,6 +515,57 @@ const removeTaskAssigneeRoute = createRoute({
   },
 });
 
+// ASYGNUZ: marcar una tarea como responsabilidad de alguien sin cuenta de
+// Kaneo. Convive con los assignees reales (taskAssignee) -- ver el
+// comentario en database/schema.ts sobre externalContactTable.
+const addTaskExternalAssigneeRoute = createRoute({
+  method: "post",
+  operationId: "addTaskExternalAssignee",
+  path: "/external-assignee/{id}/{externalContactId}",
+  tags: ["Tasks"],
+  summary: "Add external assignee",
+  description: "Mark a task as belonging to a person without a Kaneo account.",
+  middleware: [
+    workspaceAccess.fromTask(),
+    requireWorkspacePermission({ task: ["assign"] }),
+    requireEntitlement,
+  ] as const,
+  request: {
+    params: taskExternalAssigneeParam,
+  },
+  responses: {
+    200: jsonResponse("The updated task", taskSchema),
+    400: errorResponse("Invalid body, or unknown task"),
+    403: errorResponse(
+      "No workspace access, or missing task:assign permission",
+    ),
+    404: errorResponse("External contact is not part of this task's workspace"),
+  },
+});
+
+const removeTaskExternalAssigneeRoute = createRoute({
+  method: "delete",
+  operationId: "removeTaskExternalAssignee",
+  path: "/external-assignee/{id}/{externalContactId}",
+  tags: ["Tasks"],
+  summary: "Remove external assignee",
+  description: "Unmark a task from an external contact.",
+  middleware: [
+    workspaceAccess.fromTask(),
+    requireWorkspacePermission({ task: ["assign"] }),
+  ] as const,
+  request: {
+    params: taskExternalAssigneeParam,
+  },
+  responses: {
+    200: jsonResponse("The updated task", taskSchema),
+    400: errorResponse("Invalid body, or unknown task"),
+    403: errorResponse(
+      "No workspace access, or missing task:assign permission",
+    ),
+  },
+});
+
 const updateTaskDueDateRoute = createRoute({
   method: "put",
   operationId: "updateTaskDueDate",
@@ -885,6 +939,24 @@ const task = apiRouter<BaseVariables & { workspaceId: string }>()
       taskId: id,
       userId,
       currentUserId,
+    });
+    return c.json(task, 200);
+  })
+  .openapi(addTaskExternalAssigneeRoute, async (c) => {
+    const { id, externalContactId } = c.req.valid("param");
+
+    const task = await addTaskExternalAssignee({
+      taskId: id,
+      externalContactId,
+    });
+    return c.json(task, 200);
+  })
+  .openapi(removeTaskExternalAssigneeRoute, async (c) => {
+    const { id, externalContactId } = c.req.valid("param");
+
+    const task = await removeTaskExternalAssignee({
+      taskId: id,
+      externalContactId,
     });
     return c.json(task, 200);
   })

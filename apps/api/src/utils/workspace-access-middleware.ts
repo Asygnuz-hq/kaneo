@@ -26,7 +26,8 @@ type WorkspaceIdSource =
         | "customField"
         | "docPage"
         | "goal"
-        | "recurringTask";
+        | "recurringTask"
+        | "externalContact";
       idKey: string;
     }
   | {
@@ -172,7 +173,8 @@ async function lookupAccessContext(
     | "customField"
     | "docPage"
     | "goal"
-    | "recurringTask",
+    | "recurringTask"
+    | "externalContact",
   id: string,
 ): Promise<{ workspaceId: string; projectId: string | null } | null> {
   try {
@@ -408,6 +410,19 @@ async function lookupAccessContext(
           : null;
       }
 
+      // ASYGNUZ: igual que customField -- un contacto externo es
+      // workspace-scoped, no de un proyecto en particular.
+      case "externalContact": {
+        const [externalContact] = await db
+          .select({ workspaceId: schema.externalContactTable.workspaceId })
+          .from(schema.externalContactTable)
+          .where(eq(schema.externalContactTable.id, id))
+          .limit(1);
+        return externalContact?.workspaceId
+          ? { workspaceId: externalContact.workspaceId, projectId: null }
+          : null;
+      }
+
       case "docPage": {
         const [docPage] = await db
           .select({
@@ -584,6 +599,14 @@ export const workspaceAccess = {
     workspaceAccessMiddleware({
       sources: [
         { type: "lookup", resource: "customField", idKey },
+        { type: "query", key: "workspaceId" },
+      ],
+    }),
+
+  fromExternalContact: (idKey = "id") =>
+    workspaceAccessMiddleware({
+      sources: [
+        { type: "lookup", resource: "externalContact", idKey },
         { type: "query", key: "workspaceId" },
       ],
     }),

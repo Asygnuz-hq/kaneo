@@ -1970,7 +1970,10 @@
 		"popover": {
 			"assignee": {
 				"unassigned": "Belum ditugaskan",
-				"updateError": "Gagal memperbarui penanggung jawab tugas"
+				"updateError": "Gagal memperbarui penanggung jawab tugas",
+				"addExternalContactPlaceholder": "Add external contact…",
+				"createExternalContactError": "Failed to create external contact",
+				"externalContacts": "External contacts"
 			},
 			"status": {
 				"updateError": "Gagal memperbarui status tugas"
