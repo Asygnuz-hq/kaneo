@@ -1337,6 +1337,85 @@
 			"deleteConfirmTitle": "Delete this recurring task?",
 			"deleteConfirmDescription": "Tasks \"{{name}}\" already created stay as they are. This can't be undone."
 		},
+		"taskTemplates": {
+			"pageTitle": "Task Templates",
+			"title": "Task templates",
+			"subtitle": "Reusable starting points for new tasks in this project.",
+			"loading": "Loading...",
+			"empty": "No task templates yet",
+			"emptyDescription": "Create one to skip retyping the same title, description, priority or labels every time.",
+			"createTemplate": "New template",
+			"editTemplate": "Edit template",
+			"formDescription": "These values pre-fill the create-task form when this template is picked.",
+			"nameLabel": "Template name",
+			"namePlaceholder": "e.g. Bug report",
+			"nameRequired": "Give the template a name",
+			"defaultTitleLabel": "Default title",
+			"defaultTitlePlaceholder": "Leave blank to type a title each time",
+			"defaultDescriptionLabel": "Default description",
+			"priorityLabel": "Priority",
+			"issueTypeLabel": "Type",
+			"labelsLabel": "Labels",
+			"saveTemplate": "Save template",
+			"createSuccess": "Task template created",
+			"updateSuccess": "Task template updated",
+			"deleteSuccess": "Task template deleted",
+			"saveError": "Failed to save the template",
+			"deleteError": "Failed to delete the template",
+			"deleteConfirmTitle": "Delete this template?",
+			"deleteConfirmDescription": "This won't affect tasks already created from \"{{name}}\". This can't be undone.",
+			"useTemplate": "Use template",
+			"noTemplate": "No template"
+		},
+		"automationRules": {
+			"title": "Automation rules",
+			"subtitle": "When something happens to a task in this project, do something else automatically.",
+			"description": "Rules run in the order they were created. An inactive rule is skipped.",
+			"loading": "Loading...",
+			"empty": "No automation rules yet",
+			"emptyDescription": "Create one to react automatically to changes on tasks in this project.",
+			"createRule": "New rule",
+			"editRule": "Edit rule",
+			"formDescription": "Choose what to watch for, and what should happen when it does.",
+			"nameLabel": "Name",
+			"namePlaceholder": "e.g. Move to Done when finished",
+			"nameRequired": "Give the rule a name",
+			"triggerLabel": "When...",
+			"actionLabel": "Then...",
+			"triggers": {
+				"task": {
+					"created": "A task is created",
+					"status_changed": "A task's status changes",
+					"priority_changed": "A task's priority changes",
+					"assignee_changed": "A task's assignee changes",
+					"label_assigned": "A label is assigned to a task"
+				}
+			},
+			"actions": {
+				"move_to_column": "Move the task to a column",
+				"set_priority": "Set the task's priority",
+				"assign_user": "Assign the task to",
+				"add_label": "Add a label to the task"
+			},
+			"toStatusLabel": "Only when moved to",
+			"toPriorityLabel": "Only when set to",
+			"triggerLabelLabel": "Only for label",
+			"anyValue": "Any",
+			"columnLabel": "Column",
+			"priorityLabel": "Priority",
+			"userLabel": "Assignee",
+			"actionLabelLabel": "Label",
+			"selectPlaceholder": "Select...",
+			"saveRule": "Save rule",
+			"summary": "IF {{trigger}} THEN {{action}}",
+			"createSuccess": "Automation rule created",
+			"updateSuccess": "Automation rule updated",
+			"deleteSuccess": "Automation rule deleted",
+			"saveError": "Failed to save the rule",
+			"deleteError": "Failed to delete the rule",
+			"deleteConfirmTitle": "Delete this rule?",
+			"deleteConfirmDescription": "This will stop \"{{name}}\" from running. This can't be undone."
+		},
 		"externalLinks": {
 			"resources": "Resources",
 			"issue": "Issue",
@@ -1629,6 +1708,9 @@
 				"mermaid": {
 					"renderFailed": "Mermaid diagram couldn't be rendered"
 				}
+			},
+			"reactions": {
+				"addReaction": "Add reaction"
 			}
 		}
 	},
@@ -1811,7 +1893,10 @@
 			"copyTaskBranch": "Copy task branch",
 			"start": "Start",
 			"startDate": "Start date",
-			"noDate": "No date"
+			"noDate": "No date",
+			"milestone": "Milestone",
+			"milestoneHint": "Mark as a milestone -- shows as a diamond on the Gantt instead of a bar",
+			"milestoneError": "Failed to update the milestone flag"
 		},
 		"move": {
 			"title": "Move task",
@@ -1966,7 +2051,8 @@
 				"quarter": "Quarter"
 			},
 			"undatedChildren_one": "+{{count}} subtask without a date",
-			"undatedChildren_other": "+{{count}} subtasks without a date"
+			"undatedChildren_other": "+{{count}} subtasks without a date",
+			"milestoneAriaLabel": "{{title}} (milestone): open or drag to move"
 		},
 		"delete": {
 			"title": "Delete Task?",

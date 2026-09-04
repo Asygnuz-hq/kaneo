@@ -916,6 +916,85 @@
 			"deleteConfirmTitle": "¿Eliminar esta tarea recurrente?",
 			"deleteConfirmDescription": "Las tareas ya creadas de \"{{name}}\" no se ven afectadas. No se puede deshacer."
 		},
+		"taskTemplates": {
+			"pageTitle": "Plantillas de tareas",
+			"title": "Plantillas de tareas",
+			"subtitle": "Puntos de partida reutilizables para tareas nuevas en este proyecto.",
+			"loading": "Cargando...",
+			"empty": "Todavía no hay plantillas de tareas",
+			"emptyDescription": "Crea una para no volver a escribir el mismo título, descripción, prioridad o etiquetas cada vez.",
+			"createTemplate": "Nueva plantilla",
+			"editTemplate": "Editar plantilla",
+			"formDescription": "Estos valores precargan el formulario de crear tarea cuando se elige esta plantilla.",
+			"nameLabel": "Nombre de la plantilla",
+			"namePlaceholder": "ej. Reporte de bug",
+			"nameRequired": "Ponle un nombre a la plantilla",
+			"defaultTitleLabel": "Título por defecto",
+			"defaultTitlePlaceholder": "Déjalo vacío para escribir un título cada vez",
+			"defaultDescriptionLabel": "Descripción por defecto",
+			"priorityLabel": "Prioridad",
+			"issueTypeLabel": "Tipo",
+			"labelsLabel": "Etiquetas",
+			"saveTemplate": "Guardar plantilla",
+			"createSuccess": "Plantilla de tarea creada",
+			"updateSuccess": "Plantilla de tarea actualizada",
+			"deleteSuccess": "Plantilla de tarea eliminada",
+			"saveError": "No se pudo guardar la plantilla",
+			"deleteError": "No se pudo eliminar la plantilla",
+			"deleteConfirmTitle": "¿Eliminar esta plantilla?",
+			"deleteConfirmDescription": "Esto no afecta las tareas ya creadas desde \"{{name}}\". No se puede deshacer.",
+			"useTemplate": "Usar plantilla",
+			"noTemplate": "Sin plantilla"
+		},
+		"automationRules": {
+			"title": "Reglas de automatización",
+			"subtitle": "Cuando algo le pase a una tarea de este proyecto, haz otra cosa automáticamente.",
+			"description": "Las reglas corren en el orden en que se crearon. Una regla inactiva se salta.",
+			"loading": "Cargando...",
+			"empty": "Todavía no hay reglas de automatización",
+			"emptyDescription": "Crea una para reaccionar automáticamente a cambios en las tareas de este proyecto.",
+			"createRule": "Nueva regla",
+			"editRule": "Editar regla",
+			"formDescription": "Elige qué vigilar y qué debe pasar cuando ocurra.",
+			"nameLabel": "Nombre",
+			"namePlaceholder": "ej. Mover a Terminado al finalizar",
+			"nameRequired": "Ponle un nombre a la regla",
+			"triggerLabel": "Cuando...",
+			"actionLabel": "Entonces...",
+			"triggers": {
+				"task": {
+					"created": "Se crea una tarea",
+					"status_changed": "Cambia el estado de una tarea",
+					"priority_changed": "Cambia la prioridad de una tarea",
+					"assignee_changed": "Cambia el responsable de una tarea",
+					"label_assigned": "Se asigna una etiqueta a una tarea"
+				}
+			},
+			"actions": {
+				"move_to_column": "Mover la tarea a una columna",
+				"set_priority": "Cambiar la prioridad de la tarea",
+				"assign_user": "Asignar la tarea a",
+				"add_label": "Agregar una etiqueta a la tarea"
+			},
+			"toStatusLabel": "Solo cuando se mueva a",
+			"toPriorityLabel": "Solo cuando se ponga en",
+			"triggerLabelLabel": "Solo para la etiqueta",
+			"anyValue": "Cualquiera",
+			"columnLabel": "Columna",
+			"priorityLabel": "Prioridad",
+			"userLabel": "Responsable",
+			"actionLabelLabel": "Etiqueta",
+			"selectPlaceholder": "Selecciona...",
+			"saveRule": "Guardar regla",
+			"summary": "SI {{trigger}} ENTONCES {{action}}",
+			"createSuccess": "Regla de automatización creada",
+			"updateSuccess": "Regla de automatización actualizada",
+			"deleteSuccess": "Regla de automatización eliminada",
+			"saveError": "No se pudo guardar la regla",
+			"deleteError": "No se pudo eliminar la regla",
+			"deleteConfirmTitle": "¿Eliminar esta regla?",
+			"deleteConfirmDescription": "Esto detendrá \"{{name}}\". No se puede deshacer."
+		},
 		"externalLinks": {
 			"resources": "Recursos",
 			"issue": "Issue",
@@ -1634,6 +1713,9 @@
 				"mermaid": {
 					"renderFailed": "No se pudo renderizar el diagrama de Mermaid"
 				}
+			},
+			"reactions": {
+				"addReaction": "Add reaction"
 			}
 		}
 	},
@@ -1816,7 +1898,10 @@
 			"copyTaskBranch": "Copiar la rama de la tarea",
 			"start": "Comenzar",
 			"startDate": "Fecha de inicio",
-			"noDate": "Sin fecha"
+			"noDate": "Sin fecha",
+			"milestone": "Milestone",
+			"milestoneError": "Failed to update the milestone flag",
+			"milestoneHint": "Mark as a milestone -- shows as a diamond on the Gantt instead of a bar"
 		},
 		"popover": {
 			"assignee": {
@@ -1948,7 +2033,8 @@
 			},
 			"undatedChildren_many": "+{{count}} subtasks without a date",
 			"undatedChildren_one": "+{{count}} subtask without a date",
-			"undatedChildren_other": "+{{count}} subtasks without a date"
+			"undatedChildren_other": "+{{count}} subtasks without a date",
+			"milestoneAriaLabel": "{{title}} (milestone): open or drag to move"
 		},
 		"delete": {
 			"title": "¿Eliminar tarea?",

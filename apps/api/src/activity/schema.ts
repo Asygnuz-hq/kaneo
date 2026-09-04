@@ -27,3 +27,16 @@ export const updateCommentBody = z.object({
 });
 
 export const deleteCommentBody = z.object({ activityId: z.string() });
+
+// ASYGNUZ: reacciones -- lista fija en vez de emoji libre, para no terminar
+// guardando cualquier string (incluido texto no-emoji) como "reacción".
+export const REACTION_EMOJIS = ["👍", "❤️", "😂", "🎉", "👀", "🚀"] as const;
+
+export const reactionEmojiSchema = z.enum(REACTION_EMOJIS).openapi({
+  description: "One of the fixed set of allowed reaction emoji.",
+});
+
+export const toggleReactionBody = z.object({
+  activityId: z.string(),
+  emoji: reactionEmojiSchema,
+});

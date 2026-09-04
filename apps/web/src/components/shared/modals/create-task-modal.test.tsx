@@ -72,6 +72,10 @@ vi.mock("@/hooks/queries/project/use-get-projects", () => ({
   }),
 }));
 
+vi.mock("@/hooks/queries/task-template/use-get-task-templates", () => ({
+  useGetTaskTemplates: () => ({ data: [] }),
+}));
+
 vi.mock("@/store/project", () => ({
   default: () => ({ project: null, setProject: vi.fn() }),
 }));

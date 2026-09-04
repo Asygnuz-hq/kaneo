@@ -20,6 +20,8 @@ type WorkspaceIdSource =
         | "comment"
         | "column"
         | "workflowRule"
+        | "taskTemplate"
+        | "automationRule"
         | "sprint"
         | "customField"
         | "recurringTask";
@@ -162,6 +164,8 @@ async function lookupAccessContext(
     | "comment"
     | "column"
     | "workflowRule"
+    | "taskTemplate"
+    | "automationRule"
     | "sprint"
     | "customField"
     | "recurringTask",
@@ -327,6 +331,48 @@ async function lookupAccessContext(
           : null;
       }
 
+      case "taskTemplate": {
+        const [taskTemplate] = await db
+          .select({
+            workspaceId: schema.projectTable.workspaceId,
+            projectId: schema.projectTable.id,
+          })
+          .from(schema.taskTemplateTable)
+          .innerJoin(
+            schema.projectTable,
+            eq(schema.taskTemplateTable.projectId, schema.projectTable.id),
+          )
+          .where(eq(schema.taskTemplateTable.id, id))
+          .limit(1);
+        return taskTemplate
+          ? {
+              workspaceId: taskTemplate.workspaceId,
+              projectId: taskTemplate.projectId,
+            }
+          : null;
+      }
+
+      case "automationRule": {
+        const [automationRule] = await db
+          .select({
+            workspaceId: schema.projectTable.workspaceId,
+            projectId: schema.projectTable.id,
+          })
+          .from(schema.automationRuleTable)
+          .innerJoin(
+            schema.projectTable,
+            eq(schema.automationRuleTable.projectId, schema.projectTable.id),
+          )
+          .where(eq(schema.automationRuleTable.id, id))
+          .limit(1);
+        return automationRule
+          ? {
+              workspaceId: automationRule.workspaceId,
+              projectId: automationRule.projectId,
+            }
+          : null;
+      }
+
       case "sprint": {
         const [sprint] = await db
           .select({
@@ -468,6 +514,22 @@ export const workspaceAccess = {
     workspaceAccessMiddleware({
       sources: [
         { type: "lookup", resource: "workflowRule", idKey },
+        { type: "query", key: "workspaceId" },
+      ],
+    }),
+
+  fromTaskTemplate: (idKey = "id") =>
+    workspaceAccessMiddleware({
+      sources: [
+        { type: "lookup", resource: "taskTemplate", idKey },
+        { type: "query", key: "workspaceId" },
+      ],
+    }),
+
+  fromAutomationRule: (idKey = "id") =>
+    workspaceAccessMiddleware({
+      sources: [
+        { type: "lookup", resource: "automationRule", idKey },
         { type: "query", key: "workspaceId" },
       ],
     }),

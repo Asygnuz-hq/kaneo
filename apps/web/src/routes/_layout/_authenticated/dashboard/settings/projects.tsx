@@ -5,7 +5,7 @@ import {
   useLocation,
   useNavigate,
 } from "@tanstack/react-router";
-import { Eye, GitBranch, Plug, Repeat, Settings } from "lucide-react";
+import { Eye, FileText, GitBranch, Plug, Repeat, Settings } from "lucide-react";
 import { useEffect } from "react";
 import { useTranslation } from "react-i18next";
 import SettingsSidebar from "@/components/SettingsSidebar";
@@ -65,6 +65,11 @@ function RouteComponent() {
       title: t("settings:recurringTasks.title"),
       icon: Repeat,
       segment: "recurring-tasks",
+    },
+    {
+      title: t("settings:taskTemplates.title"),
+      icon: FileText,
+      segment: "templates",
     },
   ];
   const { data: projects } = useGetProjects({

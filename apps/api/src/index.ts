@@ -17,6 +17,8 @@ import { HTTPException } from "hono/http-exception";
 import activity from "./activity";
 import { auth } from "./auth";
 import { organizationRoutes } from "./auth-openapi";
+import automation from "./automation";
+import { initializeAutomationEngine } from "./automation/engine";
 import billing from "./billing";
 import clientAccess from "./client-access";
 import clientAuth from "./client-auth";
@@ -60,6 +62,7 @@ import sprint from "./sprint";
 import { getPrivateObject } from "./storage/s3";
 import task from "./task";
 import taskRelation from "./task-relation";
+import taskTemplate from "./task-template";
 import telegramIntegration from "./telegram-integration";
 import timeEntry from "./time-entry";
 import user from "./user";
@@ -631,8 +634,10 @@ export function createApp() {
     telegramIntegration,
   );
   const taskRelationApi = api.route("/task-relation", taskRelation);
+  const taskTemplateApi = api.route("/task-template", taskTemplate);
   const externalLinkApi = api.route("/external-link", externalLink);
   const workflowRuleApi = api.route("/workflow-rule", workflowRule);
+  const automationApi = api.route("/automation", automation);
   const invitationApi = api.route("/invitation", invitation);
   const workspaceApi = api.route("/workspace", workspace);
   const userApi = api.route("/user", user);
@@ -891,10 +896,12 @@ export function createApp() {
     sprintApi,
     taskApi,
     taskRelationApi,
+    taskTemplateApi,
     telegramIntegrationApi,
     timeEntryApi,
     userApi,
     workflowRuleApi,
+    automationApi,
     workspaceApi,
     oauthApi,
   };
@@ -933,6 +940,7 @@ export async function runStartupTasks() {
   await seedDefaultWorkspaceRoles();
 
   initializePlugins();
+  initializeAutomationEngine();
   initializeScheduler();
   await initializeWebSocketAdapter();
 }
@@ -1014,10 +1022,12 @@ const {
   sprintApi,
   taskApi,
   taskRelationApi,
+  taskTemplateApi,
   telegramIntegrationApi,
   timeEntryApi,
   userApi,
   workflowRuleApi,
+  automationApi,
   workspaceApi,
   oauthApi,
 } = createdApp;
@@ -1057,8 +1067,10 @@ export type AppType =
   | typeof slackIntegrationApi
   | typeof telegramIntegrationApi
   | typeof taskRelationApi
+  | typeof taskTemplateApi
   | typeof externalLinkApi
   | typeof workflowRuleApi
+  | typeof automationApi
   | typeof invitationApi
   | typeof workspaceApi
   | typeof userApi
