@@ -1772,7 +1772,10 @@
 			"noDate": "Χωρίς ημερομηνία",
 			"customFields": "Custom fields",
 			"customFieldSaveError": "Failed to save value",
-			"customFieldUnset": "Not set"
+			"customFieldUnset": "Not set",
+			"milestone": "Milestone",
+			"milestoneError": "Failed to update the milestone flag",
+			"milestoneHint": "Mark as a milestone -- shows as a diamond on the Gantt instead of a bar"
 		},
 		"move": {
 			"title": "Μετακίνηση εργασίας",
