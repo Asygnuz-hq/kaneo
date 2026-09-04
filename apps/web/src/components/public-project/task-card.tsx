@@ -84,7 +84,26 @@ export function PublicTaskCard({
         {projectSlug}-{task.number}
       </div>
 
-      {task.assigneeName && (
+      {task.assignees && task.assignees.length > 0 ? (
+        <div className="flex items-center gap-1.5 mb-2 flex-wrap">
+          {task.assignees.map((assignee) => (
+            <div key={assignee.id} className="flex items-center gap-1.5">
+              <Avatar className="h-5 w-5">
+                <AvatarImage
+                  src={assignee.image ?? ""}
+                  alt={assignee.name ?? ""}
+                />
+                <AvatarFallback className="text-[10px] font-medium border border-border/30">
+                  {getInitials(assignee.name || "")}
+                </AvatarFallback>
+              </Avatar>
+              <span className="text-[10px] text-muted-foreground font-medium truncate">
+                {assignee.name}
+              </span>
+            </div>
+          ))}
+        </div>
+      ) : task.assigneeName ? (
         <div className="flex items-center gap-1.5 mb-2">
           <Avatar className="h-5 w-5">
             <AvatarImage
@@ -99,7 +118,7 @@ export function PublicTaskCard({
             {task.assigneeName}
           </span>
         </div>
-      )}
+      ) : null}
 
       <div className="mb-3">
         <h3

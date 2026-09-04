@@ -23,6 +23,7 @@ async function updateTask(
   userId?: string,
   currentUserId?: string,
   issueType?: string,
+  isMilestone?: boolean,
 ) {
   const [existingTask] = await db
     .select({
@@ -79,6 +80,7 @@ async function updateTask(
       position,
       userId: normalizedUserId ?? null,
       ...(issueType !== undefined ? { issueType } : {}),
+      ...(isMilestone !== undefined ? { isMilestone } : {}),
     })
     .where(eq(taskTable.id, id))
     .returning();

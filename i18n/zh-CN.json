@@ -12,7 +12,8 @@
 			"reset": "重置",
 			"filter": "筛选",
 			"clearAllFilters": "清除全部筛选",
-			"add": "Add"
+			"add": "Add",
+			"edit": "Edit"
 		},
 		"a11y": {
 			"toggleSidebar": "切换侧边栏"
@@ -1271,6 +1272,85 @@
 			"draft": "草稿",
 			"open": "打开"
 		},
+		"taskTemplates": {
+			"createSuccess": "Task template created",
+			"createTemplate": "New template",
+			"defaultDescriptionLabel": "Default description",
+			"defaultTitleLabel": "Default title",
+			"defaultTitlePlaceholder": "Leave blank to type a title each time",
+			"deleteConfirmDescription": "This won't affect tasks already created from \"{{name}}\". This can't be undone.",
+			"deleteConfirmTitle": "Delete this template?",
+			"deleteError": "Failed to delete the template",
+			"deleteSuccess": "Task template deleted",
+			"editTemplate": "Edit template",
+			"empty": "No task templates yet",
+			"emptyDescription": "Create one to skip retyping the same title, description, priority or labels every time.",
+			"formDescription": "These values pre-fill the create-task form when this template is picked.",
+			"issueTypeLabel": "Type",
+			"labelsLabel": "Labels",
+			"loading": "Loading...",
+			"nameLabel": "Template name",
+			"namePlaceholder": "e.g. Bug report",
+			"nameRequired": "Give the template a name",
+			"noTemplate": "No template",
+			"pageTitle": "Task Templates",
+			"priorityLabel": "Priority",
+			"saveError": "Failed to save the template",
+			"saveTemplate": "Save template",
+			"subtitle": "Reusable starting points for new tasks in this project.",
+			"title": "Task templates",
+			"updateSuccess": "Task template updated",
+			"useTemplate": "Use template"
+		},
+		"automationRules": {
+			"actionLabel": "Then...",
+			"actionLabelLabel": "Label",
+			"actions": {
+				"add_label": "Add a label to the task",
+				"assign_user": "Assign the task to",
+				"move_to_column": "Move the task to a column",
+				"set_priority": "Set the task's priority"
+			},
+			"anyValue": "Any",
+			"columnLabel": "Column",
+			"createRule": "New rule",
+			"createSuccess": "Automation rule created",
+			"deleteConfirmDescription": "This will stop \"{{name}}\" from running. This can't be undone.",
+			"deleteConfirmTitle": "Delete this rule?",
+			"deleteError": "Failed to delete the rule",
+			"deleteSuccess": "Automation rule deleted",
+			"description": "Rules run in the order they were created. An inactive rule is skipped.",
+			"editRule": "Edit rule",
+			"empty": "No automation rules yet",
+			"emptyDescription": "Create one to react automatically to changes on tasks in this project.",
+			"formDescription": "Choose what to watch for, and what should happen when it does.",
+			"loading": "Loading...",
+			"nameLabel": "Name",
+			"namePlaceholder": "e.g. Move to Done when finished",
+			"nameRequired": "Give the rule a name",
+			"priorityLabel": "Priority",
+			"saveError": "Failed to save the rule",
+			"saveRule": "Save rule",
+			"selectPlaceholder": "Select...",
+			"subtitle": "When something happens to a task in this project, do something else automatically.",
+			"summary": "IF {{trigger}} THEN {{action}}",
+			"title": "Automation rules",
+			"toPriorityLabel": "Only when set to",
+			"toStatusLabel": "Only when moved to",
+			"triggerLabel": "When...",
+			"triggerLabelLabel": "Only for label",
+			"triggers": {
+				"task": {
+					"assignee_changed": "A task's assignee changes",
+					"created": "A task is created",
+					"label_assigned": "A label is assigned to a task",
+					"priority_changed": "A task's priority changes",
+					"status_changed": "A task's status changes"
+				}
+			},
+			"updateSuccess": "Automation rule updated",
+			"userLabel": "Assignee"
+		},
 		"workspaceCustomFields": {
 			"addOption": "Add an option",
 			"cardDescription": "Manage fields that can be set on any task.",
@@ -1326,6 +1406,84 @@
 			"pageTitle": "Docs Settings",
 			"subtitle": "A per-project wiki your team can reference from any task.",
 			"title": "Docs"
+		},
+		"goals": {
+			"createGoal": "New goal",
+			"createSuccess": "Goal created",
+			"deleteConfirmDescription": "Linked tasks stay as they are -- only the goal \"{{title}}\" is removed. This can't be undone.",
+			"deleteConfirmTitle": "Delete this goal?",
+			"deleteError": "Failed to delete the goal",
+			"deleteSuccess": "Goal deleted",
+			"descriptionLabel": "Description",
+			"editGoal": "Edit goal",
+			"empty": "No goals yet",
+			"emptyDescription": "Create one and link tasks to it to track progress toward an objective.",
+			"formDescription": "Progress is computed from the tasks you link to this goal -- it isn't set by hand.",
+			"linkTask": "Add",
+			"loading": "Loading...",
+			"manageTasks": "Manage tasks",
+			"manageTasksDescription": "Link tasks from this project to track this goal's progress.",
+			"manageTasksTitle": "Tasks for \"{{title}}\"",
+			"noLinkedTasks": "No tasks linked yet",
+			"pageTitle": "Goals",
+			"saveError": "Failed to save the goal",
+			"saveGoal": "Save",
+			"selectTaskPlaceholder": "Select a task...",
+			"statuses": {
+				"at-risk": "At risk",
+				"done": "Done",
+				"off-track": "Off track",
+				"on-track": "On track"
+			},
+			"statusLabel": "Status",
+			"subtitle": "Objectives for this project, with progress tracked from the tasks linked to each one.",
+			"targetDate": "Target: {{date}}",
+			"targetDateLabel": "Target date",
+			"taskProgress": "{{completed}}/{{total}} tasks",
+			"title": "Goals",
+			"titleLabel": "Title",
+			"titlePlaceholder": "e.g. Ship v2",
+			"titleRequired": "Give the goal a title",
+			"unlink": "Remove",
+			"updateSuccess": "Goal updated"
+		},
+		"recurringTasks": {
+			"assigneeLabel": "Assignee",
+			"createSuccess": "Recurring task created",
+			"createTask": "New recurring task",
+			"deleteConfirmDescription": "Tasks \"{{name}}\" already created stay as they are. This can't be undone.",
+			"deleteConfirmTitle": "Delete this recurring task?",
+			"deleteError": "Failed to delete the recurring task",
+			"deleteSuccess": "Recurring task deleted",
+			"editTask": "Edit recurring task",
+			"empty": "No recurring tasks yet",
+			"emptyDescription": "Create one to have a task appear automatically on a schedule -- a weekly sync, a daily standup note, a monthly report.",
+			"formDescription": "A new task is created from this template every time it's due.",
+			"frequencies": {
+				"daily": "Daily",
+				"monthly": "Monthly",
+				"weekly": "Weekly"
+			},
+			"frequencyLabel": "Repeats",
+			"issueTypeLabel": "Type",
+			"labelsLabel": "Labels",
+			"loading": "Loading...",
+			"nameLabel": "Name",
+			"namePlaceholder": "e.g. Weekly sync",
+			"nameRequired": "Give it a name and a task title",
+			"nextRun": "Next: {{date}}",
+			"nextRunLabel": "Next run",
+			"pageTitle": "Recurring Tasks",
+			"priorityLabel": "Priority",
+			"saveError": "Failed to save the recurring task",
+			"saveTask": "Save",
+			"startAtLabel": "Starting",
+			"subtitle": "Tasks that create themselves on a schedule.",
+			"taskDescriptionLabel": "Task description",
+			"taskTitleLabel": "Task title",
+			"title": "Recurring tasks",
+			"unassigned": "Unassigned",
+			"updateSuccess": "Recurring task updated"
 		}
 	},
 	"navigation": {
@@ -1404,7 +1562,8 @@
 			"projectsTitle": "项目",
 			"settingsTitle": "设置",
 			"backToWorkspace": "返回工作区",
-			"settingsWorkspaceTab": "工作区"
+			"settingsWorkspaceTab": "工作区",
+			"projectMetrics": "Metrics"
 		},
 		"projectSettings": {
 			"projectLabel": "Project"
@@ -1607,6 +1766,9 @@
 				"mermaid": {
 					"renderFailed": "Mermaid diagram couldn't be rendered"
 				}
+			},
+			"reactions": {
+				"addReaction": "Add reaction"
 			}
 		}
 	},
@@ -1789,7 +1951,10 @@
 			"noDate": "无日期",
 			"customFields": "Custom fields",
 			"customFieldSaveError": "Failed to save value",
-			"customFieldUnset": "Not set"
+			"customFieldUnset": "Not set",
+			"milestone": "Milestone",
+			"milestoneError": "Failed to update the milestone flag",
+			"milestoneHint": "Mark as a milestone -- shows as a diamond on the Gantt instead of a bar"
 		},
 		"move": {
 			"title": "移动任务",
@@ -1930,7 +2095,8 @@
 				"quarter": "Quarter",
 				"week": "Week"
 			},
-			"undatedChildren_other": "+{{count}} subtasks without a date"
+			"undatedChildren_other": "+{{count}} subtasks without a date",
+			"milestoneAriaLabel": "{{title}} (milestone): open or drag to move"
 		},
 		"delete": {
 			"title": "删除任务？",
@@ -2256,5 +2422,19 @@
 		"branding": {
 			"poweredBy": "由以下技术提供支持"
 		}
+	},
+	"metrics": {
+		"byPriority": "By priority",
+		"byStatus": "By status",
+		"completedTasks": "Completed",
+		"empty": "Nothing to show yet",
+		"loading": "Loading...",
+		"openOfTotal": "{{open}} open / {{total}} total",
+		"overdueTasks": "Overdue",
+		"pageTitle": "Metrics · {{name}}",
+		"totalTasks": "Total tasks",
+		"unassigned": "Unassigned",
+		"workload": "Workload",
+		"workloadDescription": "Open and total tasks per assignee, busiest first."
 	}
 }

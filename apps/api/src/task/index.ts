@@ -28,6 +28,7 @@ import {
   validateDateRange,
 } from "../utils/validate-dates";
 import { workspaceAccess } from "../utils/workspace-access-middleware";
+import addTaskAssignee from "./controllers/add-assignee";
 import bulkUpdateTasks from "./controllers/bulk-update-tasks";
 import createTask from "./controllers/create-task";
 import deleteTask from "./controllers/delete-task";
@@ -36,6 +37,7 @@ import getTask from "./controllers/get-task";
 import getTasks from "./controllers/get-tasks";
 import importTasks from "./controllers/import-tasks";
 import moveTask from "./controllers/move-task";
+import removeTaskAssignee from "./controllers/remove-assignee";
 import {
   requireBulkTaskEntitlement,
   requireBulkTaskPermission,
@@ -45,6 +47,7 @@ import updateTask from "./controllers/update-task";
 import updateTaskAssignee from "./controllers/update-task-assignee";
 import updateTaskDescription from "./controllers/update-task-description";
 import updateTaskDueDate from "./controllers/update-task-due-date";
+import updateTaskMilestone from "./controllers/update-task-milestone";
 import updateTaskPriority from "./controllers/update-task-priority";
 import updateTaskSprint from "./controllers/update-task-sprint";
 import updateTaskStatus from "./controllers/update-task-status";
@@ -69,10 +72,12 @@ import {
   listTasksQuery,
   moveTaskBody,
   projectIdParam,
+  taskAssigneeParam,
   taskParam,
   updateAssigneeBody,
   updateDescriptionBody,
   updateDueDateBody,
+  updateMilestoneBody,
   updatePriorityBody,
   updateStatusBody,
   updateTaskBody,
@@ -368,6 +373,36 @@ const updateTaskPriorityRoute = createRoute({
   },
 });
 
+// ASYGNUZ: marca/desmarca una tarea como hito del Gantt.
+const updateTaskMilestoneRoute = createRoute({
+  method: "put",
+  operationId: "updateTaskMilestone",
+  path: "/milestone/{id}",
+  tags: ["Tasks"],
+  summary: "Update task milestone flag",
+  description:
+    "Mark or unmark a task as a Gantt milestone. Marking it forces startDate to equal dueDate, if the task already has a dueDate.",
+  middleware: [
+    workspaceAccess.fromTask(),
+    requireWorkspacePermission({ task: ["update"] }),
+    requireEntitlement,
+  ] as const,
+  request: {
+    params: taskParam,
+    body: {
+      required: true,
+      content: { "application/json": { schema: updateMilestoneBody } },
+    },
+  },
+  responses: {
+    200: jsonResponse("The updated task", taskSchema),
+    403: errorResponse(
+      "No workspace access, or missing task:update permission",
+    ),
+    404: errorResponse("Unknown task"),
+  },
+});
+
 // ASYGNUZ
 const updateTaskSprintRoute = createRoute({
   method: "put",
@@ -426,6 +461,54 @@ const updateTaskAssigneeRoute = createRoute({
       "No workspace access, or missing task:assign permission",
     ),
     404: errorResponse("Assignee is not a member of the workspace"),
+  },
+});
+
+const addTaskAssigneeRoute = createRoute({
+  method: "post",
+  operationId: "addTaskAssignee",
+  path: "/assignee/{id}/{userId}",
+  tags: ["Tasks"],
+  summary: "Add task assignee",
+  description: "Add an assignee to a task.",
+  middleware: [
+    workspaceAccess.fromTask(),
+    requireWorkspacePermission({ task: ["assign"] }),
+    requireEntitlement,
+  ] as const,
+  request: {
+    params: taskAssigneeParam,
+  },
+  responses: {
+    200: jsonResponse("The updated task", taskSchema),
+    400: errorResponse("Invalid body, or unknown task"),
+    403: errorResponse(
+      "No workspace access, or missing task:assign permission",
+    ),
+    404: errorResponse("Assignee is not a member of the workspace"),
+  },
+});
+
+const removeTaskAssigneeRoute = createRoute({
+  method: "delete",
+  operationId: "removeTaskAssignee",
+  path: "/assignee/{id}/{userId}",
+  tags: ["Tasks"],
+  summary: "Remove task assignee",
+  description: "Remove an assignee from a task.",
+  middleware: [
+    workspaceAccess.fromTask(),
+    requireWorkspacePermission({ task: ["assign"] }),
+  ] as const,
+  request: {
+    params: taskAssigneeParam,
+  },
+  responses: {
+    200: jsonResponse("The updated task", taskSchema),
+    400: errorResponse("Invalid body, or unknown task"),
+    403: errorResponse(
+      "No workspace access, or missing task:assign permission",
+    ),
   },
 });
 
@@ -685,6 +768,7 @@ const task = apiRouter<BaseVariables & { workspaceId: string }>()
       projectId,
       position,
       userId,
+      isMilestone,
     } = c.req.valid("json");
 
     const currentUserId = c.get("userId");
@@ -713,6 +797,7 @@ const task = apiRouter<BaseVariables & { workspaceId: string }>()
       userId,
       currentUserId,
       issueType,
+      isMilestone,
     );
 
     return c.json(task, 200);
@@ -759,6 +844,14 @@ const task = apiRouter<BaseVariables & { workspaceId: string }>()
 
     return c.json(task, 200);
   })
+  .openapi(updateTaskMilestoneRoute, async (c) => {
+    const { id } = c.req.valid("param");
+    const { isMilestone } = c.req.valid("json");
+
+    const task = await updateTaskMilestone({ id, isMilestone });
+
+    return c.json(task, 200);
+  })
   .openapi(updateTaskSprintRoute, async (c) => {
     const { id } = c.req.valid("param");
     const { sprintId } = c.req.valid("json");
@@ -775,6 +868,24 @@ const task = apiRouter<BaseVariables & { workspaceId: string }>()
 
     const task = await updateTaskAssignee({ id, userId, currentUserId });
 
+    return c.json(task, 200);
+  })
+  .openapi(addTaskAssigneeRoute, async (c) => {
+    const { id, userId } = c.req.valid("param");
+    const currentUserId = c.get("userId");
+
+    const task = await addTaskAssignee({ taskId: id, userId, currentUserId });
+    return c.json(task, 200);
+  })
+  .openapi(removeTaskAssigneeRoute, async (c) => {
+    const { id, userId } = c.req.valid("param");
+    const currentUserId = c.get("userId");
+
+    const task = await removeTaskAssignee({
+      taskId: id,
+      userId,
+      currentUserId,
+    });
     return c.json(task, 200);
   })
   .openapi(updateTaskDueDateRoute, async (c) => {

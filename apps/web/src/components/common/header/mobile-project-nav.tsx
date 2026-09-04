@@ -2,6 +2,7 @@ import {
   CalendarDays,
   CalendarRange,
   Check,
+  Gauge,
   Menu,
   Plus,
   SquareKanban,
@@ -20,11 +21,12 @@ import { cn } from "@/lib/cn";
 type MobileProjectNavProps = {
   workspaceId: string;
   projectId: string;
-  activeView: "backlog" | "board" | "calendar" | "gantt";
+  activeView: "backlog" | "board" | "calendar" | "gantt" | "metrics";
   onSelectBoard: () => void;
   onSelectBacklog: () => void;
   onSelectCalendar: () => void;
   onSelectGantt: () => void;
+  onSelectMetrics: () => void;
   onSelectProject: (projectId: string) => void;
   onAddProject: () => void;
 };
@@ -37,6 +39,7 @@ export default function MobileProjectNav({
   onSelectBacklog,
   onSelectCalendar,
   onSelectGantt,
+  onSelectMetrics,
   onSelectProject,
   onAddProject,
 }: MobileProjectNavProps) {
@@ -113,6 +116,19 @@ export default function MobileProjectNav({
               >
                 <CalendarDays className="size-3.5" />
                 Gantt
+              </button>
+              <button
+                type="button"
+                onClick={onSelectMetrics}
+                className={cn(
+                  "flex w-full items-center justify-center gap-1 whitespace-nowrap rounded-md border px-2 py-1.5 text-xs font-medium transition-colors",
+                  activeView === "metrics"
+                    ? "border-border bg-secondary text-foreground"
+                    : "border-transparent text-muted-foreground hover:bg-accent",
+                )}
+              >
+                <Gauge className="size-3.5" />
+                {t("navigation:page.projectMetrics")}
               </button>
             </div>
           </div>

@@ -1,9 +1,11 @@
 import { relations } from "drizzle-orm";
 import {
   accountTable,
+  activityReactionTable,
   activityTable,
   apikeyTable,
   assetTable,
+  automationRuleTable,
   clientAccountTable,
   clientProjectAccessTable,
   clientSessionTable,
@@ -13,18 +15,23 @@ import {
   docPageTable,
   externalLinkTable,
   githubIntegrationTable,
+  goalTable,
+  goalTaskTable,
   integrationTable,
   invitationTable,
   labelTable,
   notificationTable,
   projectMemberTable,
   projectTable,
+  recurringTaskTable,
   sessionTable,
   sprintTable,
+  taskAssigneeTable,
   taskCustomFieldValueTable,
   taskRelationTable,
   taskReminderSentTable,
   taskTable,
+  taskTemplateTable,
   teamMemberTable,
   teamTable,
   timeEntryTable,
@@ -45,6 +52,7 @@ export const userTableRelations = relations(userTable, ({ many, one }) => ({
   teamMembers: many(teamMemberTable),
   workspaceMemberships: many(workspaceUserTable),
   assignedTasks: many(taskTable),
+  taskAssignments: many(taskAssigneeTable),
   timeEntries: many(timeEntryTable),
   activities: many(activityTable),
   comments: many(commentTable),
@@ -114,6 +122,10 @@ export const projectTableRelations = relations(
     assets: many(assetTable),
     columns: many(columnTable),
     workflowRules: many(workflowRuleTable),
+    goals: many(goalTable),
+    recurringTasks: many(recurringTaskTable),
+    taskTemplates: many(taskTemplateTable),
+    automationRules: many(automationRuleTable),
     githubIntegration: many(githubIntegrationTable),
     integrations: many(integrationTable),
     notificationWorkspaceProjects: many(userNotificationWorkspaceProjectTable),
@@ -210,6 +222,59 @@ export const workflowRuleTableRelations = relations(
   }),
 );
 
+export const goalTableRelations = relations(goalTable, ({ one, many }) => ({
+  project: one(projectTable, {
+    fields: [goalTable.projectId],
+    references: [projectTable.id],
+  }),
+  goalTasks: many(goalTaskTable),
+}));
+
+export const goalTaskTableRelations = relations(goalTaskTable, ({ one }) => ({
+  goal: one(goalTable, {
+    fields: [goalTaskTable.goalId],
+    references: [goalTable.id],
+  }),
+  task: one(taskTable, {
+    fields: [goalTaskTable.taskId],
+    references: [taskTable.id],
+  }),
+}));
+
+export const recurringTaskTableRelations = relations(
+  recurringTaskTable,
+  ({ one }) => ({
+    project: one(projectTable, {
+      fields: [recurringTaskTable.projectId],
+      references: [projectTable.id],
+    }),
+    assignee: one(userTable, {
+      fields: [recurringTaskTable.assigneeId],
+      references: [userTable.id],
+    }),
+  }),
+);
+
+export const taskTemplateTableRelations = relations(
+  taskTemplateTable,
+  ({ one }) => ({
+    project: one(projectTable, {
+      fields: [taskTemplateTable.projectId],
+      references: [projectTable.id],
+    }),
+  }),
+);
+
+export const automationRuleTableRelations = relations(
+  automationRuleTable,
+  ({ one }) => ({
+    project: one(projectTable, {
+      fields: [automationRuleTable.projectId],
+      references: [projectTable.id],
+    }),
+  }),
+);
+
 export const taskTableRelations = relations(taskTable, ({ one, many }) => ({
   project: one(projectTable, {
     fields: [taskTable.projectId],
@@ -219,6 +284,7 @@ export const taskTableRelations = relations(taskTable, ({ one, many }) => ({
     fields: [taskTable.userId],
     references: [userTable.id],
   }),
+  assignees: many(taskAssigneeTable),
   column: one(columnTable, {
     fields: [taskTable.columnId],
     references: [columnTable.id],
@@ -233,12 +299,27 @@ export const taskTableRelations = relations(taskTable, ({ one, many }) => ({
   assets: many(assetTable),
   labels: many(labelTable),
   externalLinks: many(externalLinkTable),
+  goalTasks: many(goalTaskTable),
   sourceRelations: many(taskRelationTable, { relationName: "sourceTask" }),
   targetRelations: many(taskRelationTable, { relationName: "targetTask" }),
   remindersSent: many(taskReminderSentTable),
   // ASYGNUZ
   customFieldValues: many(taskCustomFieldValueTable),
 }));
+
+export const taskAssigneeTableRelations = relations(
+  taskAssigneeTable,
+  ({ one }) => ({
+    task: one(taskTable, {
+      fields: [taskAssigneeTable.taskId],
+      references: [taskTable.id],
+    }),
+    user: one(userTable, {
+      fields: [taskAssigneeTable.userId],
+      references: [userTable.id],
+    }),
+  }),
+);
 
 export const timeEntryTableRelations = relations(timeEntryTable, ({ one }) => ({
   task: one(taskTable, {
@@ -261,6 +342,20 @@ export const activityTableRelations = relations(activityTable, ({ one }) => ({
     references: [userTable.id],
   }),
 }));
+
+export const activityReactionTableRelations = relations(
+  activityReactionTable,
+  ({ one }) => ({
+    activity: one(activityTable, {
+      fields: [activityReactionTable.activityId],
+      references: [activityTable.id],
+    }),
+    user: one(userTable, {
+      fields: [activityReactionTable.userId],
+      references: [userTable.id],
+    }),
+  }),
+);
 
 export const assetTableRelations = relations(assetTable, ({ one }) => ({
   workspace: one(workspaceTable, {
