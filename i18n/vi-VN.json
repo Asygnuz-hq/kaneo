@@ -1970,7 +1970,10 @@
 		"popover": {
 			"assignee": {
 				"unassigned": "Chưa giao",
-				"updateError": "Không thể cập nhật người được giao công việc"
+				"updateError": "Không thể cập nhật người được giao công việc",
+				"addExternalContactPlaceholder": "Add external contact…",
+				"createExternalContactError": "Failed to create external contact",
+				"externalContacts": "External contacts"
 			},
 			"status": {
 				"updateError": "Không thể cập nhật trạng thái công việc"

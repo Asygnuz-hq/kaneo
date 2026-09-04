@@ -1980,7 +1980,10 @@
 		"popover": {
 			"assignee": {
 				"unassigned": "Non assigné",
-				"updateError": "Échec de la mise à jour de l'assigné de la tâche"
+				"updateError": "Échec de la mise à jour de l'assigné de la tâche",
+				"addExternalContactPlaceholder": "Add external contact…",
+				"createExternalContactError": "Failed to create external contact",
+				"externalContacts": "External contacts"
 			},
 			"status": {
 				"updateError": "Échec de la mise à jour du statut de la tâche"

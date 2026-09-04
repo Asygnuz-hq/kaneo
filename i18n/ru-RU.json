@@ -1993,7 +1993,10 @@
 		"popover": {
 			"assignee": {
 				"unassigned": "Не назначено",
-				"updateError": "Не удалось обновить исполнителя задачи"
+				"updateError": "Не удалось обновить исполнителя задачи",
+				"addExternalContactPlaceholder": "Add external contact…",
+				"createExternalContactError": "Failed to create external contact",
+				"externalContacts": "External contacts"
 			},
 			"status": {
 				"updateError": "Не удалось обновить статус задачи"

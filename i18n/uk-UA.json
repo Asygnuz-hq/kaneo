@@ -1985,7 +1985,10 @@
 		"popover": {
 			"assignee": {
 				"unassigned": "Не призначено",
-				"updateError": "Не вдалося оновити виконавця завдання"
+				"updateError": "Не вдалося оновити виконавця завдання",
+				"addExternalContactPlaceholder": "Add external contact…",
+				"createExternalContactError": "Failed to create external contact",
+				"externalContacts": "External contacts"
 			},
 			"status": {
 				"updateError": "Не вдалося оновити статус завдання"

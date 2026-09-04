@@ -1980,7 +1980,10 @@
 		"popover": {
 			"assignee": {
 				"unassigned": "Não atribuído",
-				"updateError": "Falha ao atualizar o responsável pela tarefa"
+				"updateError": "Falha ao atualizar o responsável pela tarefa",
+				"addExternalContactPlaceholder": "Add external contact…",
+				"createExternalContactError": "Failed to create external contact",
+				"externalContacts": "External contacts"
 			},
 			"status": {
 				"updateError": "Falha ao atualizar o status da tarefa"

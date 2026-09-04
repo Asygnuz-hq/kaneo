@@ -1975,7 +1975,10 @@
 		"popover": {
 			"assignee": {
 				"unassigned": "असाइन नहीं",
-				"updateError": "कार्य का सौंपा गया अपडेट करने में विफल"
+				"updateError": "कार्य का सौंपा गया अपडेट करने में विफल",
+				"addExternalContactPlaceholder": "Add external contact…",
+				"createExternalContactError": "Failed to create external contact",
+				"externalContacts": "External contacts"
 			},
 			"status": {
 				"updateError": "कार्य की स्थिति अपडेट करने में विफल"

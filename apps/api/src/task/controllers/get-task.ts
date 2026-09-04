@@ -1,7 +1,13 @@
 import { eq } from "drizzle-orm";
 import { HTTPException } from "hono/http-exception";
 import db from "../../database";
-import { taskAssigneeTable, taskTable, userTable } from "../../database/schema";
+import {
+  externalContactTable,
+  taskAssigneeTable,
+  taskExternalAssigneeTable,
+  taskTable,
+  userTable,
+} from "../../database/schema";
 
 async function getTask(taskId: string) {
   const task = await db
@@ -45,7 +51,19 @@ async function getTask(taskId: string) {
     .innerJoin(userTable, eq(taskAssigneeTable.userId, userTable.id))
     .where(eq(taskAssigneeTable.taskId, taskId));
 
-  return { ...task[0], assignees };
+  const externalAssignees = await db
+    .select({
+      id: externalContactTable.id,
+      name: externalContactTable.name,
+    })
+    .from(taskExternalAssigneeTable)
+    .innerJoin(
+      externalContactTable,
+      eq(taskExternalAssigneeTable.externalContactId, externalContactTable.id),
+    )
+    .where(eq(taskExternalAssigneeTable.taskId, taskId));
+
+  return { ...task[0], assignees, externalAssignees };
 }
 
 export default getTask;

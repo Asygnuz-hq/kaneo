@@ -1964,7 +1964,10 @@
 		"popover": {
 			"assignee": {
 				"unassigned": "Niet toegewezen",
-				"updateError": "Bijwerken toegewezen persoon mislukt"
+				"updateError": "Bijwerken toegewezen persoon mislukt",
+				"addExternalContactPlaceholder": "Add external contact…",
+				"createExternalContactError": "Failed to create external contact",
+				"externalContacts": "External contacts"
 			},
 			"status": {
 				"updateError": "Bijwerken taakstatus mislukt"

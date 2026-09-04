@@ -14,10 +14,12 @@ import db from "../../database";
 import {
   clientAccountTable,
   columnTable,
+  externalContactTable,
   externalLinkTable,
   labelTable,
   projectTable,
   taskAssigneeTable,
+  taskExternalAssigneeTable,
   taskTable,
   userTable,
 } from "../../database/schema";
@@ -239,6 +241,36 @@ async function getTasks(projectId: string, options: GetTasksOptions = {}) {
     });
   }
 
+  const externalAssigneesData =
+    taskIds.length > 0
+      ? await db
+          .select({
+            taskId: taskExternalAssigneeTable.taskId,
+            id: externalContactTable.id,
+            name: externalContactTable.name,
+          })
+          .from(taskExternalAssigneeTable)
+          .innerJoin(
+            externalContactTable,
+            eq(
+              taskExternalAssigneeTable.externalContactId,
+              externalContactTable.id,
+            ),
+          )
+          .where(inArray(taskExternalAssigneeTable.taskId, taskIds))
+      : [];
+
+  const taskExternalAssigneesMap = new Map<
+    string,
+    Array<{ id: string; name: string }>
+  >();
+  for (const ea of externalAssigneesData) {
+    if (!taskExternalAssigneesMap.has(ea.taskId)) {
+      taskExternalAssigneesMap.set(ea.taskId, []);
+    }
+    taskExternalAssigneesMap.get(ea.taskId)?.push({ id: ea.id, name: ea.name });
+  }
+
   const taskExternalLinksMap = new Map<
     string,
     Array<{
@@ -283,6 +315,7 @@ async function getTasks(projectId: string, options: GetTasksOptions = {}) {
       .map((task) => ({
         ...task,
         assignees: taskAssigneesMap.get(task.id) || [],
+        externalAssignees: taskExternalAssigneesMap.get(task.id) || [],
         labels: taskLabelsMap.get(task.id) || [],
         externalLinks: taskExternalLinksMap.get(task.id) || [],
       })),
@@ -293,6 +326,7 @@ async function getTasks(projectId: string, options: GetTasksOptions = {}) {
     .map((task) => ({
       ...task,
       assignees: taskAssigneesMap.get(task.id) || [],
+      externalAssignees: taskExternalAssigneesMap.get(task.id) || [],
       labels: taskLabelsMap.get(task.id) || [],
       externalLinks: taskExternalLinksMap.get(task.id) || [],
     }));
@@ -302,6 +336,7 @@ async function getTasks(projectId: string, options: GetTasksOptions = {}) {
     .map((task) => ({
       ...task,
       assignees: taskAssigneesMap.get(task.id) || [],
+      externalAssignees: taskExternalAssigneesMap.get(task.id) || [],
       labels: taskLabelsMap.get(task.id) || [],
       externalLinks: taskExternalLinksMap.get(task.id) || [],
     }));

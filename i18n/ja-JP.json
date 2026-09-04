@@ -1970,7 +1970,10 @@
 		"popover": {
 			"assignee": {
 				"unassigned": "未割り当て",
-				"updateError": "担当者の更新に失敗しました"
+				"updateError": "担当者の更新に失敗しました",
+				"addExternalContactPlaceholder": "Add external contact…",
+				"createExternalContactError": "Failed to create external contact",
+				"externalContacts": "External contacts"
 			},
 			"status": {
 				"updateError": "ステータスの更新に失敗しました"

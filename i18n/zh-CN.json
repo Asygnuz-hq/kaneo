@@ -1970,7 +1970,10 @@
 		"popover": {
 			"assignee": {
 				"unassigned": "未指派",
-				"updateError": "更新任务负责人失败"
+				"updateError": "更新任务负责人失败",
+				"addExternalContactPlaceholder": "Add external contact…",
+				"createExternalContactError": "Failed to create external contact",
+				"externalContacts": "External contacts"
 			},
 			"status": {
 				"updateError": "更新任务状态失败"

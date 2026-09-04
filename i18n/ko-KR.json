@@ -1970,7 +1970,10 @@
 		"popover": {
 			"assignee": {
 				"unassigned": "미할당",
-				"updateError": "작업 담당자 업데이트에 실패했습니다"
+				"updateError": "작업 담당자 업데이트에 실패했습니다",
+				"addExternalContactPlaceholder": "Add external contact…",
+				"createExternalContactError": "Failed to create external contact",
+				"externalContacts": "External contacts"
 			},
 			"status": {
 				"updateError": "작업 상태 업데이트에 실패했습니다"

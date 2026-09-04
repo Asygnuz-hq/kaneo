@@ -1969,7 +1969,10 @@
 		"popover": {
 			"assignee": {
 				"unassigned": "No asignada",
-				"updateError": "Error al actualizar el asignado a esta tarea"
+				"updateError": "Error al actualizar el asignado a esta tarea",
+				"addExternalContactPlaceholder": "Agregar contacto externo…",
+				"createExternalContactError": "Error al crear el contacto externo",
+				"externalContacts": "Contactos externos"
 			},
 			"status": {
 				"updateError": "Error al actualizar el estado de esta tarea"

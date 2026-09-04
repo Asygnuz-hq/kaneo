@@ -15,6 +15,11 @@ export const taskAssigneeParam = z.object({
   userId: z.string(),
 });
 
+export const taskExternalAssigneeParam = z.object({
+  id: z.string(),
+  externalContactId: z.string(),
+});
+
 export const projectIdParam = z.object({ projectId: z.string() });
 
 const priority = z.enum(VALID_PRIORITIES);

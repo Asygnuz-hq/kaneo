@@ -1975,7 +1975,10 @@
 		"popover": {
 			"assignee": {
 				"unassigned": "Atanmamış",
-				"updateError": "Talep atananı güncellenemedi"
+				"updateError": "Talep atananı güncellenemedi",
+				"addExternalContactPlaceholder": "Add external contact…",
+				"createExternalContactError": "Failed to create external contact",
+				"externalContacts": "External contacts"
 			},
 			"status": {
 				"updateError": "Talep durumu güncellenemedi"

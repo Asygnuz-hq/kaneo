@@ -34,6 +34,10 @@ export const taskSchema = z
   })
   .openapi("Task");
 
+const taskExternalAssigneeSchema = z
+  .object({ id: z.string(), name: z.string() })
+  .openapi("TaskExternalAssignee");
+
 export const taskWithAssigneeSchema = taskSchema
   .extend({
     assigneeName: z.string().nullable(),
@@ -47,6 +51,7 @@ export const taskWithAssigneeSchema = taskSchema
         }),
       )
       .optional(),
+    externalAssignees: z.array(taskExternalAssigneeSchema).optional(),
   })
   .openapi("TaskWithAssignee");
 
@@ -105,6 +110,7 @@ export const boardTaskSchema = z
         }),
       )
       .optional(),
+    externalAssignees: z.array(taskExternalAssigneeSchema).optional(),
     projectId: z.string(),
     labels: z.array(taskLabelSchema),
     externalLinks: z.array(taskExternalLinkSchema),

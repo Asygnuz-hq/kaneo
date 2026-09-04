@@ -35,6 +35,9 @@ type Task = {
   assigneeName: string | null;
   assigneeImage?: string | null;
   assignees?: { id: string; name: string | null; image: string | null }[];
+  // ASYGNUZ: personas sin cuenta de Kaneo marcadas como responsables de la
+  // tarea -- ver el comentario en apps/api/.../database/schema.ts.
+  externalAssignees?: { id: string; name: string }[];
   projectId: string;
   columnId?: string | null;
   labels?: TaskLabel[];
