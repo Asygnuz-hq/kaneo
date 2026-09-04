@@ -393,6 +393,13 @@
 			"when": 1788495609307,
 			"tag": "0055_fancy_kitty_pryde",
 			"breakpoints": true
+		},
+		{
+			"idx": 56,
+			"version": "7",
+			"when": 1788496636560,
+			"tag": "0056_cold_maddog",
+			"breakpoints": true
 		}
 	]
 }

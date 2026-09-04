@@ -20,6 +20,7 @@ import {
   notificationTable,
   projectMemberTable,
   projectTable,
+  recurringTaskTable,
   sessionTable,
   sprintTable,
   taskAssigneeTable,
@@ -118,6 +119,7 @@ export const projectTableRelations = relations(
     assets: many(assetTable),
     columns: many(columnTable),
     workflowRules: many(workflowRuleTable),
+    recurringTasks: many(recurringTaskTable),
     taskTemplates: many(taskTemplateTable),
     automationRules: many(automationRuleTable),
     githubIntegration: many(githubIntegrationTable),
@@ -211,6 +213,20 @@ export const workflowRuleTableRelations = relations(
     column: one(columnTable, {
       fields: [workflowRuleTable.columnId],
       references: [columnTable.id],
+    }),
+  }),
+);
+
+export const recurringTaskTableRelations = relations(
+  recurringTaskTable,
+  ({ one }) => ({
+    project: one(projectTable, {
+      fields: [recurringTaskTable.projectId],
+      references: [projectTable.id],
+    }),
+    assignee: one(userTable, {
+      fields: [recurringTaskTable.assigneeId],
+      references: [userTable.id],
     }),
   }),
 );

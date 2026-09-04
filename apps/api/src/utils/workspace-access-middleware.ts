@@ -23,7 +23,8 @@ type WorkspaceIdSource =
         | "taskTemplate"
         | "automationRule"
         | "sprint"
-        | "customField";
+        | "customField"
+        | "recurringTask";
       idKey: string;
     }
   | {
@@ -166,7 +167,8 @@ async function lookupAccessContext(
     | "taskTemplate"
     | "automationRule"
     | "sprint"
-    | "customField",
+    | "customField"
+    | "recurringTask",
   id: string,
 ): Promise<{ workspaceId: string; projectId: string | null } | null> {
   try {
@@ -402,6 +404,27 @@ async function lookupAccessContext(
           : null;
       }
 
+      case "recurringTask": {
+        const [recurringTask] = await db
+          .select({
+            workspaceId: schema.projectTable.workspaceId,
+            projectId: schema.projectTable.id,
+          })
+          .from(schema.recurringTaskTable)
+          .innerJoin(
+            schema.projectTable,
+            eq(schema.recurringTaskTable.projectId, schema.projectTable.id),
+          )
+          .where(eq(schema.recurringTaskTable.id, id))
+          .limit(1);
+        return recurringTask
+          ? {
+              workspaceId: recurringTask.workspaceId,
+              projectId: recurringTask.projectId,
+            }
+          : null;
+      }
+
       default:
         return null;
     }
@@ -521,6 +544,14 @@ export const workspaceAccess = {
     workspaceAccessMiddleware({
       sources: [
         { type: "lookup", resource: "customField", idKey },
+        { type: "query", key: "workspaceId" },
+      ],
+    }),
+
+  fromRecurringTask: (idKey = "id") =>
+    workspaceAccessMiddleware({
+      sources: [
+        { type: "lookup", resource: "recurringTask", idKey },
         { type: "query", key: "workspaceId" },
       ],
     }),

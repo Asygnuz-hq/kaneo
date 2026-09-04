@@ -12,8 +12,8 @@
 			"reset": "재설정",
 			"filter": "필터",
 			"clearAllFilters": "모든 필터 지우기",
-			"edit": "Edit",
-			"add": "Add"
+			"add": "Add",
+			"edit": "Edit"
 		},
 		"a11y": {
 			"toggleSidebar": "사이드바 토글"
@@ -1384,6 +1384,44 @@
 			},
 			"updateError": "Failed to update custom field",
 			"updateSuccess": "Custom field updated"
+		},
+		"recurringTasks": {
+			"assigneeLabel": "Assignee",
+			"createSuccess": "Recurring task created",
+			"createTask": "New recurring task",
+			"deleteConfirmDescription": "Tasks \"{{name}}\" already created stay as they are. This can't be undone.",
+			"deleteConfirmTitle": "Delete this recurring task?",
+			"deleteError": "Failed to delete the recurring task",
+			"deleteSuccess": "Recurring task deleted",
+			"editTask": "Edit recurring task",
+			"empty": "No recurring tasks yet",
+			"emptyDescription": "Create one to have a task appear automatically on a schedule -- a weekly sync, a daily standup note, a monthly report.",
+			"formDescription": "A new task is created from this template every time it's due.",
+			"frequencies": {
+				"daily": "Daily",
+				"monthly": "Monthly",
+				"weekly": "Weekly"
+			},
+			"frequencyLabel": "Repeats",
+			"issueTypeLabel": "Type",
+			"labelsLabel": "Labels",
+			"loading": "Loading...",
+			"nameLabel": "Name",
+			"namePlaceholder": "e.g. Weekly sync",
+			"nameRequired": "Give it a name and a task title",
+			"nextRun": "Next: {{date}}",
+			"nextRunLabel": "Next run",
+			"pageTitle": "Recurring Tasks",
+			"priorityLabel": "Priority",
+			"saveError": "Failed to save the recurring task",
+			"saveTask": "Save",
+			"startAtLabel": "Starting",
+			"subtitle": "Tasks that create themselves on a schedule.",
+			"taskDescriptionLabel": "Task description",
+			"taskTitleLabel": "Task title",
+			"title": "Recurring tasks",
+			"unassigned": "Unassigned",
+			"updateSuccess": "Recurring task updated"
 		}
 	},
 	"navigation": {

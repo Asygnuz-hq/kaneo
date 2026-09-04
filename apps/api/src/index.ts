@@ -54,6 +54,7 @@ import { migrateGitHubIntegration } from "./plugins/github/migration";
 import project from "./project";
 import { getPublicProject } from "./project/controllers/get-public-project";
 import projectMember from "./project-member";
+import recurringTask from "./recurring-task";
 import { initializeScheduler, shutdownScheduler } from "./scheduler";
 import search from "./search";
 import slackIntegration from "./slack-integration";
@@ -592,6 +593,7 @@ export function createApp() {
   const billingApi = api.route("/billing", billing);
   const projectApi = api.route("/project", project);
   const projectMemberApi = api.route("/project-member", projectMember);
+  const recurringTaskApi = api.route("/recurring-task", recurringTask);
   const clientAccessApi = api.route("/client-access", clientAccess);
   // ASYGNUZ: client-auth/client-portal are plain Hono routers with their own
   // client-session auth (see the api.use("*", ...) bypass above) -- not part
@@ -888,6 +890,7 @@ export function createApp() {
     projectApi,
     projectMemberApi,
     publicProjectApi,
+    recurringTaskApi,
     searchApi,
     slackIntegrationApi,
     sprintApi,
@@ -1013,6 +1016,7 @@ const {
   projectApi,
   projectMemberApi,
   publicProjectApi,
+  recurringTaskApi,
   searchApi,
   slackIntegrationApi,
   sprintApi,
@@ -1043,6 +1047,7 @@ export type AppType =
   | typeof configApi
   | typeof projectApi
   | typeof projectMemberApi
+  | typeof recurringTaskApi
   | typeof clientAccessApi
   | typeof customFieldApi
   | typeof sprintApi

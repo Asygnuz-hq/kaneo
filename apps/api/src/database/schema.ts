@@ -543,6 +543,53 @@ export const workflowRuleTable = pgTable(
   ],
 );
 
+// A "blank task, already filled in, on a schedule" per project -- the
+// scheduler cron (scheduler/recurring-tasks.ts) scans for due rows and
+// creates a real task from the template, then advances nextRunAt.
+export const recurringTaskTable = pgTable(
+  "recurring_task",
+  {
+    id: text("id")
+      .$defaultFn(() => createId())
+      .primaryKey(),
+    projectId: text("project_id")
+      .notNull()
+      .references(() => projectTable.id, {
+        onDelete: "cascade",
+        onUpdate: "cascade",
+      }),
+    name: text("name").notNull(),
+    title: text("title").notNull(),
+    description: text("description").notNull().default(""),
+    priority: text("priority").notNull().default("no-priority"),
+    issueType: text("issue_type").notNull().default("task"),
+    // JSON string array, same "generic text column" choice as
+    // task_template.label_ids.
+    labelIds: text("label_ids").notNull().default("[]"),
+    assigneeId: text("assignee_id").references(() => userTable.id, {
+      onDelete: "set null",
+      onUpdate: "cascade",
+    }),
+    frequency: text("frequency").notNull(), // "daily" | "weekly" | "monthly"
+    isActive: boolean("is_active").notNull().default(true),
+    nextRunAt: timestamp("next_run_at", { mode: "date" }).notNull(),
+    lastRunAt: timestamp("last_run_at", { mode: "date" }),
+    createdAt: timestamp("created_at", { mode: "date" }).defaultNow().notNull(),
+    updatedAt: timestamp("updated_at", { mode: "date" })
+      .defaultNow()
+      .$onUpdate(() => new Date())
+      .notNull(),
+  },
+  (table) => [
+    index("recurring_task_projectId_idx").on(table.projectId),
+    index("recurring_task_nextRunAt_idx").on(table.nextRunAt),
+    unique("recurring_task_project_id_name_unique").on(
+      table.projectId,
+      table.name,
+    ),
+  ],
+);
+
 // A reusable "blank task, already filled in" per project -- picked from the
 // create-task modal to skip retyping the same title/description/priority/
 // labels combo every time (e.g. "Bug report", "Weekly sync").
