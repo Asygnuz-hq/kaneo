@@ -1590,6 +1590,9 @@
 				"mermaid": {
 					"renderFailed": "Mermaid diagram couldn't be rendered"
 				}
+			},
+			"reactions": {
+				"addReaction": "Add reaction"
 			}
 		}
 	},

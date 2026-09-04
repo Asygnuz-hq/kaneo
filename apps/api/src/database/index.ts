@@ -3,6 +3,7 @@ import { drizzle } from "drizzle-orm/node-postgres";
 import { Pool } from "pg";
 import {
   accountTableRelations,
+  activityReactionTableRelations,
   activityTableRelations,
   apikeyTableRelations,
   assetTableRelations,
@@ -43,6 +44,7 @@ import {
 import { resolveDatabaseConnectionString } from "./resolve-database-url";
 import {
   accountTable,
+  activityReactionTable,
   activityTable,
   apikeyTable,
   assetTable,
@@ -94,6 +96,7 @@ config();
 export const schema = {
   accountTable,
   assetTable,
+  activityReactionTable,
   activityTable,
   apikeyTable,
   billingReminderSentTable,
@@ -139,6 +142,7 @@ export const schema = {
   workspaceUserTable,
   accountTableRelations,
   assetTableRelations,
+  activityReactionTableRelations,
   activityTableRelations,
   apikeyTableRelations,
   clientAccountTableRelations,

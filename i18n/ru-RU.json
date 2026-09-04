@@ -1606,6 +1606,9 @@
 				"mermaid": {
 					"renderFailed": "Не удалось отобразить диаграмму Mermaid"
 				}
+			},
+			"reactions": {
+				"addReaction": "Add reaction"
 			}
 		},
 		"moved": "переместил задачу из «{{from}}» в «{{to}}»",

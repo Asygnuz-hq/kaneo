@@ -1595,6 +1595,9 @@
 				"mermaid": {
 					"renderFailed": "Impossible d'afficher le diagramme Mermaid"
 				}
+			},
+			"reactions": {
+				"addReaction": "Add reaction"
 			}
 		}
 	},

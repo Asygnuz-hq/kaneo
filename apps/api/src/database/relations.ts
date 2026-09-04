@@ -1,6 +1,7 @@
 import { relations } from "drizzle-orm";
 import {
   accountTable,
+  activityReactionTable,
   activityTable,
   apikeyTable,
   assetTable,
@@ -276,6 +277,20 @@ export const activityTableRelations = relations(activityTable, ({ one }) => ({
     references: [userTable.id],
   }),
 }));
+
+export const activityReactionTableRelations = relations(
+  activityReactionTable,
+  ({ one }) => ({
+    activity: one(activityTable, {
+      fields: [activityReactionTable.activityId],
+      references: [activityTable.id],
+    }),
+    user: one(userTable, {
+      fields: [activityReactionTable.userId],
+      references: [userTable.id],
+    }),
+  }),
+);
 
 export const assetTableRelations = relations(assetTable, ({ one }) => ({
   workspace: one(workspaceTable, {

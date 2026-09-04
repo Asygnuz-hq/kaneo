@@ -1590,6 +1590,9 @@
 				"mermaid": {
 					"renderFailed": "Mermaid-diagram kon niet worden weergegeven"
 				}
+			},
+			"reactions": {
+				"addReaction": "Add reaction"
 			}
 		}
 	},

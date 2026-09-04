@@ -1229,6 +1229,42 @@ export const commentTable = pgTable(
   ],
 );
 
+// ASYGNUZ: reacción emoji de un usuario sobre un comentario. Los comentarios
+// se guardan de verdad como filas de `activity` (type="comment"), no en
+// `commentTable` de arriba (esa tabla quedó sin uso tras consolidar todo en
+// el feed de actividad) -- por eso esta referencia a activityTable, no a
+// commentTable.
+export const activityReactionTable = pgTable(
+  "activity_reaction",
+  {
+    id: text("id")
+      .$defaultFn(() => createId())
+      .primaryKey(),
+    activityId: text("activity_id")
+      .notNull()
+      .references(() => activityTable.id, {
+        onDelete: "cascade",
+        onUpdate: "cascade",
+      }),
+    userId: text("user_id")
+      .notNull()
+      .references(() => userTable.id, {
+        onDelete: "cascade",
+        onUpdate: "cascade",
+      }),
+    emoji: text("emoji").notNull(),
+    createdAt: timestamp("created_at", { mode: "date" }).defaultNow().notNull(),
+  },
+  (table) => [
+    index("activity_reaction_activity_idx").on(table.activityId),
+    unique("activity_reaction_activity_user_emoji_unique").on(
+      table.activityId,
+      table.userId,
+      table.emoji,
+    ),
+  ],
+);
+
 export const taskRelationTable = pgTable(
   "task_relation",
   {

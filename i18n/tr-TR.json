@@ -1590,6 +1590,9 @@
 				"mermaid": {
 					"renderFailed": "Mermaid diyagramı oluşturulamadı"
 				}
+			},
+			"reactions": {
+				"addReaction": "Add reaction"
 			}
 		}
 	},
