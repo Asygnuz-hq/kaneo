@@ -27,6 +27,7 @@ type ActivityItem = {
   externalUserAvatar?: string | null;
   externalSource?: string | null;
   externalUrl?: string | null;
+  reactions?: { emoji: string; count: number; reactedByMe: boolean }[];
 };
 
 function getEventDataRecord(
@@ -460,6 +461,7 @@ function Activity({
             createdAt={activity.createdAt}
             externalSource={activity.externalSource}
             externalUrl={activity.externalUrl}
+            reactions={activity.reactions}
           />
         </TimelineContent>
       </TimelineItem>

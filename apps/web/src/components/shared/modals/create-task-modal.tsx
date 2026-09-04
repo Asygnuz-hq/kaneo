@@ -37,12 +37,20 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import useCreateLabel from "@/hooks/mutations/label/use-create-label";
 import useCreateTask from "@/hooks/mutations/task/use-create-task";
 import { useDeleteTask } from "@/hooks/mutations/task/use-delete-task";
 import { useUpdateTask } from "@/hooks/mutations/task/use-update-task";
 import useGetLabelsByWorkspace from "@/hooks/queries/label/use-get-labels-by-workspace";
 import useGetProjects from "@/hooks/queries/project/use-get-projects";
+import { useGetTaskTemplates } from "@/hooks/queries/task-template/use-get-task-templates";
 import useActiveWorkspace from "@/hooks/queries/workspace/use-active-workspace";
 import { useGetActiveWorkspaceUsers } from "@/hooks/queries/workspace-users/use-get-active-workspace-users";
 import { useWorkspacePermission } from "@/hooks/use-workspace-permission";
@@ -215,6 +223,28 @@ function CreateTaskModal({
     ? project
     : (workspaceProjects?.find((p) => p.id === resolvedProjectId) ?? null);
 
+  const { data: taskTemplates } = useGetTaskTemplates(resolvedProjectId);
+  const [appliedTemplateId, setAppliedTemplateId] = useState("");
+
+  const applyTemplate = (templateId: string | null) => {
+    if (!templateId) return;
+    setAppliedTemplateId(templateId);
+    const template = taskTemplates?.find((t) => t.id === templateId);
+    if (!template) return;
+
+    if (template.title) setTitle(template.title);
+    if (template.description) setDescription(template.description);
+    setPriority(template.priority as Priority);
+    setIssueType(template.issueType as IssueType);
+    if (template.labelIds.length > 0) {
+      const templateLabels = workspaceLabels.filter(
+        (label): label is typeof label & { workspaceId: string } =>
+          !!label.workspaceId && template.labelIds.includes(label.id),
+      );
+      setLabels(templateLabels);
+    }
+  };
+
   const searchInputRef = useRef<HTMLInputElement>(null);
   const draftCreationPromiseRef = useRef<Promise<Task> | null>(null);
   const didSubmitRef = useRef(false);
@@ -257,6 +287,7 @@ function CreateTaskModal({
     setDueDate(undefined);
     setCreateMore(false);
     setLabels([]);
+    setAppliedTemplateId("");
     setLabelsStep("select");
     setSearchValue("");
     setSelectedColor("gray");
@@ -453,6 +484,7 @@ function CreateTaskModal({
         setStartDate(undefined);
         setDueDate(undefined);
         setLabels([]);
+        setAppliedTemplateId("");
         setLabelsStep("select");
         setSearchValue("");
         setSelectedColor("gray");
@@ -651,6 +683,26 @@ function CreateTaskModal({
           className="flex flex-col flex-1 min-h-0 space-y-6"
         >
           <div className="flex-1 min-h-0 overflow-y-auto space-y-6 px-6">
+            {taskTemplates && taskTemplates.length > 0 && (
+              <Select value={appliedTemplateId} onValueChange={applyTemplate}>
+                <SelectTrigger className="w-56 h-8 text-sm">
+                  <SelectValue
+                    placeholder={t("settings:taskTemplates.useTemplate")}
+                  >
+                    {taskTemplates.find((t2) => t2.id === appliedTemplateId)
+                      ?.name ?? t("settings:taskTemplates.useTemplate")}
+                  </SelectValue>
+                </SelectTrigger>
+                <SelectContent>
+                  {taskTemplates.map((template) => (
+                    <SelectItem key={template.id} value={template.id}>
+                      {template.name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            )}
+
             <Input
               unstyled
               value={title}

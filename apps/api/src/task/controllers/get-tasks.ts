@@ -17,6 +17,7 @@ import {
   externalLinkTable,
   labelTable,
   projectTable,
+  taskAssigneeTable,
   taskTable,
   userTable,
 } from "../../database/schema";
@@ -137,6 +138,7 @@ async function getTasks(projectId: string, options: GetTasksOptions = {}) {
     sprintId: taskTable.sprintId,
     startDate: taskTable.startDate,
     dueDate: taskTable.dueDate,
+    isMilestone: taskTable.isMilestone,
     position: taskTable.position,
     createdAt: taskTable.createdAt,
     userId: taskTable.userId,
@@ -208,6 +210,35 @@ async function getTasks(projectId: string, options: GetTasksOptions = {}) {
     }
   }
 
+  const assigneesData =
+    taskIds.length > 0
+      ? await db
+          .select({
+            taskId: taskAssigneeTable.taskId,
+            id: userTable.id,
+            name: userTable.name,
+            image: userTable.image,
+          })
+          .from(taskAssigneeTable)
+          .innerJoin(userTable, eq(taskAssigneeTable.userId, userTable.id))
+          .where(inArray(taskAssigneeTable.taskId, taskIds))
+      : [];
+
+  const taskAssigneesMap = new Map<
+    string,
+    Array<{ id: string; name: string | null; image: string | null }>
+  >();
+  for (const a of assigneesData) {
+    if (!taskAssigneesMap.has(a.taskId)) {
+      taskAssigneesMap.set(a.taskId, []);
+    }
+    taskAssigneesMap.get(a.taskId)?.push({
+      id: a.id,
+      name: a.name,
+      image: a.image,
+    });
+  }
+
   const taskExternalLinksMap = new Map<
     string,
     Array<{
@@ -251,6 +282,7 @@ async function getTasks(projectId: string, options: GetTasksOptions = {}) {
       .filter((task) => task.status === column.slug)
       .map((task) => ({
         ...task,
+        assignees: taskAssigneesMap.get(task.id) || [],
         labels: taskLabelsMap.get(task.id) || [],
         externalLinks: taskExternalLinksMap.get(task.id) || [],
       })),
@@ -260,6 +292,7 @@ async function getTasks(projectId: string, options: GetTasksOptions = {}) {
     .filter((task) => task.status === "archived")
     .map((task) => ({
       ...task,
+      assignees: taskAssigneesMap.get(task.id) || [],
       labels: taskLabelsMap.get(task.id) || [],
       externalLinks: taskExternalLinksMap.get(task.id) || [],
     }));
@@ -268,6 +301,7 @@ async function getTasks(projectId: string, options: GetTasksOptions = {}) {
     .filter((task) => task.status === "planned")
     .map((task) => ({
       ...task,
+      assignees: taskAssigneesMap.get(task.id) || [],
       labels: taskLabelsMap.get(task.id) || [],
       externalLinks: taskExternalLinksMap.get(task.id) || [],
     }));
