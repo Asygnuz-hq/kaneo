@@ -23,6 +23,7 @@ type GanttTaskBarProps = {
   };
   pixelsPerDay: number;
   isMobile?: boolean;
+  isCritical?: boolean;
   // 0-100. No hay un campo de "progreso" en el modelo de datos; se deriva
   // de en qué columna vive la tarea (ver columnProgress en gantt.tsx).
   progressPct?: number;
@@ -78,6 +79,7 @@ export function GanttTaskBar({
   timeline,
   pixelsPerDay,
   isMobile = false,
+  isCritical = false,
   progressPct = 0,
   onOpenTask,
 }: GanttTaskBarProps) {
@@ -304,6 +306,57 @@ export function GanttTaskBar({
     return null;
   }
 
+  // ASYGNUZ: un hito no tiene duracion que redimensionar -- se dibuja como
+  // un rombo en su unico dia en vez de una barra, y solo se puede mover
+  // (arrastrar), no estirar. Reusa el mismo handleMovePointerDown: con
+  // duracion 0 (startDate === dueDate) ya mueve ambas fechas juntas sin
+  // ningun cambio.
+  if (task.isMilestone) {
+    return (
+      <div
+        className="pointer-events-none absolute inset-0 z-[1] grid items-center"
+        style={{ gridTemplateColumns: timeline.gridTemplateColumns }}
+      >
+        <div
+          style={{ gridColumn: `${lineStart} / ${lineEnd}` }}
+          className="group pointer-events-auto relative flex h-full min-h-[44px] items-center justify-center sm:min-h-0"
+        >
+          <button
+            type="button"
+            aria-label={t("tasks:gantt.milestoneAriaLabel", {
+              title: task.title,
+            })}
+            onPointerDown={handleMovePointerDown}
+            onKeyDown={(e) => {
+              if (e.key === "Enter" || e.key === " ") {
+                e.preventDefault();
+                onOpenTask();
+              }
+            }}
+            className={cn(
+              "flex size-6 shrink-0 touch-none cursor-grab items-center justify-center active:cursor-grabbing sm:size-4",
+              "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-1",
+            )}
+          >
+            <span
+              aria-hidden="true"
+              className={cn(
+                "size-3 rotate-45 border shadow-sm transition-colors group-hover:border-primary/70",
+                "border-primary/40",
+                task.priority
+                  ? getPriorityAccentClass(task.priority)
+                  : "bg-primary",
+              )}
+            />
+          </button>
+          <span className="pointer-events-none absolute left-1/2 top-full mt-1 max-w-[8rem] -translate-x-1/2 truncate text-[10px] font-medium text-foreground">
+            {task.title}
+          </span>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div
       className="pointer-events-none absolute inset-0 z-[1] grid items-center"
@@ -313,7 +366,13 @@ export function GanttTaskBar({
     >
       <div
         style={{ gridColumn: `${lineStart} / ${lineEnd}` }}
-        className="group pointer-events-auto relative mx-1 flex min-h-[44px] min-w-0 items-stretch overflow-hidden rounded-md border border-primary/25 bg-background text-left text-sm font-medium leading-none text-foreground shadow-sm transition-colors hover:border-primary/40 sm:h-11 sm:min-h-0"
+        title={isCritical ? t("tasks:gantt.criticalPath") : undefined}
+        className={cn(
+          "group pointer-events-auto relative mx-1 flex min-h-[44px] min-w-0 items-stretch overflow-hidden rounded-md border bg-background text-left text-sm font-medium leading-none text-foreground shadow-sm transition-colors sm:h-11 sm:min-h-0",
+          isCritical
+            ? "border-destructive/70 hover:border-destructive"
+            : "border-primary/25 hover:border-primary/40",
+        )}
       >
         <span
           aria-hidden="true"

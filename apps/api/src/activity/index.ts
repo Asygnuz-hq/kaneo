@@ -4,6 +4,7 @@ import {
   createRoute,
   errorResponse,
   jsonResponse,
+  z,
 } from "../openapi";
 import { requireWorkspacePermission } from "../utils/require-workspace-permission";
 import { workspaceAccess } from "../utils/workspace-access-middleware";
@@ -11,13 +12,19 @@ import createActivity from "./controllers/create-activity";
 import createComment from "./controllers/create-comment";
 import deleteComment from "./controllers/delete-comment";
 import getActivities from "./controllers/get-activities";
+import toggleReaction from "./controllers/toggle-reaction";
 import updateComment from "./controllers/update-comment";
-import { activityListSchema, activitySchema } from "./response";
+import {
+  activityListSchema,
+  activityReactionSchema,
+  activitySchema,
+} from "./response";
 import {
   createActivityBody,
   createCommentBody,
   deleteCommentBody,
   taskIdParam,
+  toggleReactionBody,
   updateCommentBody,
 } from "./schema";
 
@@ -138,9 +145,42 @@ const deleteCommentRoute = createRoute({
   },
 });
 
+const toggleReactionRoute = createRoute({
+  method: "post",
+  operationId: "toggleReaction",
+  path: "/reaction",
+  tags: ["Activity"],
+  summary: "Toggle reaction",
+  description:
+    "React to a comment with an emoji, or remove your own reaction if you already reacted with that same emoji. Returns the comment's full reaction summary.",
+  middleware: [
+    workspaceAccess.fromActivity("activityId"),
+    requireWorkspacePermission({ task: ["update"] }),
+  ] as const,
+  request: {
+    body: {
+      required: true,
+      content: { "application/json": { schema: toggleReactionBody } },
+    },
+  },
+  responses: {
+    200: jsonResponse(
+      "The comment's updated reactions",
+      z.array(activityReactionSchema),
+    ),
+    400: errorResponse("Invalid body, or unknown activity"),
+    403: errorResponse(
+      "No workspace access, or missing task:update permission",
+    ),
+  },
+});
+
 const activity = apiRouter()
   .openapi(getActivitiesRoute, async (c) =>
-    c.json(await getActivities(c.req.valid("param").taskId), 200),
+    c.json(
+      await getActivities(c.req.valid("param").taskId, c.get("userId")),
+      200,
+    ),
   )
   .openapi(createActivityRoute, async (c) => {
     const { taskId, message, type, eventData } = c.req.valid("json");
@@ -165,7 +205,14 @@ const activity = apiRouter()
       await deleteComment(c.get("userId"), c.req.valid("json").activityId),
       200,
     ),
-  );
+  )
+  .openapi(toggleReactionRoute, async (c) => {
+    const { activityId, emoji } = c.req.valid("json");
+    return c.json(
+      await toggleReaction(c.get("userId"), activityId, emoji),
+      200,
+    );
+  });
 
 subscribeToEvent<{
   taskId: string;

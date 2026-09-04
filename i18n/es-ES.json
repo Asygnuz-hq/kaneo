@@ -3,6 +3,7 @@
 		"appName": "Kaneo",
 		"actions": {
 			"cancel": "Cancelar",
+			"add": "Agregar",
 			"close": "Cerrar",
 			"edit": "Editar",
 			"clearAll": "Limpiar todo",
@@ -907,6 +908,55 @@
 			"useTemplate": "Usar plantilla",
 			"noTemplate": "Sin plantilla"
 		},
+		"automationRules": {
+			"title": "Reglas de automatización",
+			"subtitle": "Cuando algo le pase a una tarea de este proyecto, haz otra cosa automáticamente.",
+			"description": "Las reglas corren en el orden en que se crearon. Una regla inactiva se salta.",
+			"loading": "Cargando...",
+			"empty": "Todavía no hay reglas de automatización",
+			"emptyDescription": "Crea una para reaccionar automáticamente a cambios en las tareas de este proyecto.",
+			"createRule": "Nueva regla",
+			"editRule": "Editar regla",
+			"formDescription": "Elige qué vigilar y qué debe pasar cuando ocurra.",
+			"nameLabel": "Nombre",
+			"namePlaceholder": "ej. Mover a Terminado al finalizar",
+			"nameRequired": "Ponle un nombre a la regla",
+			"triggerLabel": "Cuando...",
+			"actionLabel": "Entonces...",
+			"triggers": {
+				"task": {
+					"created": "Se crea una tarea",
+					"status_changed": "Cambia el estado de una tarea",
+					"priority_changed": "Cambia la prioridad de una tarea",
+					"assignee_changed": "Cambia el responsable de una tarea",
+					"label_assigned": "Se asigna una etiqueta a una tarea"
+				}
+			},
+			"actions": {
+				"move_to_column": "Mover la tarea a una columna",
+				"set_priority": "Cambiar la prioridad de la tarea",
+				"assign_user": "Asignar la tarea a",
+				"add_label": "Agregar una etiqueta a la tarea"
+			},
+			"toStatusLabel": "Solo cuando se mueva a",
+			"toPriorityLabel": "Solo cuando se ponga en",
+			"triggerLabelLabel": "Solo para la etiqueta",
+			"anyValue": "Cualquiera",
+			"columnLabel": "Columna",
+			"priorityLabel": "Prioridad",
+			"userLabel": "Responsable",
+			"actionLabelLabel": "Etiqueta",
+			"selectPlaceholder": "Selecciona...",
+			"saveRule": "Guardar regla",
+			"summary": "SI {{trigger}} ENTONCES {{action}}",
+			"createSuccess": "Regla de automatización creada",
+			"updateSuccess": "Regla de automatización actualizada",
+			"deleteSuccess": "Regla de automatización eliminada",
+			"saveError": "No se pudo guardar la regla",
+			"deleteError": "No se pudo eliminar la regla",
+			"deleteConfirmTitle": "¿Eliminar esta regla?",
+			"deleteConfirmDescription": "Esto detendrá \"{{name}}\". No se puede deshacer."
+		},
 		"externalLinks": {
 			"resources": "Recursos",
 			"issue": "Issue",
@@ -1180,6 +1230,40 @@
 			"updateError": "Error al actualizar etiqueta",
 			"deleteError": "Error al eliminar etiqueta",
 			"nameRequired": "El nombre de la etiqueta es obligatorio"
+		},
+		"workspaceCustomFields": {
+			"pageTitle": "Configuración de Campos Personalizados",
+			"title": "Campos Personalizados",
+			"subtitle": "Extiende las tareas con campos propios de tu equipo, disponibles en todos los proyectos de este workspace.",
+			"cardDescription": "Administra los campos que se pueden asignar a cualquier tarea.",
+			"createField": "Crear campo",
+			"editField": "Editar campo",
+			"deleteField": "Eliminar",
+			"saveField": "Guardar",
+			"nameLabel": "Nombre del campo",
+			"namePlaceholder": "ej. Prioridad del cliente",
+			"typeLabel": "Tipo",
+			"optionsLabel": "Opciones",
+			"addOption": "Agregar una opción",
+			"optionsRequired": "Agrega al menos una opción",
+			"createDescription": "El tipo no se puede cambiar después de crear el campo, así que elígelo con cuidado.",
+			"deleteConfirmTitle": "¿Eliminar este campo?",
+			"deleteConfirmDescription": "También se elimina el valor de este campo en todas las tareas. Esta acción no se puede deshacer.",
+			"empty": "Todavía no hay campos personalizados. Crea el primero para empezar.",
+			"createSuccess": "Campo personalizado creado",
+			"updateSuccess": "Campo personalizado actualizado",
+			"deleteSuccess": "Campo personalizado eliminado",
+			"createError": "No se pudo crear el campo personalizado",
+			"updateError": "No se pudo actualizar el campo personalizado",
+			"deleteError": "No se pudo eliminar el campo personalizado",
+			"nameRequired": "El nombre del campo es obligatorio",
+			"types": {
+				"text": "Texto",
+				"number": "Número",
+				"date": "Fecha",
+				"select": "Selección única",
+				"checkbox": "Casilla de verificación"
+			}
 		},
 		"giteaIntegration": {
 			"validation": {
@@ -1591,6 +1675,9 @@
 				"mermaid": {
 					"renderFailed": "No se pudo renderizar el diagrama de Mermaid"
 				}
+			},
+			"reactions": {
+				"addReaction": "Add reaction"
 			}
 		}
 	},
@@ -1766,11 +1853,17 @@
 		"properties": {
 			"title": "Propiedades",
 			"labels": "Etiquetas",
+			"customFields": "Campos personalizados",
+			"customFieldUnset": "Sin definir",
+			"customFieldSaveError": "No se pudo guardar el valor",
 			"copyTaskLink": "Copiar enlace a tarea",
 			"copyTaskBranch": "Copiar la rama de la tarea",
 			"start": "Comenzar",
 			"startDate": "Fecha de inicio",
-			"noDate": "Sin fecha"
+			"noDate": "Sin fecha",
+			"milestone": "Milestone",
+			"milestoneError": "Failed to update the milestone flag",
+			"milestoneHint": "Mark as a milestone -- shows as a diamond on the Gantt instead of a bar"
 		},
 		"popover": {
 			"assignee": {
@@ -1892,9 +1985,18 @@
 			"resizeStart": "Cambiar la fecha de comienzo",
 			"resizeDue": "Cambiar la fecha de vencimiento",
 			"taskAriaLabel": "{{title}}: abrir o arrastrar para mover",
+			"criticalPath": "On the critical path -- delaying this task pushes back the project's finish date",
+			"criticalPathLegend": "Critical path",
+			"zoom": {
+				"day": "Day",
+				"month": "Month",
+				"quarter": "Quarter",
+				"week": "Week"
+			},
 			"undatedChildren_many": "+{{count}} subtasks without a date",
 			"undatedChildren_one": "+{{count}} subtask without a date",
-			"undatedChildren_other": "+{{count}} subtasks without a date"
+			"undatedChildren_other": "+{{count}} subtasks without a date",
+			"milestoneAriaLabel": "{{title}} (milestone): open or drag to move"
 		},
 		"delete": {
 			"title": "¿Eliminar tarea?",

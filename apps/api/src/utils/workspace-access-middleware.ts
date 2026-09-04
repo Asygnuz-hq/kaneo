@@ -21,7 +21,9 @@ type WorkspaceIdSource =
         | "column"
         | "workflowRule"
         | "taskTemplate"
-        | "sprint";
+        | "automationRule"
+        | "sprint"
+        | "customField";
       idKey: string;
     }
   | {
@@ -162,7 +164,9 @@ async function lookupAccessContext(
     | "column"
     | "workflowRule"
     | "taskTemplate"
-    | "sprint",
+    | "automationRule"
+    | "sprint"
+    | "customField",
   id: string,
 ): Promise<{ workspaceId: string; projectId: string | null } | null> {
   try {
@@ -346,6 +350,27 @@ async function lookupAccessContext(
           : null;
       }
 
+      case "automationRule": {
+        const [automationRule] = await db
+          .select({
+            workspaceId: schema.projectTable.workspaceId,
+            projectId: schema.projectTable.id,
+          })
+          .from(schema.automationRuleTable)
+          .innerJoin(
+            schema.projectTable,
+            eq(schema.automationRuleTable.projectId, schema.projectTable.id),
+          )
+          .where(eq(schema.automationRuleTable.id, id))
+          .limit(1);
+        return automationRule
+          ? {
+              workspaceId: automationRule.workspaceId,
+              projectId: automationRule.projectId,
+            }
+          : null;
+      }
+
       case "sprint": {
         const [sprint] = await db
           .select({
@@ -361,6 +386,19 @@ async function lookupAccessContext(
           .limit(1);
         return sprint
           ? { workspaceId: sprint.workspaceId, projectId: sprint.projectId }
+          : null;
+      }
+
+      // ASYGNUZ: custom field definitions are workspace-scoped, same as
+      // labels -- no projectId to restrict against.
+      case "customField": {
+        const [customField] = await db
+          .select({ workspaceId: schema.customFieldTable.workspaceId })
+          .from(schema.customFieldTable)
+          .where(eq(schema.customFieldTable.id, id))
+          .limit(1);
+        return customField?.workspaceId
+          ? { workspaceId: customField.workspaceId, projectId: null }
           : null;
       }
 
@@ -465,9 +503,25 @@ export const workspaceAccess = {
       ],
     }),
 
+  fromAutomationRule: (idKey = "id") =>
+    workspaceAccessMiddleware({
+      sources: [
+        { type: "lookup", resource: "automationRule", idKey },
+        { type: "query", key: "workspaceId" },
+      ],
+    }),
+
   // ASYGNUZ
   fromSprint: (idKey = "id") =>
     workspaceAccessMiddleware({
       sources: [{ type: "lookup", resource: "sprint", idKey }],
+    }),
+
+  fromCustomField: (idKey = "id") =>
+    workspaceAccessMiddleware({
+      sources: [
+        { type: "lookup", resource: "customField", idKey },
+        { type: "query", key: "workspaceId" },
+      ],
     }),
 };

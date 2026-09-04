@@ -1,8 +1,10 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useTranslation } from "react-i18next";
 import PageTitle from "@/components/page-title";
+import AutomationRuleEditor from "@/components/project/automation-rule-editor";
 import ColumnEditor from "@/components/project/column-editor";
 import WorkflowEditor from "@/components/project/workflow-editor";
+import { useWorkspacePermission } from "@/hooks/use-workspace-permission";
 
 export const Route = createFileRoute(
   "/_layout/_authenticated/dashboard/settings/projects/$projectId/workflow",
@@ -13,6 +15,7 @@ export const Route = createFileRoute(
 function RouteComponent() {
   const { t } = useTranslation();
   const { projectId } = Route.useParams();
+  const { workspace } = useWorkspacePermission();
 
   return (
     <>
@@ -49,6 +52,23 @@ function RouteComponent() {
             </p>
           </div>
           <WorkflowEditor projectId={projectId} />
+        </div>
+
+        <div className="space-y-6">
+          <div className="space-y-1">
+            <h2 className="text-md font-medium">
+              {t("settings:automationRules.title")}
+            </h2>
+            <p className="text-xs text-muted-foreground">
+              {t("settings:automationRules.subtitle")}
+            </p>
+          </div>
+          {workspace?.id && (
+            <AutomationRuleEditor
+              projectId={projectId}
+              workspaceId={workspace.id}
+            />
+          )}
         </div>
       </div>
     </>

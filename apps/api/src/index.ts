@@ -17,6 +17,8 @@ import { HTTPException } from "hono/http-exception";
 import activity from "./activity";
 import { auth } from "./auth";
 import { organizationRoutes } from "./auth-openapi";
+import automation from "./automation";
+import { initializeAutomationEngine } from "./automation/engine";
 import billing from "./billing";
 import clientAccess from "./client-access";
 import clientAuth from "./client-auth";
@@ -26,6 +28,7 @@ import clientPortal from "./client-portal";
 import column from "./column";
 import comment from "./comment";
 import config from "./config";
+import customField from "./custom-field";
 import db, { getDatabase, schema } from "./database";
 import { prepareDatabaseStartup } from "./database/prepare-database-startup";
 import { waitForDatabase } from "./database/wait-for-database";
@@ -603,6 +606,7 @@ export function createApp() {
   const commentApi = api.route("/comment", comment);
   const timeEntryApi = api.route("/time-entry", timeEntry);
   const labelApi = api.route("/label", label);
+  const customFieldApi = api.route("/custom-field", customField);
   const notificationApi = api.route("/notification", notification);
   const notificationPreferencesApi = api.route(
     "/notification-preferences",
@@ -631,6 +635,7 @@ export function createApp() {
   const taskTemplateApi = api.route("/task-template", taskTemplate);
   const externalLinkApi = api.route("/external-link", externalLink);
   const workflowRuleApi = api.route("/workflow-rule", workflowRule);
+  const automationApi = api.route("/automation", automation);
   const invitationApi = api.route("/invitation", invitation);
   const workspaceApi = api.route("/workspace", workspace);
   const userApi = api.route("/user", user);
@@ -869,6 +874,7 @@ export function createApp() {
     columnApi,
     commentApi,
     configApi,
+    customFieldApi,
     discordIntegrationApi,
     externalLinkApi,
     genericWebhookIntegrationApi,
@@ -892,6 +898,7 @@ export function createApp() {
     timeEntryApi,
     userApi,
     workflowRuleApi,
+    automationApi,
     workspaceApi,
     oauthApi,
   };
@@ -930,6 +937,7 @@ export async function runStartupTasks() {
   await seedDefaultWorkspaceRoles();
 
   initializePlugins();
+  initializeAutomationEngine();
   initializeScheduler();
   await initializeWebSocketAdapter();
 }
@@ -991,6 +999,7 @@ const {
   columnApi,
   commentApi,
   configApi,
+  customFieldApi,
   discordIntegrationApi,
   externalLinkApi,
   genericWebhookIntegrationApi,
@@ -1014,6 +1023,7 @@ const {
   timeEntryApi,
   userApi,
   workflowRuleApi,
+  automationApi,
   workspaceApi,
   oauthApi,
 } = createdApp;
@@ -1034,6 +1044,7 @@ export type AppType =
   | typeof projectApi
   | typeof projectMemberApi
   | typeof clientAccessApi
+  | typeof customFieldApi
   | typeof sprintApi
   | typeof taskApi
   | typeof columnApi
@@ -1054,6 +1065,7 @@ export type AppType =
   | typeof taskTemplateApi
   | typeof externalLinkApi
   | typeof workflowRuleApi
+  | typeof automationApi
   | typeof invitationApi
   | typeof workspaceApi
   | typeof userApi

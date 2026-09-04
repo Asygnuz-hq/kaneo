@@ -12,7 +12,8 @@
 			"reset": "リセット",
 			"filter": "フィルター",
 			"clearAllFilters": "すべてのフィルターをクリア",
-			"edit": "Edit"
+			"edit": "Edit",
+			"add": "Add"
 		},
 		"a11y": {
 			"toggleSidebar": "サイドバーを切り替え"
@@ -1300,6 +1301,89 @@
 			"title": "Task templates",
 			"updateSuccess": "Task template updated",
 			"useTemplate": "Use template"
+		},
+		"automationRules": {
+			"actionLabel": "Then...",
+			"actionLabelLabel": "Label",
+			"actions": {
+				"add_label": "Add a label to the task",
+				"assign_user": "Assign the task to",
+				"move_to_column": "Move the task to a column",
+				"set_priority": "Set the task's priority"
+			},
+			"anyValue": "Any",
+			"columnLabel": "Column",
+			"createRule": "New rule",
+			"createSuccess": "Automation rule created",
+			"deleteConfirmDescription": "This will stop \"{{name}}\" from running. This can't be undone.",
+			"deleteConfirmTitle": "Delete this rule?",
+			"deleteError": "Failed to delete the rule",
+			"deleteSuccess": "Automation rule deleted",
+			"description": "Rules run in the order they were created. An inactive rule is skipped.",
+			"editRule": "Edit rule",
+			"empty": "No automation rules yet",
+			"emptyDescription": "Create one to react automatically to changes on tasks in this project.",
+			"formDescription": "Choose what to watch for, and what should happen when it does.",
+			"loading": "Loading...",
+			"nameLabel": "Name",
+			"namePlaceholder": "e.g. Move to Done when finished",
+			"nameRequired": "Give the rule a name",
+			"priorityLabel": "Priority",
+			"saveError": "Failed to save the rule",
+			"saveRule": "Save rule",
+			"selectPlaceholder": "Select...",
+			"subtitle": "When something happens to a task in this project, do something else automatically.",
+			"summary": "IF {{trigger}} THEN {{action}}",
+			"title": "Automation rules",
+			"toPriorityLabel": "Only when set to",
+			"toStatusLabel": "Only when moved to",
+			"triggerLabel": "When...",
+			"triggerLabelLabel": "Only for label",
+			"triggers": {
+				"task": {
+					"assignee_changed": "A task's assignee changes",
+					"created": "A task is created",
+					"label_assigned": "A label is assigned to a task",
+					"priority_changed": "A task's priority changes",
+					"status_changed": "A task's status changes"
+				}
+			},
+			"updateSuccess": "Automation rule updated",
+			"userLabel": "Assignee"
+		},
+		"workspaceCustomFields": {
+			"addOption": "Add an option",
+			"cardDescription": "Manage fields that can be set on any task.",
+			"createDescription": "The type can't be changed after creation, so pick carefully.",
+			"createError": "Failed to create custom field",
+			"createField": "Create Field",
+			"createSuccess": "Custom field created",
+			"deleteConfirmDescription": "Every task's value for this field is deleted too. This action cannot be undone.",
+			"deleteConfirmTitle": "Delete this field?",
+			"deleteError": "Failed to delete custom field",
+			"deleteField": "Delete",
+			"deleteSuccess": "Custom field deleted",
+			"editField": "Edit Field",
+			"empty": "No custom fields yet. Create your first one to get started.",
+			"nameLabel": "Field name",
+			"namePlaceholder": "e.g. Client priority",
+			"nameRequired": "Field name is required",
+			"optionsLabel": "Options",
+			"optionsRequired": "Add at least one option",
+			"pageTitle": "Custom Field Settings",
+			"saveField": "Save",
+			"subtitle": "Extend tasks with fields specific to your team, available across every project in this workspace.",
+			"title": "Custom Fields",
+			"typeLabel": "Type",
+			"types": {
+				"checkbox": "Checkbox",
+				"date": "Date",
+				"number": "Number",
+				"select": "Select",
+				"text": "Text"
+			},
+			"updateError": "Failed to update custom field",
+			"updateSuccess": "Custom field updated"
 		}
 	},
 	"navigation": {
@@ -1581,6 +1665,9 @@
 				"mermaid": {
 					"renderFailed": "Mermaid ダイアグラムを描画できませんでした"
 				}
+			},
+			"reactions": {
+				"addReaction": "Add reaction"
 			}
 		}
 	},
@@ -1760,7 +1847,13 @@
 			"copyTaskBranch": "タスクのブランチ名をコピー",
 			"start": "開始",
 			"startDate": "開始日",
-			"noDate": "日付なし"
+			"noDate": "日付なし",
+			"customFields": "Custom fields",
+			"customFieldSaveError": "Failed to save value",
+			"customFieldUnset": "Not set",
+			"milestone": "Milestone",
+			"milestoneError": "Failed to update the milestone flag",
+			"milestoneHint": "Mark as a milestone -- shows as a diamond on the Gantt instead of a bar"
 		},
 		"move": {
 			"title": "タスクを移動",
@@ -1906,7 +1999,16 @@
 			"resizeStart": "開始日を変更",
 			"resizeDue": "期限を変更",
 			"taskAriaLabel": "{{title}}: 開く、またはドラッグして移動",
-			"undatedChildren_other": "+{{count}} subtasks without a date"
+			"criticalPath": "On the critical path -- delaying this task pushes back the project's finish date",
+			"criticalPathLegend": "Critical path",
+			"zoom": {
+				"day": "Day",
+				"month": "Month",
+				"quarter": "Quarter",
+				"week": "Week"
+			},
+			"undatedChildren_other": "+{{count}} subtasks without a date",
+			"milestoneAriaLabel": "{{title}} (milestone): open or drag to move"
 		},
 		"delete": {
 			"title": "タスクを削除しますか？",
