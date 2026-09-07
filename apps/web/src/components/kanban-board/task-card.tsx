@@ -30,6 +30,7 @@ import {
 import { useDeleteTask } from "@/hooks/mutations/task/use-delete-task";
 import useActiveWorkspace from "@/hooks/queries/workspace/use-active-workspace";
 import { useGetActiveWorkspaceUsers } from "@/hooks/queries/workspace-users/use-get-active-workspace-users";
+import { getChecklistProgress } from "@/lib/checklist-progress";
 import {
   dueDateStatusColors,
   getDueDateStatus,
@@ -47,6 +48,7 @@ import type Task from "@/types/task";
 import { Button } from "../ui/button";
 import { ContextMenu, ContextMenuTrigger } from "../ui/context-menu";
 import TaskCardContextMenuContent from "./task-card-context-menu/task-card-context-menu-content";
+import { TaskChecklistBadge } from "./task-checklist-badge";
 import { TaskLabels } from "./task-labels";
 
 type TaskCardProps = {
@@ -86,6 +88,11 @@ function TaskCard({ task, disableDragDrop = false }: TaskCardProps) {
       (link) => link.resourceType === "pull_request",
     );
   }, [task.externalLinks]);
+
+  const checklistProgress = useMemo(
+    () => getChecklistProgress(task.description),
+    [task.description],
+  );
 
   const getPRInfo = (pr: (typeof pullRequests)[number]) => {
     const isMerged = pr.metadata?.merged === true;
@@ -283,6 +290,10 @@ function TaskCard({ task, disableDragDrop = false }: TaskCardProps) {
                 <span className="inline-flex items-center gap-1 rounded border border-border/70 bg-muted/55 px-2 py-1 text-[10px] font-medium text-muted-foreground">
                   {getPriorityIcon(task.priority ?? "")}
                 </span>
+              )}
+
+              {checklistProgress && (
+                <TaskChecklistBadge progress={checklistProgress} />
               )}
 
               {showDueDates && task.dueDate && (
