@@ -591,7 +591,9 @@
 					"nameRequired": "Il nome è obbligatorio",
 					"nameShort": "Il nome deve essere di almeno 3 caratteri",
 					"expirationRequired": "La scadenza è obbligatoria"
-				}
+				},
+				"scopedDescription": "Restrict this key to only the actions you pick below, no matter what your own account can do.",
+				"scopedLabel": "Limit access"
 			}
 		},
 		"workspaceGeneral": {

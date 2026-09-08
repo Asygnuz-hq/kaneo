@@ -2340,6 +2340,12 @@
 										"nameShort",
 										"expirationRequired"
 									]
+								},
+								"scopedLabel": {
+									"type": "string"
+								},
+								"scopedDescription": {
+									"type": "string"
 								}
 							},
 							"required": [
@@ -2359,7 +2365,9 @@
 								"create",
 								"creating",
 								"failedCreate",
-								"validation"
+								"validation",
+								"scopedLabel",
+								"scopedDescription"
 							]
 						}
 					},

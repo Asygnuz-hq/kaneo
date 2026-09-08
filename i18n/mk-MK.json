@@ -591,7 +591,9 @@
 					"nameRequired": "Името е задолжително",
 					"nameShort": "Името мора да има најмалку 3 знаци",
 					"expirationRequired": "Истекувањето е задолжително"
-				}
+				},
+				"scopedDescription": "Restrict this key to only the actions you pick below, no matter what your own account can do.",
+				"scopedLabel": "Limit access"
 			}
 		},
 		"workspaceGeneral": {

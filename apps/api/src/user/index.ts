@@ -6,10 +6,15 @@ import {
   jsonResponse,
 } from "../openapi";
 import { MAX_AVATAR_BYTES } from "./avatar";
+import createScopedApiKey from "./controllers/create-scoped-api-key";
 import deleteAvatar from "./controllers/delete-avatar";
 import saveAvatar from "./controllers/save-avatar";
-import { avatarDeletedSchema, avatarSchema } from "./response";
-import { uploadAvatarBody } from "./schema";
+import {
+  avatarDeletedSchema,
+  avatarSchema,
+  scopedApiKeySchema,
+} from "./response";
+import { createScopedApiKeyBody, uploadAvatarBody } from "./schema";
 
 const uploadAvatarRoute = createRoute({
   method: "put",
@@ -47,7 +52,37 @@ const deleteAvatarRoute = createRoute({
   },
 });
 
+const createScopedApiKeyRoute = createRoute({
+  method: "post",
+  operationId: "createScopedApiKey",
+  path: "/api-key",
+  tags: ["User"],
+  summary: "Create an API key with a narrowed permission scope",
+  description:
+    "Like the generic Better Auth API key creation, but lets you also set `permissions` to narrow what this specific key can do (e.g. only read/update tasks) -- useful for handing a key to an external integration without giving it full account access. A key can never exceed the workspace role of the user who created it, regardless of what permissions are requested here; this only narrows further. The raw key is returned once, in this response, and never again.",
+  request: {
+    body: {
+      required: true,
+      content: { "application/json": { schema: createScopedApiKeyBody } },
+    },
+  },
+  responses: {
+    200: jsonResponse("The created API key", scopedApiKeySchema),
+    400: errorResponse("Invalid body"),
+  },
+});
+
 const user = apiRouter()
+  .openapi(createScopedApiKeyRoute, async (c) => {
+    const { name, expiresIn, permissions } = c.req.valid("json");
+    const created = await createScopedApiKey({
+      userId: c.get("userId"),
+      name,
+      expiresIn,
+      permissions,
+    });
+    return c.json(created, 200);
+  })
   .openapi(uploadAvatarRoute, async (c) => {
     const { contentType, data } = c.req.valid("json");
     try {

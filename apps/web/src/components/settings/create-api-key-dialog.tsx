@@ -1,4 +1,5 @@
 import { standardSchemaResolver } from "@hookform/resolvers/standard-schema";
+import { statement } from "@kaneo/permissions";
 import { useMemo, useState } from "react";
 import { useForm } from "react-hook-form";
 import { useTranslation } from "react-i18next";
@@ -7,6 +8,7 @@ import useCreateApiKey from "@/hooks/mutations/api-key/use-create-api-key";
 import { toast } from "@/lib/toast";
 import type { CreateApiKeyResponse } from "@/types/api-key";
 import { Button } from "../ui/button";
+import { Checkbox } from "../ui/checkbox";
 import {
   Dialog,
   DialogContent,
@@ -32,6 +34,17 @@ import {
   SelectTrigger,
   SelectValue,
 } from "../ui/select";
+import { Switch } from "../ui/switch";
+
+// Resources an API key's scope can be narrowed to. Only the ones a caller
+// could plausibly hand to an external integration (task/project/label) --
+// `workspace` management and org-level statements stay out of this picker,
+// since scoping a key to those isn't a case this dialog needs to serve.
+const SCOPABLE_RESOURCES = [
+  "project",
+  "task",
+  "label",
+] as const satisfies ReadonlyArray<keyof typeof statement>;
 
 const EXPIRATION_SECONDS = {
   "1d": 86400,
@@ -59,6 +72,33 @@ export function CreateApiKeyDialog({
   const { t } = useTranslation();
   const { mutateAsync: createApiKey } = useCreateApiKey();
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [scoped, setScoped] = useState(false);
+  const [selectedActions, setSelectedActions] = useState<
+    Record<string, Set<string>>
+  >({});
+
+  const toggleAction = (resource: string, action: string) => {
+    setSelectedActions((current) => {
+      const next = { ...current };
+      const forResource = new Set(next[resource] ?? []);
+      if (forResource.has(action)) {
+        forResource.delete(action);
+      } else {
+        forResource.add(action);
+      }
+      next[resource] = forResource;
+      return next;
+    });
+  };
+
+  const scopedPermissions = useMemo(() => {
+    if (!scoped) return undefined;
+    const result: Record<string, string[]> = {};
+    for (const [resource, actions] of Object.entries(selectedActions)) {
+      if (actions.size > 0) result[resource] = Array.from(actions);
+    }
+    return Object.keys(result).length > 0 ? result : undefined;
+  }, [scoped, selectedActions]);
 
   const createApiKeySchema = useMemo(
     () =>
@@ -123,9 +163,12 @@ export function CreateApiKeyDialog({
       const result = await createApiKey({
         name: data.name,
         expiresIn: expiresInValue ?? null,
+        permissions: scopedPermissions,
       });
 
       form.reset();
+      setScoped(false);
+      setSelectedActions({});
       onSuccess(result);
       onClose();
     } catch (error) {
@@ -142,6 +185,8 @@ export function CreateApiKeyDialog({
   const handleClose = () => {
     if (!isSubmitting) {
       form.reset();
+      setScoped(false);
+      setSelectedActions({});
       onClose();
     }
   };
@@ -225,6 +270,59 @@ export function CreateApiKeyDialog({
                   </FormItem>
                 )}
               />
+
+              <div className="flex items-center justify-between gap-2 rounded-md border border-border p-3">
+                <div>
+                  <p className="text-sm font-medium">
+                    {t("settings:apiKey.createDialog.scopedLabel")}
+                  </p>
+                  <p className="text-sm text-muted-foreground">
+                    {t("settings:apiKey.createDialog.scopedDescription")}
+                  </p>
+                </div>
+                <Switch
+                  checked={scoped}
+                  onCheckedChange={setScoped}
+                  disabled={isSubmitting}
+                />
+              </div>
+
+              {scoped && (
+                <div className="flex flex-col gap-3 rounded-md border border-border p-3">
+                  {SCOPABLE_RESOURCES.map((resource) => (
+                    <div key={resource} className="flex flex-col gap-1.5">
+                      <p className="text-sm font-medium capitalize">
+                        {resource}
+                      </p>
+                      <div className="flex flex-wrap gap-3">
+                        {statement[resource].map((action) => {
+                          const inputId = `api-key-scope-${resource}-${action}`;
+                          return (
+                            <label
+                              key={action}
+                              htmlFor={inputId}
+                              className="flex items-center gap-1.5 text-sm text-muted-foreground"
+                            >
+                              <Checkbox
+                                id={inputId}
+                                checked={
+                                  selectedActions[resource]?.has(action) ??
+                                  false
+                                }
+                                onCheckedChange={() =>
+                                  toggleAction(resource, action)
+                                }
+                                disabled={isSubmitting}
+                              />
+                              {action}
+                            </label>
+                          );
+                        })}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
             </div>
 
             <DialogFooter className="gap-2 sm:gap-2">

@@ -488,7 +488,9 @@
 					"nameRequired": "El nombre es obligatorio",
 					"nameShort": "El nombre debe tener al menos 3 caracteres",
 					"expirationRequired": "La fecha de expiración es obligatoria"
-				}
+				},
+				"scopedDescription": "Restringe esta llave solo a las acciones que elijas abajo, sin importar lo que tu propia cuenta pueda hacer.",
+				"scopedLabel": "Limitar acceso"
 			}
 		},
 		"workspaceGeneral": {
