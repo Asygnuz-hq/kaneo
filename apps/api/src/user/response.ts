@@ -18,3 +18,18 @@ export const avatarDeletedSchema = z
     }),
   })
   .openapi("UserAvatarDeleted");
+
+export const scopedApiKeySchema = z
+  .object({
+    id: z.string(),
+    name: z.string().nullable(),
+    key: z.string().openapi({
+      description: "The raw key value. Returned only once, at creation.",
+    }),
+    prefix: z.string().nullable(),
+    start: z.string().nullable(),
+    permissions: z.record(z.string(), z.array(z.string())).nullable(),
+    expiresAt: z.union([z.string(), z.date()]).nullable(),
+    createdAt: z.union([z.string(), z.date()]),
+  })
+  .openapi("ScopedApiKey");

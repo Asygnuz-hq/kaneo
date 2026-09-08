@@ -591,7 +591,9 @@
 					"nameRequired": "Ad gereklidir",
 					"nameShort": "Ad en az 3 karakter olmalıdır",
 					"expirationRequired": "Süre sonu gereklidir"
-				}
+				},
+				"scopedDescription": "Restrict this key to only the actions you pick below, no matter what your own account can do.",
+				"scopedLabel": "Limit access"
 			}
 		},
 		"workspaceGeneral": {

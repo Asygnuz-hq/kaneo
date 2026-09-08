@@ -591,7 +591,9 @@
 					"nameRequired": "नाम आवश्यक है",
 					"nameShort": "नाम कम से कम 3 अक्षरों का होना चाहिए",
 					"expirationRequired": "समाप्ति आवश्यक है"
-				}
+				},
+				"scopedDescription": "Restrict this key to only the actions you pick below, no matter what your own account can do.",
+				"scopedLabel": "Limit access"
 			}
 		},
 		"workspaceGeneral": {
