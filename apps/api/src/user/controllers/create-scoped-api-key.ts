@@ -1,3 +1,4 @@
+import { APIError } from "better-auth/api";
 import { HTTPException } from "hono/http-exception";
 import { auth } from "../../auth";
 
@@ -22,14 +23,32 @@ async function createScopedApiKey({
   expiresIn: number | null;
   permissions?: Record<string, string[]>;
 }) {
-  const created = await auth.api.createApiKey({
-    body: {
-      userId,
-      name,
-      expiresIn,
-      permissions,
-    },
-  });
+  let created: Awaited<ReturnType<typeof auth.api.createApiKey>>;
+  try {
+    created = await auth.api.createApiKey({
+      body: {
+        userId,
+        name,
+        expiresIn,
+        permissions,
+      },
+    });
+  } catch (error) {
+    // better-auth validates expiresIn/permissions itself (e.g. "expiresIn
+    // is smaller than the predefined minimum value") and throws an APIError
+    // -- a normal 4xx, not a server failure. Left uncaught, it fell through
+    // to the app's generic onError handler, which turns any non-HTTPException
+    // into an opaque 500, hiding a message the caller could actually act on.
+    if (error instanceof APIError) {
+      // better-auth's api-key plugin only ever rejects createApiKey's own
+      // input this way (bad expiresIn, malformed permissions, ...) -- there
+      // is no case where it throws a non-400 APIError from this call.
+      throw new HTTPException(400, {
+        message: error.body?.message ?? error.message,
+      });
+    }
+    throw error;
+  }
 
   if (!created) {
     throw new HTTPException(500, { message: "Failed to create API key" });
