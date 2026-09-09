@@ -100,4 +100,23 @@ describe("API integration: scoped API keys", () => {
     });
     expect(createTaskResponse.status).toBe(200);
   });
+
+  it("rejects an expiresIn below better-auth's minimum with a 400, not an opaque 500", async () => {
+    // Regression: better-auth's own validation (bad expiresIn, malformed
+    // permissions, ...) threw an APIError that fell through to the app's
+    // generic onError handler, which turns any non-HTTPException into an
+    // opaque 500 -- hiding a message the caller could otherwise act on.
+    const member = await createWorkspaceMember({ role: "owner" });
+    mockAuthenticatedSession(member.user);
+    const { app } = createApp();
+
+    const response = await app.request("/api/user/api-key", {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({ name: "Too short-lived", expiresIn: 3600 }),
+    });
+
+    expect(response.status).toBe(400);
+    expect(await response.text()).toContain("expiresIn");
+  });
 });
