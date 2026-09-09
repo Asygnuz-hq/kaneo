@@ -29,6 +29,14 @@ else
   sed -i "s#MCP_AS_JSON_PLACEHOLDER#{}#g" /etc/nginx/conf.d/default.conf
 fi
 
+# ASYGNUZ: who may embed this Kaneo in an iframe (CSP frame-ancestors).
+# 'self' matches the X-Frame-Options: SAMEORIGIN default above -- no change
+# in behavior for anyone who leaves this unset. Set it to embed Kaneo inside
+# another trusted app, e.g. "'self' https://app.example.com".
+FRAME_ANCESTORS="${KANEO_FRAME_ANCESTORS:-'self'}"
+sed -i "s#KANEO_FRAME_ANCESTORS_PLACEHOLDER#$FRAME_ANCESTORS#g" /etc/nginx/conf.d/default.conf
+echo "✅ frame-ancestors set to: $FRAME_ANCESTORS"
+
 # Process KANEO_CLIENT_URL efficiently
 if [ ! -z "$KANEO_CLIENT_URL" ]; then
   echo "Found KANEO_CLIENT_URL: $KANEO_CLIENT_URL"

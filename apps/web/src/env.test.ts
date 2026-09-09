@@ -40,3 +40,60 @@ describe("runtime environment replacement", () => {
     );
   });
 });
+
+describe("KANEO_FRAME_ANCESTORS (CSP frame-ancestors for embedding)", () => {
+  // The exact default-value expression from env.sh, run in isolation (no
+  // sed -i here -- its in-place flag differs between BSD sed on a dev
+  // machine and the GNU/BusyBox sed the container actually runs, which
+  // isn't what this line is testing anyway).
+  function defaultedValue(kaneoFrameAncestors?: string): string {
+    return execFileSync(
+      "sh",
+      [
+        "-c",
+        `FRAME_ANCESTORS="\${KANEO_FRAME_ANCESTORS:-'self'}"; printf '%s' "$FRAME_ANCESTORS"`,
+      ],
+      {
+        encoding: "utf8",
+        env: {
+          ...process.env,
+          KANEO_FRAME_ANCESTORS: kaneoFrameAncestors ?? "",
+        },
+      },
+    );
+  }
+
+  it("defaults to 'self' when unset -- same as X-Frame-Options: SAMEORIGIN before this existed", () => {
+    expect(defaultedValue(undefined)).toBe("'self'");
+  });
+
+  it("passes through a configured allowlist so another origin can embed Kaneo", () => {
+    expect(defaultedValue("'self' https://app.asygnuz.com")).toBe(
+      "'self' https://app.asygnuz.com",
+    );
+  });
+
+  it("env.sh has the exact default-value expression this test exercises", () => {
+    const entrypoint = readFileSync(
+      resolve(import.meta.dirname, "../env.sh"),
+      "utf8",
+    );
+    expect(entrypoint).toContain(
+      `FRAME_ANCESTORS="\${KANEO_FRAME_ANCESTORS:-'self'}"`,
+    );
+  });
+
+  it("env.sh substitutes the same placeholder the nginx conf declares", () => {
+    const entrypoint = readFileSync(
+      resolve(import.meta.dirname, "../env.sh"),
+      "utf8",
+    );
+    const nginxConf = readFileSync(
+      resolve(import.meta.dirname, "../nginx.kaneo.conf"),
+      "utf8",
+    );
+
+    expect(entrypoint).toContain("KANEO_FRAME_ANCESTORS_PLACEHOLDER");
+    expect(nginxConf).toContain("KANEO_FRAME_ANCESTORS_PLACEHOLDER");
+  });
+});
