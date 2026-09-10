@@ -118,6 +118,7 @@ export const updateStatusBody = z.object({ status: z.string() });
 export const updatePriorityBody = z.object({ priority });
 
 export const updateMilestoneBody = z.object({ isMilestone: z.boolean() });
+export const updateBlockedBody = z.object({ isBlocked: z.boolean() });
 export const updateIssueTypeBody = z.object({ issueType });
 export const updateAssigneeBody = z.object({
   userId: z.string().nullable().openapi({ description: "Null unassigns." }),

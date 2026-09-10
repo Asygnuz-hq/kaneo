@@ -24,6 +24,7 @@ async function getTask(taskId: string) {
       startDate: taskTable.startDate,
       dueDate: taskTable.dueDate,
       isMilestone: taskTable.isMilestone,
+      isBlocked: taskTable.isBlocked,
       spec: taskTable.spec,
       position: taskTable.position,
       createdAt: taskTable.createdAt,

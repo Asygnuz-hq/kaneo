@@ -1956,7 +1956,11 @@
 			"customFieldUnset": "Not set",
 			"milestone": "Milestone",
 			"milestoneError": "Failed to update the milestone flag",
-			"milestoneHint": "Mark as a milestone -- shows as a diamond on the Gantt instead of a bar"
+			"milestoneHint": "Mark as a milestone -- shows as a diamond on the Gantt instead of a bar",
+			"blocked": "Blocked",
+			"blockedError": "Failed to update the blocked flag",
+			"blockedHint": "Mark as blocked -- the task keeps its column but shows a red badge",
+			"unblock": "Unblock"
 		},
 		"move": {
 			"title": "タスクを移動",

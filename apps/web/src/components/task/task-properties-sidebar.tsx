@@ -37,6 +37,7 @@ import { getPriorityLabel, getStatusDisplayLabel } from "@/lib/i18n/domain";
 import { getPriorityIcon } from "@/lib/priority";
 import { toast } from "@/lib/toast";
 import TaskAssigneePopover from "./task-assignee-popover";
+import { TaskBlockedToggle } from "./task-blocked-toggle";
 import TaskCustomFieldsSection from "./task-custom-fields-section";
 import TaskDueDatePopover from "./task-due-date-popover";
 import TaskLabelsPopover from "./task-labels-popover";
@@ -223,6 +224,7 @@ export default function TaskPropertiesSidebar({
                 </TaskPriorityPopover>
               )}
               {task && <TaskMilestoneToggle task={task} />}
+              {task && <TaskBlockedToggle task={task} />}
               {task && (
                 <TaskAssigneePopover task={task} workspaceId={workspaceId} />
               )}
@@ -383,6 +385,7 @@ export default function TaskPropertiesSidebar({
                   </TaskPriorityPopover>
                 )}
                 {task && <TaskMilestoneToggle task={task} />}
+                {task && <TaskBlockedToggle task={task} />}
                 {task && (
                   <TaskAssigneePopover task={task} workspaceId={workspaceId} />
                 )}
@@ -545,6 +548,7 @@ export default function TaskPropertiesSidebar({
                   </TaskPriorityPopover>
                 )}
                 {task && <TaskMilestoneToggle task={task} />}
+                {task && <TaskBlockedToggle task={task} />}
                 {task && (
                   <TaskAssigneePopover task={task} workspaceId={workspaceId} />
                 )}

@@ -1966,7 +1966,11 @@
 			"noDate": "Sin fecha",
 			"milestone": "Milestone",
 			"milestoneError": "Failed to update the milestone flag",
-			"milestoneHint": "Mark as a milestone -- shows as a diamond on the Gantt instead of a bar"
+			"milestoneHint": "Mark as a milestone -- shows as a diamond on the Gantt instead of a bar",
+			"blocked": "Bloqueada",
+			"unblock": "Desbloquear",
+			"blockedHint": "Marcar como bloqueada -- la tarea se queda en su columna pero muestra una insignia roja",
+			"blockedError": "No se pudo actualizar el estado de bloqueo"
 		},
 		"popover": {
 			"assignee": {

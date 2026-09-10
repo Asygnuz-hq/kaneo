@@ -1961,7 +1961,11 @@
 			"noDate": "No date",
 			"milestone": "Milestone",
 			"milestoneHint": "Mark as a milestone -- shows as a diamond on the Gantt instead of a bar",
-			"milestoneError": "Failed to update the milestone flag"
+			"milestoneError": "Failed to update the milestone flag",
+			"blocked": "Blocked",
+			"unblock": "Unblock",
+			"blockedHint": "Mark as blocked -- the task keeps its column but shows a red badge",
+			"blockedError": "Failed to update the blocked flag"
 		},
 		"move": {
 			"title": "Move task",

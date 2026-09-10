@@ -417,4 +417,46 @@ describe("API integration: task creation", () => {
       expect(persistedTask?.userId).toBeNull();
     },
   );
+
+  it("toggles the blocked flag without moving the task", async () => {
+    const member = await createWorkspaceMember({ role: "owner" });
+    const { project } = await createProjectFixture({
+      workspaceId: member.workspace.id,
+    });
+    mockAuthenticatedSession(member.user);
+    const { app } = createApp();
+
+    const created = await app.request(`/api/task/${project.id}`, {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({
+        title: "Bloqueable",
+        description: "",
+        priority: "medium",
+        status: "in-progress",
+      }),
+    });
+    const task = (await created.json()) as { id: string };
+
+    const blocked = await app.request(`/api/task/blocked/${task.id}`, {
+      method: "PUT",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({ isBlocked: true }),
+    });
+    expect(blocked.status).toBe(200);
+    const blockedTask = (await blocked.json()) as {
+      isBlocked: boolean;
+      status: string;
+    };
+    expect(blockedTask.isBlocked).toBe(true);
+    expect(blockedTask.status).toBe("in-progress");
+
+    const unblocked = await app.request(`/api/task/blocked/${task.id}`, {
+      method: "PUT",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({ isBlocked: false }),
+    });
+    const unblockedTask = (await unblocked.json()) as { isBlocked: boolean };
+    expect(unblockedTask.isBlocked).toBe(false);
+  });
 });
