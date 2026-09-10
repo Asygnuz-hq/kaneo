@@ -2225,7 +2225,8 @@
 			"label": "Type",
 			"story": "Story",
 			"task": "Task",
-			"epic": "Epic"
+			"epic": "Epic",
+			"requirement": "Business Requirement"
 		},
 		"sprint": {
 			"backlog": "Backlog",

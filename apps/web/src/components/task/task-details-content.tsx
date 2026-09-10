@@ -15,6 +15,7 @@ import useGetTaskRelations from "@/hooks/queries/task-relation/use-get-task-rela
 import type { ExternalLink } from "@/types/external-link";
 import TaskDescription from "./task-description";
 import TaskRelations from "./task-relations";
+import TaskSpecEditor from "./task-spec-editor";
 import TaskSubtasks from "./task-subtasks";
 import TaskTitle from "./task-title";
 
@@ -77,7 +78,11 @@ export default function TaskDetailsContent({
           {project?.slug}-{task?.number}
         </p>
         <TaskTitle taskId={taskId} />
-        <TaskDescription taskId={taskId} />
+        {task?.issueType === "requirement" || task?.issueType === "story" ? (
+          <TaskSpecEditor taskId={taskId} projectId={projectId} />
+        ) : (
+          <TaskDescription taskId={taskId} />
+        )}
       </div>
       {!isLoadingExternalLinks && externalLinks.length > 0 && (
         <div className="mt-4">

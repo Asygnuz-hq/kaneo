@@ -20,7 +20,25 @@ export const VIRTUAL_STATUSES = ["planned", "archived"] as const;
 // freshly-created epic has none yet. The list-view tree (parent/child
 // nesting, expand/collapse) is unrelated: that's still built from
 // "subtask" task_relation rows, on any task type.
-export const VALID_ISSUE_TYPES = ["task", "story", "bug", "epic"] as const;
+// "requirement" (Requisito de Negocio) is a parent type like epic, but with
+// its own structured spec (traceability, planned %, phase, ...) and a
+// read-time computed executed % from the completion of its child stories.
+export const VALID_ISSUE_TYPES = [
+  "task",
+  "story",
+  "bug",
+  "epic",
+  "requirement",
+] as const;
+
+export const TRACEABILITY_STATUSES = [
+  "inicio",
+  "cotizacion",
+  "desarrollo",
+  "pruebas",
+  "finalizado",
+  "bloqueado",
+] as const;
 
 export function assertValidPriority(priority: string): void {
   if (!(VALID_PRIORITIES as readonly string[]).includes(priority)) {

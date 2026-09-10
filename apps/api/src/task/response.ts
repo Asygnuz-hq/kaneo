@@ -1,7 +1,11 @@
 import { nullableResponseTimestamp, responseTimestamp, z } from "../openapi";
 
 const priorityDescription = "One of: no-priority, low, medium, high, urgent.";
-const issueTypeDescription = "One of: task, story, bug, epic.";
+const issueTypeDescription = "One of: task, story, bug, epic, requirement.";
+const specDescription =
+  "Structured payload for 'requirement' / 'story' tasks; null otherwise.";
+const executedPctDescription =
+  "Requirement tasks only: % of child stories in a final column. Null when there are no children yet, or the task is not a requirement.";
 
 export const taskSchema = z
   .object({
@@ -30,6 +34,12 @@ export const taskSchema = z
     startDate: nullableResponseTimestamp,
     dueDate: nullableResponseTimestamp,
     isMilestone: z.boolean(),
+    spec: z.unknown().nullable().openapi({ description: specDescription }),
+    executedPct: z
+      .number()
+      .nullable()
+      .optional()
+      .openapi({ description: executedPctDescription }),
     createdAt: responseTimestamp,
   })
   .openapi("Task");

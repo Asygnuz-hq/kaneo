@@ -15,6 +15,34 @@ type TaskExternalLink = {
   metadata: Record<string, unknown> | null;
 };
 
+// ASYGNUZ: structured payload for issueType "requirement" / "story",
+// carried on task.spec. `description` is regenerated from it server-side.
+export type RequirementSpec = {
+  traceabilityStatus:
+    | "inicio"
+    | "cotizacion"
+    | "desarrollo"
+    | "pruebas"
+    | "finalizado"
+    | "bloqueado";
+  plannedPct: number;
+  implementationPhase: string;
+  platform: string;
+  changeType: string;
+};
+
+export type StorySpec = {
+  como: string;
+  quiero: string;
+  para: string;
+  asIs: string;
+  toBe: string;
+  acceptanceCriteria: string;
+  businessRules: string;
+  functionalRequirements: string;
+  definitionOfDone: string;
+};
+
 type Task = {
   id: string;
   title: string;
@@ -23,6 +51,9 @@ type Task = {
   status: string;
   priority: string | null;
   issueType?: string | null;
+  spec?: RequirementSpec | StorySpec | null;
+  // Requirement tasks only: % of child stories in a final column.
+  executedPct?: number | null;
   sprintId?: string | null;
   startDate: string | null;
   dueDate: string | null;

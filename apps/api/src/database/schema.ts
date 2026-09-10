@@ -771,6 +771,16 @@ export const taskTable = pgTable(
     // esta bandera; startDate/dueDate se siguen usando igual (se fuerzan
     // iguales al marcarla como hito).
     isMilestone: boolean("is_milestone").default(false).notNull(),
+    // ASYGNUZ: campos estructurados por issueType. null para task/bug/epic.
+    //  - issueType "requirement": { traceabilityStatus, plannedPct,
+    //    implementationPhase, platform, changeType }. El % ejecutado NO se
+    //    guarda: se calcula al leer, desde el avance de las historias hijas.
+    //  - issueType "story": { como, quiero, para, asIs, toBe,
+    //    acceptanceCriteria, businessRules, functionalRequirements,
+    //    definitionOfDone }.
+    // "description" se regenera desde este spec al guardar, para que las
+    // tarjetas, la búsqueda y los exports sigan viendo texto legible.
+    spec: jsonb("spec"),
     // ASYGNUZ: Service Desk fase 2 -- set solo cuando la tarea nació como
     // ticket enviado por un cliente del portal (client-portal), no cuando la
     // crea alguien del equipo. Null en todos los demás casos.
