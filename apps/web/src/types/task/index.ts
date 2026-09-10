@@ -51,7 +51,10 @@ type Task = {
   status: string;
   priority: string | null;
   issueType?: string | null;
-  spec?: RequirementSpec | StorySpec | null;
+  // Structured payload for "requirement" / "story" issue types. Left as
+  // unknown (matching the API's z.unknown() response field); the spec
+  // editor narrows it to RequirementSpec / StorySpec by issueType.
+  spec?: unknown;
   // Requirement tasks only: % of child stories in a final column.
   executedPct?: number | null;
   sprintId?: string | null;
