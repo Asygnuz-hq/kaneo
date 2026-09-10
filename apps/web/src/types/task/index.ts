@@ -62,6 +62,8 @@ type Task = {
   startDate: string | null;
   dueDate: string | null;
   isMilestone?: boolean;
+  // ASYGNUZ: la tarea está bloqueada, esperando algo externo.
+  isBlocked?: boolean;
   position: number | null;
   createdAt: string;
   updatedAt?: string;

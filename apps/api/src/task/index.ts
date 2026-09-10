@@ -48,6 +48,7 @@ import {
 } from "./controllers/require-task-permission";
 import updateTask from "./controllers/update-task";
 import updateTaskAssignee from "./controllers/update-task-assignee";
+import updateTaskBlocked from "./controllers/update-task-blocked";
 import updateTaskDescription from "./controllers/update-task-description";
 import updateTaskDueDate from "./controllers/update-task-due-date";
 import updateTaskMilestone from "./controllers/update-task-milestone";
@@ -81,6 +82,7 @@ import {
   taskExternalAssigneeParam,
   taskParam,
   updateAssigneeBody,
+  updateBlockedBody,
   updateDescriptionBody,
   updateDueDateBody,
   updateMilestoneBody,
@@ -419,6 +421,35 @@ const updateTaskMilestoneRoute = createRoute({
     body: {
       required: true,
       content: { "application/json": { schema: updateMilestoneBody } },
+    },
+  },
+  responses: {
+    200: jsonResponse("The updated task", taskSchema),
+    403: errorResponse(
+      "No workspace access, or missing task:update permission",
+    ),
+    404: errorResponse("Unknown task"),
+  },
+});
+
+// ASYGNUZ: marca/desmarca una tarea como bloqueada.
+const updateTaskBlockedRoute = createRoute({
+  method: "put",
+  operationId: "updateTaskBlocked",
+  path: "/blocked/{id}",
+  tags: ["Tasks"],
+  summary: "Update task blocked flag",
+  description:
+    "Mark or unmark a task as blocked. The task keeps its column; only its appearance changes.",
+  middleware: [
+    workspaceAccess.fromTask(),
+    requireWorkspacePermission({ task: ["update"] }),
+  ] as const,
+  request: {
+    params: taskParam,
+    body: {
+      required: true,
+      content: { "application/json": { schema: updateBlockedBody } },
     },
   },
   responses: {
@@ -966,6 +997,18 @@ const task = apiRouter<BaseVariables & { workspaceId: string }>()
     const { isMilestone } = c.req.valid("json");
 
     const task = await updateTaskMilestone({ id, isMilestone });
+
+    return c.json(task, 200);
+  })
+  .openapi(updateTaskBlockedRoute, async (c) => {
+    const { id } = c.req.valid("param");
+    const { isBlocked } = c.req.valid("json");
+
+    const task = await updateTaskBlocked({
+      id,
+      isBlocked,
+      currentUserId: c.get("userId"),
+    });
 
     return c.json(task, 200);
   })

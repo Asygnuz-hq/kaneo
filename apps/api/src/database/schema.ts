@@ -771,6 +771,10 @@ export const taskTable = pgTable(
     // esta bandera; startDate/dueDate se siguen usando igual (se fuerzan
     // iguales al marcarla como hito).
     isMilestone: boolean("is_milestone").default(false).notNull(),
+    // ASYGNUZ: la tarea está bloqueada (esperando algo externo). Bandera
+    // aparte del status para no perder en qué columna iba; se muestra como
+    // una insignia roja en la tarjeta y se cuenta en las métricas.
+    isBlocked: boolean("is_blocked").default(false).notNull(),
     // ASYGNUZ: campos estructurados por issueType. null para task/bug/epic.
     //  - issueType "requirement": { traceabilityStatus, plannedPct,
     //    implementationPhase, platform, changeType }. El % ejecutado NO se

@@ -3,6 +3,7 @@ import { CSS } from "@dnd-kit/utilities";
 import { useNavigate } from "@tanstack/react-router";
 import { format } from "date-fns";
 import {
+  Ban,
   Calendar,
   CalendarClock,
   CalendarX,
@@ -261,6 +262,15 @@ function TaskCard({ task, disableDragDrop = false }: TaskCardProps) {
                 {task.title}
               </div>
             </div>
+
+            {task.isBlocked && (
+              <div className="mb-2.5">
+                <span className="inline-flex items-center gap-1 rounded border border-destructive-foreground/40 bg-destructive-foreground/10 px-2 py-1 text-[10px] font-medium text-destructive-foreground">
+                  <Ban className="h-3 w-3" />
+                  <span>Bloqueada</span>
+                </span>
+              </div>
+            )}
 
             {showLabels && (
               <div className="mb-2.5">

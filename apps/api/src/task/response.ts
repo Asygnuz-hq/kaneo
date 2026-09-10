@@ -34,6 +34,10 @@ export const taskSchema = z
     startDate: nullableResponseTimestamp,
     dueDate: nullableResponseTimestamp,
     isMilestone: z.boolean(),
+    isBlocked: z.boolean().optional().openapi({
+      description:
+        "ASYGNUZ: the task is blocked, waiting on something external.",
+    }),
     spec: z.unknown().nullable().openapi({ description: specDescription }),
     executedPct: z
       .number()
@@ -104,6 +108,10 @@ export const boardTaskSchema = z
     isMilestone: z.boolean().openapi({
       description:
         "Renders as a diamond marker at dueDate in the Gantt view instead of a bar.",
+    }),
+    isBlocked: z.boolean().optional().openapi({
+      description:
+        "ASYGNUZ: the task is blocked, waiting on something external.",
     }),
     position: z.number().nullable(),
     createdAt: responseTimestamp,

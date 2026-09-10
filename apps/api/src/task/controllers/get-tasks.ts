@@ -141,6 +141,7 @@ async function getTasks(projectId: string, options: GetTasksOptions = {}) {
     startDate: taskTable.startDate,
     dueDate: taskTable.dueDate,
     isMilestone: taskTable.isMilestone,
+    isBlocked: taskTable.isBlocked,
     position: taskTable.position,
     createdAt: taskTable.createdAt,
     userId: taskTable.userId,
