@@ -45,6 +45,7 @@ async function getWorkspaceRequirements(workspaceId: string) {
       totalStories: progress?.totalStories ?? 0,
       doneStories: progress?.doneStories ?? 0,
       executedPct: progress?.executedPct ?? null,
+      stories: progress?.stories ?? [],
     };
   });
 }

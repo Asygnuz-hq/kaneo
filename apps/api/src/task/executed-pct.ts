@@ -54,6 +54,14 @@ export type RequirementProgress = {
   doneStories: number;
   // % of child stories in a final column; null when there are no children yet.
   executedPct: number | null;
+  // The child stories themselves, so a list view can link straight to them.
+  stories: {
+    id: string;
+    number: number | null;
+    title: string;
+    status: string;
+    done: boolean;
+  }[];
 };
 
 // Batch variant for list/overview endpoints: one pass for many requirements.
@@ -89,6 +97,8 @@ export async function computeRequirementProgressMany(
     ? await db
         .select({
           id: taskTable.id,
+          number: taskTable.number,
+          title: taskTable.title,
           status: taskTable.status,
           projectId: taskTable.projectId,
         })
@@ -118,12 +128,20 @@ export async function computeRequirementProgressMany(
     const kids = (childIdsByParent.get(reqId) ?? [])
       .map((id) => childById.get(id))
       .filter((c): c is NonNullable<typeof c> => Boolean(c));
-    const done = kids.filter((c) => finalSlugs.has(c.status)).length;
+    const stories = kids.map((c) => ({
+      id: c.id,
+      number: c.number,
+      title: c.title,
+      status: c.status,
+      done: finalSlugs.has(c.status),
+    }));
+    const done = stories.filter((s) => s.done).length;
     out.set(reqId, {
       totalStories: kids.length,
       doneStories: done,
       executedPct:
         kids.length === 0 ? null : Math.round((done / kids.length) * 100),
+      stories,
     });
   }
   return out;

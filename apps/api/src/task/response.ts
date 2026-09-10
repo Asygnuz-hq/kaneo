@@ -201,6 +201,17 @@ export const workspaceRequirementSchema = z
       .number()
       .nullable()
       .openapi({ description: executedPctDescription }),
+    stories: z
+      .array(
+        z.object({
+          id: z.string(),
+          number: z.number().nullable(),
+          title: z.string(),
+          status: z.string(),
+          done: z.boolean(),
+        }),
+      )
+      .openapi({ description: "The requirement's child stories." }),
   })
   .openapi("WorkspaceRequirement");
 
