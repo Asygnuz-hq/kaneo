@@ -421,6 +421,13 @@
 			"when": 1788559352714,
 			"tag": "0059_nappy_silverclaw",
 			"breakpoints": true
+		},
+		{
+			"idx": 60,
+			"version": "7",
+			"when": 1789051617343,
+			"tag": "0060_harsh_ikaris",
+			"breakpoints": true
 		}
 	]
 }

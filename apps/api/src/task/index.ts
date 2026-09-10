@@ -51,6 +51,7 @@ import updateTaskDescription from "./controllers/update-task-description";
 import updateTaskDueDate from "./controllers/update-task-due-date";
 import updateTaskMilestone from "./controllers/update-task-milestone";
 import updateTaskPriority from "./controllers/update-task-priority";
+import updateTaskSpec from "./controllers/update-task-spec";
 import updateTaskSprint from "./controllers/update-task-sprint";
 import updateTaskStatus from "./controllers/update-task-status";
 import updateTaskTitle from "./controllers/update-task-title";
@@ -82,6 +83,7 @@ import {
   updateDueDateBody,
   updateMilestoneBody,
   updatePriorityBody,
+  updateSpecBody,
   updateStatusBody,
   updateTaskBody,
   updateTaskSprintBody,
@@ -713,6 +715,39 @@ const updateTaskDescriptionRoute = createRoute({
   },
 });
 
+// ASYGNUZ: structured spec for "requirement" / "story" tasks. Regenerates
+// `description` from the spec so the rest of the app keeps working.
+const updateTaskSpecRoute = createRoute({
+  method: "put",
+  operationId: "updateTaskSpec",
+  path: "/spec/{id}",
+  tags: ["Tasks"],
+  summary: "Update task structured spec",
+  description:
+    "Set the structured payload for a 'requirement' or 'story' task. The task's `description` is regenerated from it.",
+  middleware: [
+    workspaceAccess.fromTask(),
+    requireWorkspacePermission({ task: ["update"] }),
+    requireEntitlement,
+  ] as const,
+  request: {
+    params: taskParam,
+    body: {
+      required: true,
+      content: { "application/json": { schema: updateSpecBody } },
+    },
+  },
+  responses: {
+    200: jsonResponse("The updated task", taskSchema),
+    400: errorResponse(
+      "Malformed spec, or the task's issueType does not take one",
+    ),
+    403: errorResponse(
+      "No workspace access, or missing task:update permission",
+    ),
+  },
+});
+
 const task = apiRouter<BaseVariables & { workspaceId: string }>()
   .openapi(listTasksRoute, async (c) => {
     const { projectId } = c.req.valid("param");
@@ -760,6 +795,7 @@ const task = apiRouter<BaseVariables & { workspaceId: string }>()
       issueType,
       status,
       userId,
+      spec,
     } = c.req.valid("json");
 
     const parsedStartDate =
@@ -784,6 +820,7 @@ const task = apiRouter<BaseVariables & { workspaceId: string }>()
       priority,
       issueType,
       status,
+      spec,
     });
 
     return c.json(task, 200);
@@ -1154,6 +1191,15 @@ const task = apiRouter<BaseVariables & { workspaceId: string }>()
       description,
       currentUserId,
     });
+
+    return c.json(task, 200);
+  })
+  .openapi(updateTaskSpecRoute, async (c) => {
+    const { id } = c.req.valid("param");
+    const { spec } = c.req.valid("json");
+    const currentUserId = c.get("userId");
+
+    const task = await updateTaskSpec({ id, spec, currentUserId });
 
     return c.json(task, 200);
   });

@@ -8,6 +8,7 @@ import {
   taskTable,
   userTable,
 } from "../../database/schema";
+import { computeExecutedPct } from "../executed-pct";
 
 async function getTask(taskId: string) {
   const task = await db
@@ -23,6 +24,7 @@ async function getTask(taskId: string) {
       startDate: taskTable.startDate,
       dueDate: taskTable.dueDate,
       isMilestone: taskTable.isMilestone,
+      spec: taskTable.spec,
       position: taskTable.position,
       createdAt: taskTable.createdAt,
       userId: taskTable.userId,
@@ -63,7 +65,12 @@ async function getTask(taskId: string) {
     )
     .where(eq(taskExternalAssigneeTable.taskId, taskId));
 
-  return { ...task[0], assignees, externalAssignees };
+  const executedPct =
+    task[0].issueType === "requirement"
+      ? await computeExecutedPct(task[0].id)
+      : null;
+
+  return { ...task[0], executedPct, assignees, externalAssignees };
 }
 
 export default getTask;

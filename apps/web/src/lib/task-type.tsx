@@ -1,4 +1,4 @@
-import { Bookmark, Bug, SquareCheck, Zap } from "lucide-react";
+import { Bookmark, Bug, ClipboardList, SquareCheck, Zap } from "lucide-react";
 
 // ASYGNUZ: Jira-style issue type icon, shown next to the task ID on cards
 // and in the list view. "epic" is an explicit choice a person makes when
@@ -8,6 +8,10 @@ import { Bookmark, Bug, SquareCheck, Zap } from "lucide-react";
 // any type can have children.
 export function getIssueTypeIcon(issueType: string | null | undefined) {
   switch (issueType) {
+    case "requirement":
+      return (
+        <ClipboardList className="h-[12px] w-[12px] fill-amber-500/20 text-amber-500" />
+      );
     case "epic":
       return (
         <Zap className="h-[12px] w-[12px] fill-violet-500/20 text-violet-500" />

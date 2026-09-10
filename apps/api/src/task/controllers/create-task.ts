@@ -7,6 +7,7 @@ import {
   assertAssignableUser,
   getProjectWorkspaceId,
 } from "../../utils/assert-assignable-user";
+import { parseSpec, specToDescription } from "../spec";
 import { assertValidTaskStatus } from "../validate-task-fields";
 import { claimTaskNumber } from "./claim-task-numbers";
 
@@ -21,6 +22,7 @@ async function createTask({
   description,
   priority,
   issueType,
+  spec,
   requestedByClientId,
 }: {
   projectId: string;
@@ -33,6 +35,8 @@ async function createTask({
   description?: string;
   priority?: string;
   issueType?: string;
+  // ASYGNUZ: payload estructurado para issueType "requirement" / "story".
+  spec?: unknown;
   // ASYGNUZ: set únicamente cuando la tarea nace de un ticket del portal
   // de cliente (Service Desk fase 2) -- currentUserId llega vacío en ese
   // caso, no hay usuario interno que la haya creado.
@@ -41,6 +45,10 @@ async function createTask({
   const resolvedStatus = status || "to-do";
   const resolvedPriority = priority || "no-priority";
   const resolvedIssueType = issueType || "task";
+  const parsedSpec = parseSpec(resolvedIssueType, spec);
+  const resolvedDescription = parsedSpec
+    ? specToDescription(resolvedIssueType, parsedSpec, description || "")
+    : description || "";
 
   const normalizedUserId = userId?.trim() || undefined;
 
@@ -94,9 +102,10 @@ async function createTask({
         columnId: column?.id ?? null,
         startDate: startDate || null,
         dueDate: dueDate || null,
-        description: description || "",
+        description: resolvedDescription,
         priority: resolvedPriority,
         issueType: resolvedIssueType,
+        spec: parsedSpec ?? null,
         number: taskNumber,
         position: nextPosition,
         requestedByClientId: requestedByClientId ?? null,

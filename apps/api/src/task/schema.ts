@@ -1,4 +1,5 @@
 import { z } from "../openapi";
+import { taskSpecInputSchema } from "./spec";
 import { VALID_ISSUE_TYPES, VALID_PRIORITIES } from "./validate-task-fields";
 
 const pagingNumber = (min: number, max: number) =>
@@ -68,6 +69,10 @@ export const createTaskBody = z.object({
   issueType: issueType.optional(),
   status: z.string().openapi({ description: "The target column's slug." }),
   userId: z.string().optional().openapi({ description: "Assignee, if any." }),
+  spec: taskSpecInputSchema.optional().openapi({
+    description:
+      "Structured payload for issueType 'requirement' or 'story'. When set, `description` is regenerated from it.",
+  }),
 });
 
 export const updateTaskBody = z.object({
@@ -122,6 +127,12 @@ export const updateTaskSprintBody = z.object({
 export const updateDueDateBody = z.object({ dueDate: z.string().optional() });
 export const updateTitleBody = z.object({ title: z.string() });
 export const updateDescriptionBody = z.object({ description: z.string() });
+export const updateSpecBody = z.object({
+  spec: taskSpecInputSchema.openapi({
+    description:
+      "Structured payload for the task's issueType. `description` is regenerated from it.",
+  }),
+});
 
 const surface = z.enum(["description", "comment"]).openapi({
   description: "Where the image is used, which decides how it is scoped.",
