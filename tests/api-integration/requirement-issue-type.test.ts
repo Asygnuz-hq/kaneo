@@ -132,6 +132,87 @@ describe("API integration: requirement issue type", () => {
     expect(updated.description).toContain("debe ser automático");
   });
 
+  it("GET /api/task/requirements lists the workspace's requirements with spec and story progress", async () => {
+    const member = await createWorkspaceMember({ role: "owner" });
+    const { project } = await createProjectFixture({
+      workspaceId: member.workspace.id,
+    });
+    mockAuthenticatedSession(member.user);
+    const { app } = createApp();
+
+    const reqRes = await app.request(`/api/task/${project.id}`, {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({
+        title: "Requisito con historias",
+        description: "",
+        priority: "high",
+        issueType: "requirement",
+        status: "to-do",
+        spec: {
+          traceabilityStatus: "pruebas",
+          plannedPct: 60,
+          implementationPhase: "Fase 2",
+          platform: "Loggro",
+          changeType: "Nuevo",
+        },
+      }),
+    });
+    const requirement = (await reqRes.json()) as { id: string };
+
+    const storyIds: string[] = [];
+    for (const title of ["HU-A", "HU-B", "HU-C"]) {
+      const res = await app.request(`/api/task/${project.id}`, {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({
+          title,
+          description: "",
+          priority: "medium",
+          issueType: "story",
+          status: "to-do",
+        }),
+      });
+      const story = (await res.json()) as { id: string };
+      storyIds.push(story.id);
+      await app.request("/api/task-relation", {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({
+          sourceTaskId: requirement.id,
+          targetTaskId: story.id,
+          relationType: "subtask",
+        }),
+      });
+    }
+    await app.request(`/api/task/status/${storyIds[0]}`, {
+      method: "PUT",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({ status: "done" }),
+    });
+
+    const listRes = await app.request(
+      `/api/task/requirements?workspaceId=${member.workspace.id}`,
+    );
+    expect(listRes.status).toBe(200);
+    const list = (await listRes.json()) as Array<{
+      id: string;
+      title: string;
+      spec: { platform: string } | null;
+      totalStories: number;
+      doneStories: number;
+      executedPct: number | null;
+      projectName: string;
+    }>;
+    expect(list).toHaveLength(1);
+    expect(list[0].id).toBe(requirement.id);
+    expect(list[0].spec?.platform).toBe("Loggro");
+    expect(list[0].totalStories).toBe(3);
+    expect(list[0].doneStories).toBe(1);
+    expect(list[0].executedPct).toBe(33);
+    expect(list[0].projectName).toBe(project.name);
+  });
+
   it("rejects a spec on an issueType that does not take one", async () => {
     const member = await createWorkspaceMember({ role: "owner" });
     const { project } = await createProjectFixture({

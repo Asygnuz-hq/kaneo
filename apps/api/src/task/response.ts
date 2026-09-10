@@ -175,6 +175,39 @@ export const boardSchema = z
   })
   .openapi("BoardResponse");
 
+export const workspaceRequirementSchema = z
+  .object({
+    id: z.string(),
+    number: z.number().nullable(),
+    title: z.string(),
+    status: z
+      .string()
+      .openapi({ description: "Slug of the column it sits in." }),
+    priority: z.string().openapi({ description: priorityDescription }),
+    startDate: nullableResponseTimestamp,
+    dueDate: nullableResponseTimestamp,
+    createdAt: responseTimestamp,
+    spec: z.unknown().nullable().openapi({ description: specDescription }),
+    projectId: z.string(),
+    projectName: z.string(),
+    projectSlug: z.string(),
+    totalStories: z.number().openapi({
+      description: "Child stories (subtask relations) of this requirement.",
+    }),
+    doneStories: z.number().openapi({
+      description: "Child stories currently in a final column.",
+    }),
+    executedPct: z
+      .number()
+      .nullable()
+      .openapi({ description: executedPctDescription }),
+  })
+  .openapi("WorkspaceRequirement");
+
+export const workspaceRequirementListSchema = z
+  .array(workspaceRequirementSchema)
+  .openapi("WorkspaceRequirementList");
+
 export const bulkResultSchema = z
   .object({ success: z.boolean(), updatedCount: z.number() })
   .openapi("BulkTaskResult");

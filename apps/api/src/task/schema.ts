@@ -23,6 +23,10 @@ export const taskExternalAssigneeParam = z.object({
 
 export const projectIdParam = z.object({ projectId: z.string() });
 
+export const workspaceRequirementsQuery = z.object({
+  workspaceId: z.string(),
+});
+
 const priority = z.enum(VALID_PRIORITIES);
 const issueType = z.enum(VALID_ISSUE_TYPES);
 
