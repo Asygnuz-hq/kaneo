@@ -132,6 +132,58 @@ describe("API integration: requirement issue type", () => {
     expect(updated.description).toContain("debe ser automático");
   });
 
+  it("keeps the requirement's free-text context in the regenerated description", async () => {
+    const member = await createWorkspaceMember({ role: "owner" });
+    const { project } = await createProjectFixture({
+      workspaceId: member.workspace.id,
+    });
+    mockAuthenticatedSession(member.user);
+    const { app } = createApp();
+
+    const reqRes = await app.request(`/api/task/${project.id}`, {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({
+        title: "Requisito con contexto",
+        description: "",
+        priority: "high",
+        issueType: "requirement",
+        status: "to-do",
+        spec: {
+          context: "El cliente necesita cerrar la venta desde el checkout.",
+          traceabilityStatus: "cotizacion",
+          plannedPct: 40,
+        },
+      }),
+    });
+    const requirement = (await reqRes.json()) as {
+      id: string;
+      description: string;
+    };
+    expect(requirement.description).toContain(
+      "El cliente necesita cerrar la venta desde el checkout.",
+    );
+    expect(requirement.description).toContain("Cotización");
+
+    // Editing only the metadata must not drop the context prose.
+    const specRes = await app.request(`/api/task/spec/${requirement.id}`, {
+      method: "PUT",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({
+        spec: {
+          context: "El cliente necesita cerrar la venta desde el checkout.",
+          traceabilityStatus: "desarrollo",
+          plannedPct: 70,
+        },
+      }),
+    });
+    const updated = (await specRes.json()) as { description: string };
+    expect(updated.description).toContain(
+      "El cliente necesita cerrar la venta desde el checkout.",
+    );
+    expect(updated.description).toContain("Desarrollo");
+  });
+
   it("GET /api/task/requirements lists the workspace's requirements with spec and story progress", async () => {
     const member = await createWorkspaceMember({ role: "owner" });
     const { project } = await createProjectFixture({

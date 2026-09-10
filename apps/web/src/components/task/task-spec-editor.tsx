@@ -21,6 +21,7 @@ const TRACEABILITY: {
 ];
 
 const EMPTY_REQUIREMENT: RequirementSpec = {
+  context: "",
   traceabilityStatus: "inicio",
   plannedPct: 0,
   implementationPhase: "",
@@ -101,6 +102,19 @@ export default function TaskSpecEditor({
     return (
       <div className="flex flex-col gap-4 rounded-lg border border-border bg-muted/30 p-4">
         <p className="text-sm font-semibold">Requisito de Negocio</p>
+
+        <div className="flex flex-col gap-1.5">
+          {fieldLabel("Descripción / Contexto del requisito")}
+          <Textarea
+            rows={4}
+            value={requirement.context}
+            onChange={(e) =>
+              setRequirement((prev) => ({ ...prev, context: e.target.value }))
+            }
+            onBlur={() => save(requirement)}
+            placeholder="Qué se necesita y por qué, desde el negocio."
+          />
+        </div>
 
         <div className="flex flex-col gap-1.5">
           {fieldLabel("Estado de Trazabilidad")}
