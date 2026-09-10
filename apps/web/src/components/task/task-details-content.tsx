@@ -99,6 +99,7 @@ export default function TaskDetailsContent({
             projectId={projectId}
             workspaceId={workspaceId}
             parentStatus={task.status}
+            parentIssueType={task.issueType}
           />
         )}
       </div>

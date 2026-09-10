@@ -39,6 +39,10 @@ type TaskSubtasksProps = {
   projectId: string;
   workspaceId: string;
   parentStatus: string;
+  // ASYGNUZ: cuando el padre es un "requirement" (Requisito de Negocio),
+  // sus subtareas son Historias de Usuario -- se crean con issueType
+  // "story" para que abran con el editor estructurado.
+  parentIssueType?: string | null;
 };
 
 export default function TaskSubtasks({
@@ -46,6 +50,7 @@ export default function TaskSubtasks({
   projectId,
   workspaceId,
   parentStatus,
+  parentIssueType,
 }: TaskSubtasksProps) {
   const { t } = useTranslation();
   const navigate = useNavigate();
@@ -270,6 +275,9 @@ export default function TaskSubtasks({
         projectId,
         status: initialStatus,
         priority: "no-priority",
+        ...(parentIssueType === "requirement"
+          ? { issueType: "story" as const }
+          : {}),
       });
 
       await createRelation.mutateAsync({
@@ -403,7 +411,11 @@ export default function TaskSubtasks({
             <div className="flex items-center gap-2 mt-2">
               <Input
                 size="sm"
-                placeholder={t("tasks:subtasks.inputPlaceholder")}
+                placeholder={
+                  parentIssueType === "requirement"
+                    ? "Título de la historia de usuario"
+                    : t("tasks:subtasks.inputPlaceholder")
+                }
                 value={newTitle}
                 onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
                   setNewTitle(e.target.value)
