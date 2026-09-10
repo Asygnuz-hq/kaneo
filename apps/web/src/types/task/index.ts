@@ -18,6 +18,7 @@ type TaskExternalLink = {
 // ASYGNUZ: structured payload for issueType "requirement" / "story",
 // carried on task.spec. `description` is regenerated from it server-side.
 export type RequirementSpec = {
+  context: string;
   traceabilityStatus:
     | "inicio"
     | "cotizacion"

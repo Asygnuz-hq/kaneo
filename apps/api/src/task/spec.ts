@@ -8,6 +8,9 @@ import { TRACEABILITY_STATUSES } from "./validate-task-fields";
 
 export const requirementSpecSchema = z
   .object({
+    // Free-text description of the requirement itself. Kept in the spec so a
+    // spec save does not wipe it out of the regenerated `description`.
+    context: z.string().default(""),
     traceabilityStatus: z.enum(TRACEABILITY_STATUSES).default("inicio"),
     plannedPct: z.number().int().min(0).max(100).default(0),
     implementationPhase: z.string().default(""),
@@ -82,7 +85,8 @@ export function specToDescription(
       lines.push(`**Fase de implementación:** ${s.implementationPhase}`);
     if (s.platform) lines.push(`**Plataforma / Software:** ${s.platform}`);
     if (s.changeType) lines.push(`**Tipo de cambio:** ${s.changeType}`);
-    return lines.join("\n");
+    const meta = lines.join("\n");
+    return s.context ? `${s.context}\n\n---\n\n${meta}` : meta;
   }
 
   const s = spec as StorySpec;
