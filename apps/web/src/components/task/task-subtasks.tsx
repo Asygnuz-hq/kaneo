@@ -29,6 +29,7 @@ import useGetTaskRelations from "@/hooks/queries/task-relation/use-get-task-rela
 import useActiveWorkspace from "@/hooks/queries/workspace/use-active-workspace";
 import { useGetActiveWorkspaceUsers } from "@/hooks/queries/workspace-users/use-get-active-workspace-users";
 import { useWorkspacePermission } from "@/hooks/use-workspace-permission";
+import { getIssueTypeIcon } from "@/lib/task-type";
 import { toast } from "@/lib/toast";
 import queryClient from "@/query-client";
 import type Task from "@/types/task";
@@ -39,10 +40,21 @@ type TaskSubtasksProps = {
   projectId: string;
   workspaceId: string;
   parentStatus: string;
-  // ASYGNUZ: cuando el padre es un "requirement" (Requisito de Negocio),
-  // sus subtareas son Historias de Usuario -- se crean con issueType
-  // "story" para que abran con el editor estructurado.
+  // ASYGNUZ: el tipo de la subtarea se elige al crearla (tarea / historia /
+  // bug). Por defecto, bajo un "requirement" (Requisito de Negocio) es una
+  // Historia de Usuario; bajo cualquier otro padre, una tarea.
   parentIssueType?: string | null;
+};
+
+// ASYGNUZ: tipos que una subtarea puede tomar (epic/requirement son padres,
+// no subtareas).
+const SUBTASK_TYPES = ["task", "story", "bug"] as const;
+type SubtaskType = (typeof SUBTASK_TYPES)[number];
+
+const SUBTASK_TYPE_LABEL: Record<SubtaskType, string> = {
+  task: "Tarea",
+  story: "Historia de Usuario",
+  bug: "Bug",
 };
 
 export default function TaskSubtasks({
@@ -57,6 +69,10 @@ export default function TaskSubtasks({
   const [isOpen, setIsOpen] = useState(true);
   const [isAdding, setIsAdding] = useState(false);
   const [newTitle, setNewTitle] = useState("");
+  const defaultSubtaskType: SubtaskType =
+    parentIssueType === "requirement" ? "story" : "task";
+  const [subtaskType, setSubtaskType] =
+    useState<SubtaskType>(defaultSubtaskType);
   const [deleteTaskId, setDeleteTaskId] = useState<string | null>(null);
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
   const [focusedIndex, setFocusedIndex] = useState(-1);
@@ -275,9 +291,7 @@ export default function TaskSubtasks({
         projectId,
         status: initialStatus,
         priority: "no-priority",
-        ...(parentIssueType === "requirement"
-          ? { issueType: "story" as const }
-          : {}),
+        issueType: subtaskType,
       });
 
       await createRelation.mutateAsync({
@@ -287,6 +301,7 @@ export default function TaskSubtasks({
       });
 
       setNewTitle("");
+      setSubtaskType(defaultSubtaskType);
       setIsAdding(false);
     } catch {
       toast.error(t("tasks:subtasks.createError"));
@@ -352,7 +367,10 @@ export default function TaskSubtasks({
               size="xs"
               className="text-muted-foreground"
               aria-label={`${t("tasks:subtasks.addAction")} ${t("tasks:subtasks.title")}`}
-              onClick={() => setIsAdding(true)}
+              onClick={() => {
+                setSubtaskType(defaultSubtaskType);
+                setIsAdding(true);
+              }}
               disabled={!canCreateSubtask}
             >
               <Plus className="size-3.5" />
@@ -408,46 +426,69 @@ export default function TaskSubtasks({
           </div>
 
           {isAdding && canEdit && canCreate && (
-            <div className="flex items-center gap-2 mt-2">
-              <Input
-                size="sm"
-                placeholder={
-                  parentIssueType === "requirement"
-                    ? "Título de la historia de usuario"
-                    : t("tasks:subtasks.inputPlaceholder")
-                }
-                value={newTitle}
-                onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-                  setNewTitle(e.target.value)
-                }
-                onKeyDown={(e: React.KeyboardEvent<HTMLInputElement>) => {
-                  if (e.key === "Enter") handleAddSubtask();
-                  if (e.key === "Escape") {
+            <div className="flex flex-col gap-2 mt-2">
+              <div className="flex items-center gap-1">
+                {SUBTASK_TYPES.map((type) => (
+                  <button
+                    key={type}
+                    type="button"
+                    onClick={() => setSubtaskType(type)}
+                    className={`flex items-center gap-1 rounded-md border px-2 py-1 text-xs transition-colors ${
+                      subtaskType === type
+                        ? "border-primary bg-primary/10 text-foreground"
+                        : "border-border text-muted-foreground hover:bg-accent/50"
+                    }`}
+                  >
+                    {getIssueTypeIcon(type)}
+                    {SUBTASK_TYPE_LABEL[type]}
+                  </button>
+                ))}
+              </div>
+              <div className="flex items-center gap-2">
+                <Input
+                  size="sm"
+                  placeholder={
+                    subtaskType === "story"
+                      ? "Título de la historia de usuario"
+                      : subtaskType === "bug"
+                        ? "Título del bug"
+                        : t("tasks:subtasks.inputPlaceholder")
+                  }
+                  value={newTitle}
+                  onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+                    setNewTitle(e.target.value)
+                  }
+                  onKeyDown={(e: React.KeyboardEvent<HTMLInputElement>) => {
+                    if (e.key === "Enter") handleAddSubtask();
+                    if (e.key === "Escape") {
+                      setIsAdding(false);
+                      setNewTitle("");
+                    }
+                  }}
+                  autoFocus
+                />
+                <Button
+                  size="xs"
+                  onClick={handleAddSubtask}
+                  disabled={
+                    !newTitle.trim() ||
+                    createTask.isPending ||
+                    !canCreateSubtask
+                  }
+                >
+                  {t("tasks:subtasks.addAction")}
+                </Button>
+                <Button
+                  variant="ghost"
+                  size="xs"
+                  onClick={() => {
                     setIsAdding(false);
                     setNewTitle("");
-                  }
-                }}
-                autoFocus
-              />
-              <Button
-                size="xs"
-                onClick={handleAddSubtask}
-                disabled={
-                  !newTitle.trim() || createTask.isPending || !canCreateSubtask
-                }
-              >
-                {t("tasks:subtasks.addAction")}
-              </Button>
-              <Button
-                variant="ghost"
-                size="xs"
-                onClick={() => {
-                  setIsAdding(false);
-                  setNewTitle("");
-                }}
-              >
-                {t("common:actions.cancel")}
-              </Button>
+                  }}
+                >
+                  {t("common:actions.cancel")}
+                </Button>
+              </div>
             </div>
           )}
 
