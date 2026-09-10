@@ -36,6 +36,7 @@ import deleteTask from "./controllers/delete-task";
 import exportTasks from "./controllers/export-tasks";
 import getTask from "./controllers/get-task";
 import getTasks from "./controllers/get-tasks";
+import getWorkspaceRequirements from "./controllers/get-workspace-requirements";
 import importTasks from "./controllers/import-tasks";
 import moveTask from "./controllers/move-task";
 import removeTaskAssignee from "./controllers/remove-assignee";
@@ -65,6 +66,7 @@ import {
   taskImportResultSchema,
   taskSchema,
   taskWithAssigneeSchema,
+  workspaceRequirementListSchema,
 } from "./response";
 import {
   bulkUpdateBody,
@@ -88,6 +90,7 @@ import {
   updateTaskBody,
   updateTaskSprintBody,
   updateTitleBody,
+  workspaceRequirementsQuery,
 } from "./schema";
 
 const listTasksRoute = createRoute({
@@ -106,6 +109,25 @@ const listTasksRoute = createRoute({
       "Unknown project, or its workspace could not be determined",
     ),
     403: errorResponse("No access to the project's workspace"),
+  },
+});
+
+const listWorkspaceRequirementsRoute = createRoute({
+  method: "get",
+  operationId: "listWorkspaceRequirements",
+  path: "/requirements",
+  tags: ["Tasks"],
+  summary: "List workspace requirements",
+  description:
+    "Every 'requirement' task in the workspace, each with its structured spec and child-story progress (total, done, executed %). One call for a Requisitos de Negocio overview.",
+  middleware: [workspaceAccess.fromQuery("workspaceId")] as const,
+  request: { query: workspaceRequirementsQuery },
+  responses: {
+    200: jsonResponse(
+      "The workspace's requirement tasks",
+      workspaceRequirementListSchema,
+    ),
+    403: errorResponse("No access to the workspace"),
   },
 });
 
@@ -756,6 +778,10 @@ const task = apiRouter<BaseVariables & { workspaceId: string }>()
     const tasks = await getTasks(projectId, filters);
 
     return c.json(tasks, 200);
+  })
+  .openapi(listWorkspaceRequirementsRoute, async (c) => {
+    const { workspaceId } = c.req.valid("query");
+    return c.json(await getWorkspaceRequirements(workspaceId), 200);
   })
   .openapi(bulkUpdateTasksRoute, async (c) => {
     const { taskIds, operation, value } = c.req.valid("json");

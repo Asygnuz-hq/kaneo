@@ -49,11 +49,19 @@ export async function computeExecutedPct(
   return Math.round((done / children.length) * 100);
 }
 
-// Batch variant for list/board endpoints: one pass for many requirements.
-export async function computeExecutedPctMany(
+export type RequirementProgress = {
+  totalStories: number;
+  doneStories: number;
+  // % of child stories in a final column; null when there are no children yet.
+  executedPct: number | null;
+};
+
+// Batch variant for list/overview endpoints: one pass for many requirements.
+// Returns story counts alongside the % so a caller can show "3/8 historias".
+export async function computeRequirementProgressMany(
   requirementIds: string[],
-): Promise<Map<string, number | null>> {
-  const out = new Map<string, number | null>();
+): Promise<Map<string, RequirementProgress>> {
+  const out = new Map<string, RequirementProgress>();
   if (requirementIds.length === 0) return out;
 
   const relations = await db
@@ -110,12 +118,13 @@ export async function computeExecutedPctMany(
     const kids = (childIdsByParent.get(reqId) ?? [])
       .map((id) => childById.get(id))
       .filter((c): c is NonNullable<typeof c> => Boolean(c));
-    if (kids.length === 0) {
-      out.set(reqId, null);
-      continue;
-    }
     const done = kids.filter((c) => finalSlugs.has(c.status)).length;
-    out.set(reqId, Math.round((done / kids.length) * 100));
+    out.set(reqId, {
+      totalStories: kids.length,
+      doneStories: done,
+      executedPct:
+        kids.length === 0 ? null : Math.round((done / kids.length) * 100),
+    });
   }
   return out;
 }
