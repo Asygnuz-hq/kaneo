@@ -263,6 +263,13 @@ describe("API integration: requirement issue type", () => {
     expect(list[0].doneStories).toBe(1);
     expect(list[0].executedPct).toBe(33);
     expect(list[0].projectName).toBe(project.name);
+    expect(list[0].stories).toHaveLength(3);
+    expect(list[0].stories.filter((s) => s.done)).toHaveLength(1);
+    expect(list[0].stories.map((s) => s.title).sort()).toEqual([
+      "HU-A",
+      "HU-B",
+      "HU-C",
+    ]);
   });
 
   it("rejects a spec on an issueType that does not take one", async () => {
