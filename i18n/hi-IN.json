@@ -256,7 +256,8 @@
 			"failedSignIn": "साइन इन विफल",
 			"signedInSuccess": "सफलतापूर्वक साइन इन किया",
 			"signingIn": "साइन इन हो रहा है...",
-			"signIn": "साइन इन"
+			"signIn": "साइन इन",
+			"forgotPassword": "Forgot password?"
 		},
 		"signUpForm": {
 			"fullName": "पूरा नाम",
@@ -334,6 +335,28 @@
 				"nameRequired": "नाम आवश्यक है",
 				"nameShort": "नाम कम से कम 2 अक्षरों का होना चाहिए"
 			}
+		},
+		"forgotPassword": {
+			"failed": "Failed to send the reset link",
+			"pageTitle": "Forgot Password",
+			"sending": "Sending...",
+			"sendLink": "Send reset link",
+			"subtitle": "Enter your email and we'll send you a link to set a new password.",
+			"title": "Reset your password"
+		},
+		"resetPassword": {
+			"confirmPassword": "Confirm password",
+			"failed": "Failed to reset the password",
+			"invalidLinkMessage": "This password reset link is invalid or has expired. Request a new one.",
+			"invalidLinkTitle": "Invalid or expired link",
+			"newPassword": "New password",
+			"pageTitle": "Reset Password",
+			"passwordsDontMatch": "Passwords don't match",
+			"save": "Save password",
+			"saving": "Saving...",
+			"subtitle": "Choose a new password for your account.",
+			"success": "Password updated. You can sign in now.",
+			"title": "Set a new password"
 		}
 	},
 	"settings": {

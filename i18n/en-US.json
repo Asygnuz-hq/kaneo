@@ -256,7 +256,8 @@
 			"failedSignIn": "Failed to sign in",
 			"signedInSuccess": "Signed in successfully",
 			"signingIn": "Signing In...",
-			"signIn": "Sign In"
+			"signIn": "Sign In",
+			"forgotPassword": "Forgot password?"
 		},
 		"signUpForm": {
 			"fullName": "Full Name",
@@ -334,6 +335,28 @@
 				"nameRequired": "Name is required",
 				"nameShort": "Name must be at least 2 characters"
 			}
+		},
+		"forgotPassword": {
+			"pageTitle": "Forgot Password",
+			"title": "Reset your password",
+			"subtitle": "Enter your email and we'll send you a link to set a new password.",
+			"sendLink": "Send reset link",
+			"sending": "Sending...",
+			"failed": "Failed to send the reset link"
+		},
+		"resetPassword": {
+			"pageTitle": "Reset Password",
+			"title": "Set a new password",
+			"subtitle": "Choose a new password for your account.",
+			"newPassword": "New password",
+			"confirmPassword": "Confirm password",
+			"save": "Save password",
+			"saving": "Saving...",
+			"success": "Password updated. You can sign in now.",
+			"failed": "Failed to reset the password",
+			"passwordsDontMatch": "Passwords don't match",
+			"invalidLinkTitle": "Invalid or expired link",
+			"invalidLinkMessage": "This password reset link is invalid or has expired. Request a new one."
 		}
 	},
 	"settings": {

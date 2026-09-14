@@ -2,6 +2,7 @@ import { apiKey } from "@better-auth/api-key";
 import {
   sendMagicLinkEmail,
   sendOtpEmail,
+  sendPasswordResetEmail,
   sendWorkspaceInvitationEmail,
 } from "@kaneo/email";
 import {
@@ -133,6 +134,7 @@ function getAuthEmailCopy(locale?: string | null) {
     return {
       magicLinkSubject: "Anmeldelink fuer Kaneo",
       otpSubject: "Bestaetigungscode fuer Kaneo",
+      passwordResetSubject: "Kaneo-Passwort zuruecksetzen",
     };
   }
 
@@ -140,6 +142,7 @@ function getAuthEmailCopy(locale?: string | null) {
     return {
       magicLinkSubject: "Liên kết đăng nhập Kaneo",
       otpSubject: "Mã xác minh Kaneo",
+      passwordResetSubject: "Đặt lại mật khẩu Kaneo",
     };
   }
 
@@ -147,12 +150,14 @@ function getAuthEmailCopy(locale?: string | null) {
     return {
       magicLinkSubject: "Kaneo ログインリンク",
       otpSubject: "Kaneo 認証コード",
+      passwordResetSubject: "Kaneo パスワードのリセット",
     };
   }
 
   return {
     magicLinkSubject: "Login for Kaneo",
     otpSubject: "Authentication code for Kaneo",
+    passwordResetSubject: "Reset your Kaneo password",
   };
 }
 
@@ -255,6 +260,19 @@ export const auth = betterAuth({
       verify: async ({ hash, password }) => {
         return await bcrypt.compare(password, hash);
       },
+    },
+    sendResetPassword: async ({ user, url }) => {
+      try {
+        const locale = await getUserLocale(user.email);
+        const copy = getAuthEmailCopy(locale);
+        await sendPasswordResetEmail(user.email, copy.passwordResetSubject, {
+          resetLink: url,
+          userName: user.name,
+          locale,
+        });
+      } catch (error) {
+        console.error(error);
+      }
     },
   },
   socialProviders: {
