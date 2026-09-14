@@ -256,7 +256,8 @@
 			"failedSignIn": "로그인에 실패했습니다",
 			"signedInSuccess": "로그인되었습니다",
 			"signingIn": "로그인 중...",
-			"signIn": "로그인"
+			"signIn": "로그인",
+			"forgotPassword": "Forgot password?"
 		},
 		"signUpForm": {
 			"fullName": "이름",
@@ -334,6 +335,28 @@
 				"nameRequired": "이름은 필수입니다",
 				"nameShort": "이름은 2자 이상이어야 합니다"
 			}
+		},
+		"forgotPassword": {
+			"failed": "Failed to send the reset link",
+			"pageTitle": "Forgot Password",
+			"sending": "Sending...",
+			"sendLink": "Send reset link",
+			"subtitle": "Enter your email and we'll send you a link to set a new password.",
+			"title": "Reset your password"
+		},
+		"resetPassword": {
+			"confirmPassword": "Confirm password",
+			"failed": "Failed to reset the password",
+			"invalidLinkMessage": "This password reset link is invalid or has expired. Request a new one.",
+			"invalidLinkTitle": "Invalid or expired link",
+			"newPassword": "New password",
+			"pageTitle": "Reset Password",
+			"passwordsDontMatch": "Passwords don't match",
+			"save": "Save password",
+			"saving": "Saving...",
+			"subtitle": "Choose a new password for your account.",
+			"success": "Password updated. You can sign in now.",
+			"title": "Set a new password"
 		}
 	},
 	"settings": {

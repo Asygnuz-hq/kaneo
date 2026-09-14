@@ -256,7 +256,8 @@
 			"failedSignIn": "Error al iniciar sesión",
 			"signedInSuccess": "¡Has iniciado sesión correctamente!",
 			"signingIn": "Iniciando sesión...",
-			"signIn": "Iniciar sesión"
+			"signIn": "Iniciar sesión",
+			"forgotPassword": "¿Olvidaste tu contraseña?"
 		},
 		"signUpForm": {
 			"fullName": "Nombre completo",
@@ -334,6 +335,28 @@
 				"nameRequired": "El nombre es obligatorio",
 				"nameShort": "Tu nombre debe tener al menos 2 caracteres"
 			}
+		},
+		"forgotPassword": {
+			"pageTitle": "Recuperar Contraseña",
+			"title": "Recuperar tu contraseña",
+			"subtitle": "Escribí tu correo y te mandamos un link para poner una contraseña nueva.",
+			"sendLink": "Enviar link de recuperación",
+			"sending": "Enviando...",
+			"failed": "No se pudo enviar el link de recuperación"
+		},
+		"resetPassword": {
+			"pageTitle": "Restablecer Contraseña",
+			"title": "Poné una contraseña nueva",
+			"subtitle": "Elegí una contraseña nueva para tu cuenta.",
+			"newPassword": "Contraseña nueva",
+			"confirmPassword": "Confirmar contraseña",
+			"save": "Guardar contraseña",
+			"saving": "Guardando...",
+			"success": "Contraseña actualizada. Ya podés iniciar sesión.",
+			"failed": "No se pudo restablecer la contraseña",
+			"passwordsDontMatch": "Las contraseñas no coinciden",
+			"invalidLinkTitle": "Link inválido o vencido",
+			"invalidLinkMessage": "Este link para restablecer la contraseña no es válido o ya venció. Pedí uno nuevo."
 		}
 	},
 	"settings": {

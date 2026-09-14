@@ -1,4 +1,5 @@
 import { standardSchemaResolver } from "@hookform/resolvers/standard-schema";
+import { Link } from "@tanstack/react-router";
 import { Eye, EyeOff } from "lucide-react";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
@@ -102,9 +103,17 @@ export function SignInForm({ onSuccess, defaultEmail }: SignInFormProps) {
             name="password"
             render={({ field }) => (
               <FormItem>
-                <FormLabel className="text-sm font-medium">
-                  {t("auth:forms.password")}
-                </FormLabel>
+                <div className="flex items-center justify-between">
+                  <FormLabel className="text-sm font-medium">
+                    {t("auth:forms.password")}
+                  </FormLabel>
+                  <Link
+                    to="/auth/forgot-password"
+                    className="text-xs text-muted-foreground hover:text-foreground"
+                  >
+                    {t("auth:signInForm.forgotPassword")}
+                  </Link>
+                </div>
                 <FormControl>
                   <div className="relative">
                     <Input
