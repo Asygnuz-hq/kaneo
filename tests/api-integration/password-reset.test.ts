@@ -36,12 +36,25 @@ describe("API integration: password reset", () => {
     expect(requestRes.status).toBe(200);
     expect(sendPasswordResetEmail).toHaveBeenCalledTimes(1);
 
+    // The emailed link is the API's own GET /reset-password/:token callback
+    // -- clicking it validates the token server-side, then 302s the browser
+    // to redirectTo?token=... (the actual frontend page). Follow that hop
+    // instead of assuming the token is already a query param on the link.
     const [, , data] = sendPasswordResetEmail.mock.calls[0] as [
       string,
       string,
       { resetLink: string },
     ];
-    const token = new URL(data.resetLink).searchParams.get("token");
+    const resetLinkUrl = new URL(data.resetLink);
+    const callbackRes = await app.request(
+      resetLinkUrl.pathname + resetLinkUrl.search,
+      { redirect: "manual" },
+    );
+    expect(callbackRes.status).toBeGreaterThanOrEqual(300);
+    expect(callbackRes.status).toBeLessThan(400);
+    const redirectLocation = callbackRes.headers.get("location");
+    expect(redirectLocation).toBeTruthy();
+    const token = new URL(redirectLocation as string).searchParams.get("token");
     expect(token).toBeTruthy();
 
     const newPassword = "a-brand-new-password-123";
