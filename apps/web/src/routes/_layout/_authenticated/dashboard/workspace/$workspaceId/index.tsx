@@ -61,6 +61,7 @@ import { useGetWorkspaceWorkload } from "@/hooks/queries/project-metrics/use-get
 import { useRegisterShortcuts } from "@/hooks/use-keyboard-shortcuts";
 import { useWorkspacePermission } from "@/hooks/use-workspace-permission";
 import { formatDateMedium } from "@/lib/format";
+import { isProjectOverdue } from "@/lib/project-status";
 import { toast } from "@/lib/toast";
 import { cn } from "@/lib/utils";
 
@@ -400,10 +401,7 @@ function RouteComponent() {
                   const IconComponent =
                     icons[project.icon as keyof typeof icons] || icons.Layout;
 
-                  const isOverdue =
-                    project.statistics.dueDate &&
-                    project.statistics.completionPercentage < 100 &&
-                    new Date(project.statistics.dueDate) < new Date();
+                  const isOverdue = isProjectOverdue(project.statistics);
 
                   const getStatusText = () => {
                     if (isOverdue)

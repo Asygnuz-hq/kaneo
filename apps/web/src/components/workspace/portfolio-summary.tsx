@@ -8,25 +8,13 @@ import {
 import { useMemo } from "react";
 import { useTranslation } from "react-i18next";
 import CircularProgress from "@/components/ui/circular-progress";
+import { isProjectOverdue, type ProjectStatistics } from "@/lib/project-status";
 import { cn } from "@/lib/utils";
-
-type ProjectStatistics = {
-  completionPercentage: number;
-  totalTasks: number;
-  dueDate: string | Date | null;
-};
 
 type PortfolioProject = {
   id: string;
   statistics: ProjectStatistics | null;
 };
-
-function isOverdue(statistics: ProjectStatistics) {
-  if (!statistics.dueDate || statistics.completionPercentage >= 100) {
-    return false;
-  }
-  return new Date(statistics.dueDate) < startOfToday();
-}
 
 function isDueThisWeek(statistics: ProjectStatistics) {
   if (!statistics.dueDate || statistics.completionPercentage >= 100) {
@@ -98,7 +86,7 @@ export default function PortfolioSummary({
           )
         : 0;
 
-    const overdueCount = withStats.filter(isOverdue).length;
+    const overdueCount = withStats.filter(isProjectOverdue).length;
     const dueThisWeekCount = withStats.filter(isDueThisWeek).length;
 
     const notStarted = withStats.filter((s) => s.totalTasks === 0).length;
