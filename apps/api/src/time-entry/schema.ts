@@ -39,10 +39,14 @@ export const createTimeEntryBody = z.object({
     description: "Omit to start an open-ended entry that is still running.",
   }),
   description: z.string().optional(),
+  billable: z.boolean().optional().openapi({
+    description: "Defaults to true — most logged time is billable.",
+  }),
 });
 
 export const updateTimeEntryBody = z.object({
   startTime: timestamp,
   endTime: timestamp.optional(),
   description: z.string().optional(),
+  billable: z.boolean().optional(),
 });

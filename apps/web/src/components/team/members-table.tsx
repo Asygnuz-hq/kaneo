@@ -51,6 +51,7 @@ import {
   TableHeader,
   TableRow,
 } from "../ui/table";
+import MemberRateCell from "./member-rate-cell";
 
 type Props = {
   workspaceId: string;
@@ -106,8 +107,12 @@ function MembersTable({ workspaceId, invitations, users }: Props) {
   const { mutateAsync: updateMemberRole } = useUpdateWorkspaceUserRole();
   const { copy: copyInvitationLink } = useCopyInvitationLink();
   const { data: allWorkspaceRoles = [] } = useWorkspaceRoles(workspaceId);
-  const { canManageTeam, canRemoveMembers, canInviteUsers } =
-    useWorkspacePermission();
+  const {
+    canManageTeam,
+    canRemoveMembers,
+    canInviteUsers,
+    canManageWorkspace,
+  } = useWorkspacePermission();
   const canChangeRoles = Boolean(canManageTeam());
   const canRemove = Boolean(canRemoveMembers());
   const canInvite = Boolean(canInviteUsers());
@@ -193,6 +198,11 @@ function MembersTable({ workspaceId, invitations, users }: Props) {
             </TableHead>
             <TableHead className="text-foreground font-medium">
               {t("team:membersTable.columns.role", { defaultValue: "Role" })}
+            </TableHead>
+            <TableHead className="text-foreground font-medium">
+              {t("team:membersTable.columns.rate", {
+                defaultValue: "Rate/hr",
+              })}
             </TableHead>
             <TableHead className="text-foreground font-medium">
               {t("team:membersTable.columns.joined", {
@@ -288,6 +298,13 @@ function MembersTable({ workspaceId, invitations, users }: Props) {
                       })}
                     </Badge>
                   )}
+                </TableCell>
+                <TableCell className="py-3">
+                  <MemberRateCell
+                    workspaceId={workspaceId}
+                    userId={member.userId}
+                    canEdit={canManageWorkspace()}
+                  />
                 </TableCell>
                 <TableCell className="py-3 text-sm text-muted-foreground tabular-nums">
                   {member.createdAt ? formatDateMedium(member.createdAt) : "–"}
@@ -402,7 +419,7 @@ function MembersTable({ workspaceId, invitations, users }: Props) {
 
           {users.length === 0 && pendingInvitations.length === 0 ? (
             <TableRow>
-              <TableCell colSpan={4} className="py-16 text-center">
+              <TableCell colSpan={5} className="py-16 text-center">
                 <div className="flex flex-col items-center gap-2 text-muted-foreground">
                   <p className="text-sm font-medium text-foreground">
                     {t("team:membersTable.emptyTitle")}

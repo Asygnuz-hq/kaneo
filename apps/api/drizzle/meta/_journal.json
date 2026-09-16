@@ -435,6 +435,13 @@
 			"when": 1789083633535,
 			"tag": "0061_amused_marten_broadcloak",
 			"breakpoints": true
+		},
+		{
+			"idx": 62,
+			"version": "7",
+			"when": 1789522671212,
+			"tag": "0062_absurd_celestials",
+			"breakpoints": true
 		}
 	]
 }

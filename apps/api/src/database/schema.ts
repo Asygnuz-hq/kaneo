@@ -169,6 +169,11 @@ export const workspaceUserTable = pgTable(
       }),
     role: text("role").default("member").notNull(),
     joinedAt: timestamp("joined_at", { mode: "date" }).notNull(),
+    // ASYGNUZ: this person's billing rate within this workspace, in cents —
+    // null means unset (their time can still be logged, just not costed).
+    // Lives on the membership row, not the user, because the same person
+    // can have a different rate in a different workspace.
+    hourlyRateCents: integer("hourly_rate_cents"),
   },
   (table) => [
     index("workspace_member_workspaceId_idx").on(table.workspaceId),
@@ -330,6 +335,11 @@ export const projectTable = pgTable(
     archivedAt: timestamp("archived_at", { mode: "date" }),
     lastTaskNumber: integer("last_task_number").notNull().default(0),
     position: integer("position").notNull().default(0),
+    // ASYGNUZ: contracted budget for the project, in cents to avoid float
+    // drift. Null means no budget has been set — the budget UI simply
+    // doesn't show for that project rather than showing a fabricated $0.
+    budgetCents: integer("budget_cents"),
+    currency: text("currency").notNull().default("USD"),
   },
   (table) => [
     unique("project_workspace_id_id_unique").on(table.workspaceId, table.id),
@@ -983,6 +993,13 @@ export const timeEntryTable = pgTable(
       .defaultNow()
       .$onUpdate(() => new Date())
       .notNull(),
+    // ASYGNUZ: most logged time is billable, so entries default to true
+    // rather than forcing every timer start to answer a question upfront.
+    billable: boolean("billable").notNull().default(true),
+    // Snapshot of workspaceUserTable.hourlyRateCents at the moment this entry
+    // was logged. Copied rather than joined at read time so a later rate
+    // change never rewrites the cost of work already logged.
+    hourlyRateCentsSnapshot: integer("hourly_rate_cents_snapshot"),
   },
   (table) => [
     index("time_entry_taskId_idx").on(table.taskId),

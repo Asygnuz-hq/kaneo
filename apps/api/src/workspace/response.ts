@@ -10,7 +10,19 @@ export const workspaceMemberSchema = z
       description:
         "The member's workspace role: a built-in role (owner, admin, member, guest) or a custom role name.",
     }),
+    hourlyRateCents: z.number().nullable().openapi({
+      description:
+        "This person's billing rate within this workspace, in cents. Null if unset.",
+    }),
   })
   .openapi("WorkspaceMember");
 
 export const workspaceMemberListSchema = z.array(workspaceMemberSchema);
+
+export const workspaceMemberRateSchema = z
+  .object({
+    userId: z.string(),
+    workspaceId: z.string(),
+    hourlyRateCents: z.number().nullable(),
+  })
+  .openapi("WorkspaceMemberRate");

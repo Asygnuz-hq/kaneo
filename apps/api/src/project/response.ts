@@ -25,6 +25,12 @@ export const projectSchema = z
       description:
         "Highest task number issued in this project; the next task gets this plus one.",
     }),
+    budgetCents: z.number().nullable().openapi({
+      description: "Contracted budget in cents. Null if not set.",
+    }),
+    currency: z.string().openapi({
+      description: "ISO 4217 currency code the budget is denominated in.",
+    }),
   })
   .openapi("Project");
 

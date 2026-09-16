@@ -17,6 +17,7 @@ import getProjectsCtrl from "./controllers/get-projects";
 import reorderProjectsCtrl from "./controllers/reorder-projects";
 import unarchiveProjectCtrl from "./controllers/unarchive-project";
 import updateProjectCtrl from "./controllers/update-project";
+import updateProjectBudgetCtrl from "./controllers/update-project-budget";
 import { projectListSchema, projectSchema } from "./response";
 import {
   createProjectBody,
@@ -24,6 +25,7 @@ import {
   projectParam,
   reorderProjectsBody,
   updateProjectBody,
+  updateProjectBudgetBody,
   workspaceIdQuery,
 } from "./schema";
 
@@ -137,6 +139,34 @@ const updateProjectRoute = createRoute({
     body: {
       required: true,
       content: { "application/json": { schema: updateProjectBody } },
+    },
+  },
+  responses: {
+    200: jsonResponse("The updated project", projectSchema),
+    400: errorResponse("Invalid body, or unknown project"),
+    403: errorResponse(
+      "No workspace access, or missing project:update permission",
+    ),
+  },
+});
+
+const updateProjectBudgetRoute = createRoute({
+  method: "put",
+  operationId: "updateProjectBudget",
+  path: "/{id}/budget",
+  tags: ["Projects"],
+  summary: "Set project budget",
+  description:
+    "Set or clear the project's contracted budget, used to project spend-to-date against billable time logged on its tasks.",
+  middleware: [
+    workspaceAccess.fromProject(),
+    requireWorkspacePermission({ project: ["update"] }),
+  ] as const,
+  request: {
+    params: projectParam,
+    body: {
+      required: true,
+      content: { "application/json": { schema: updateProjectBudgetBody } },
     },
   },
   responses: {
@@ -265,6 +295,18 @@ const project = apiRouter<BaseVariables & { workspaceId: string }>()
       isPublic,
       workspaceId,
     );
+    return c.json(updatedProject, 200);
+  })
+  .openapi(updateProjectBudgetRoute, async (c) => {
+    const { id } = c.req.valid("param");
+    const { budgetCents, currency } = c.req.valid("json");
+    const workspaceId = c.get("workspaceId");
+    const updatedProject = await updateProjectBudgetCtrl({
+      id,
+      workspaceId,
+      budgetCents,
+      currency,
+    });
     return c.json(updatedProject, 200);
   })
   .openapi(deleteProjectRoute, async (c) => {

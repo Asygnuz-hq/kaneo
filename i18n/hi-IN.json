@@ -2418,7 +2418,8 @@
 				"name": "नाम",
 				"role": "भूमिका",
 				"joined": "शामिल हुए",
-				"actions": "कार्रवाइयाँ"
+				"actions": "कार्रवाइयाँ",
+				"rate": "Rate/hr"
 			},
 			"memberRolePending": "{{role}} (लंबित)",
 			"ariaCancelInvitation": "निमंत्रण रद्द करें",
@@ -2435,7 +2436,11 @@
 			"cancelInviteSuccess": "निमंत्रण सफलतापूर्वक रद्द किया गया",
 			"cancelInviteError": "निमंत्रण रद्द करने में विफल",
 			"roleUpdateSuccess": "भूमिका अपडेट की गई",
-			"roleUpdateError": "भूमिका अपडेट करने में विफल"
+			"roleUpdateError": "भूमिका अपडेट करने में विफल",
+			"rateEmptyPlaceholder": "Not set",
+			"rateInvalid": "Enter a valid, non-negative rate",
+			"rateUpdateError": "Failed to update rate",
+			"rateValue": "${{amount}}/hr"
 		}
 	},
 	"publicProject": {
@@ -2491,6 +2496,20 @@
 		"crossProjectDescription": "Open tasks per person, summed across every active project — busiest first.",
 		"crossProjectTitle": "Workload across the workspace",
 		"overdueCount_one": "{{count}} overdue",
-		"overdueCount_other": "{{count}} overdue"
+		"overdueCount_other": "{{count}} overdue",
+		"budget": {
+			"addBudget": "Add budget",
+			"amountLabel": "Amount",
+			"currencyLabel": "Currency",
+			"description": "Spend is derived from billable time logged so far.",
+			"edit": "Edit",
+			"invalidAmount": "Enter a valid, non-negative amount",
+			"notSet": "No budget set for this project yet.",
+			"ofBudget": "of {{amount}}",
+			"projected": "Projected total at this pace: {{amount}}",
+			"saveError": "Failed to save the budget",
+			"title": "Budget",
+			"unratedWarning": "{{hours}}h of billable time has no rate set yet, so it isn't counted above."
+		}
 	}
 }

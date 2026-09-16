@@ -2426,7 +2426,8 @@
 				"name": "Nome",
 				"role": "Função",
 				"joined": "Entrou em",
-				"actions": "Ações"
+				"actions": "Ações",
+				"rate": "Rate/hr"
 			},
 			"memberRolePending": "{{role}} (Pendente)",
 			"ariaCancelInvitation": "Cancelar convite",
@@ -2443,7 +2444,11 @@
 			"cancelInviteSuccess": "Convite cancelado com sucesso",
 			"cancelInviteError": "Falha ao cancelar convite",
 			"roleUpdateSuccess": "Função atualizada",
-			"roleUpdateError": "Falha ao atualizar função"
+			"roleUpdateError": "Falha ao atualizar função",
+			"rateEmptyPlaceholder": "Not set",
+			"rateInvalid": "Enter a valid, non-negative rate",
+			"rateUpdateError": "Failed to update rate",
+			"rateValue": "${{amount}}/hr"
 		}
 	},
 	"publicProject": {
@@ -2500,6 +2505,20 @@
 		"crossProjectTitle": "Workload across the workspace",
 		"overdueCount_many": "{{count}} overdue",
 		"overdueCount_one": "{{count}} overdue",
-		"overdueCount_other": "{{count}} overdue"
+		"overdueCount_other": "{{count}} overdue",
+		"budget": {
+			"addBudget": "Add budget",
+			"amountLabel": "Amount",
+			"currencyLabel": "Currency",
+			"description": "Spend is derived from billable time logged so far.",
+			"edit": "Edit",
+			"invalidAmount": "Enter a valid, non-negative amount",
+			"notSet": "No budget set for this project yet.",
+			"ofBudget": "of {{amount}}",
+			"projected": "Projected total at this pace: {{amount}}",
+			"saveError": "Failed to save the budget",
+			"title": "Budget",
+			"unratedWarning": "{{hours}}h of billable time has no rate set yet, so it isn't counted above."
+		}
 	}
 }

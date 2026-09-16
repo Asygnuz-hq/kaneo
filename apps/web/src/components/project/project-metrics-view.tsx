@@ -9,8 +9,10 @@ import {
 } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
 import { useGetProjectMetrics } from "@/hooks/queries/project-metrics/use-get-project-metrics";
+import { useWorkspacePermission } from "@/hooks/use-workspace-permission";
 import { getInitials } from "@/lib/get-initials";
 import { getPriorityLabel } from "@/lib/i18n/domain";
+import ProjectBudgetCard from "./project-budget-card";
 
 type ProjectMetricsViewProps = {
   projectId: string;
@@ -42,6 +44,7 @@ export default function ProjectMetricsView({
 }: ProjectMetricsViewProps) {
   const { t } = useTranslation();
   const { data: metrics, isLoading } = useGetProjectMetrics(projectId);
+  const { canUpdateProjects } = useWorkspacePermission();
 
   if (isLoading) {
     return (
@@ -88,6 +91,8 @@ export default function ProjectMetricsView({
           </CardHeader>
         </Card>
       </div>
+
+      <ProjectBudgetCard projectId={projectId} canEdit={canUpdateProjects()} />
 
       <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
         <Card>

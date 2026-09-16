@@ -26,6 +26,15 @@ export const updateProjectBody = z.object({
   isPublic: z.boolean(),
 });
 
+export const updateProjectBudgetBody = z.object({
+  budgetCents: z.number().int().min(0).nullable().openapi({
+    description: "Contracted budget in cents. Pass null to clear it.",
+  }),
+  currency: z.string().length(3).default("USD").openapi({
+    description: "ISO 4217 currency code, e.g. USD, COP.",
+  }),
+});
+
 export const reorderProjectsBody = z.object({
   // Positions express a relative order only; the controller renumbers the
   // workspace to 0..n-1, so the values just have to be sane.

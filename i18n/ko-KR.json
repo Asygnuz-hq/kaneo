@@ -2410,7 +2410,8 @@
 				"name": "이름",
 				"role": "역할",
 				"joined": "참여",
-				"actions": "작업"
+				"actions": "작업",
+				"rate": "Rate/hr"
 			},
 			"memberRolePending": "{{role}} (대기 중)",
 			"ariaCancelInvitation": "초대 취소",
@@ -2427,7 +2428,11 @@
 			"cancelInviteError": "초대 취소에 실패했습니다",
 			"ariaInvitationActions": "초대 작업",
 			"roleUpdateSuccess": "역할이 업데이트되었습니다",
-			"roleUpdateError": "역할 업데이트에 실패했습니다"
+			"roleUpdateError": "역할 업데이트에 실패했습니다",
+			"rateEmptyPlaceholder": "Not set",
+			"rateInvalid": "Enter a valid, non-negative rate",
+			"rateUpdateError": "Failed to update rate",
+			"rateValue": "${{amount}}/hr"
 		}
 	},
 	"publicProject": {
@@ -2482,6 +2487,20 @@
 		"workloadDescription": "Open and total tasks per assignee, busiest first.",
 		"crossProjectDescription": "Open tasks per person, summed across every active project — busiest first.",
 		"crossProjectTitle": "Workload across the workspace",
-		"overdueCount_other": "{{count}} overdue"
+		"overdueCount_other": "{{count}} overdue",
+		"budget": {
+			"addBudget": "Add budget",
+			"amountLabel": "Amount",
+			"currencyLabel": "Currency",
+			"description": "Spend is derived from billable time logged so far.",
+			"edit": "Edit",
+			"invalidAmount": "Enter a valid, non-negative amount",
+			"notSet": "No budget set for this project yet.",
+			"ofBudget": "of {{amount}}",
+			"projected": "Projected total at this pace: {{amount}}",
+			"saveError": "Failed to save the budget",
+			"title": "Budget",
+			"unratedWarning": "{{hours}}h of billable time has no rate set yet, so it isn't counted above."
+		}
 	}
 }

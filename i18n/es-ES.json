@@ -2425,9 +2425,14 @@
 			"columns": {
 				"name": "Nombre",
 				"role": "Rol",
+				"rate": "Tarifa/hora",
 				"joined": "Unido",
 				"actions": "Acciones"
 			},
+			"rateValue": "${{amount}}/hora",
+			"rateEmptyPlaceholder": "Sin definir",
+			"rateInvalid": "Ingresá una tarifa válida, no negativa",
+			"rateUpdateError": "No se pudo actualizar la tarifa",
 			"memberRolePending": "{{role}} (Pendiente)",
 			"ariaCancelInvitation": "Cancelar invitacion",
 			"ariaInvitationActions": "Acciones de invitación",
@@ -2500,6 +2505,20 @@
 		"crossProjectDescription": "Tareas abiertas por persona, sumadas en todos los proyectos activos — de mayor a menor carga.",
 		"overdueCount_one": "{{count}} atrasada",
 		"overdueCount_other": "{{count}} atrasadas",
-		"overdueCount_many": "{{count}} atrasadas"
+		"overdueCount_many": "{{count}} atrasadas",
+		"budget": {
+			"title": "Presupuesto",
+			"description": "El gasto se calcula a partir del tiempo facturable registrado hasta ahora.",
+			"notSet": "Este proyecto todavía no tiene presupuesto definido.",
+			"addBudget": "Agregar presupuesto",
+			"edit": "Editar",
+			"amountLabel": "Monto",
+			"currencyLabel": "Moneda",
+			"ofBudget": "de {{amount}}",
+			"projected": "Proyectado a este ritmo: {{amount}}",
+			"unratedWarning": "{{hours}}h de tiempo facturable no tienen tarifa definida todavía, así que no están contadas arriba.",
+			"invalidAmount": "Ingresá un monto válido, no negativo",
+			"saveError": "No se pudo guardar el presupuesto"
+		}
 	}
 }

@@ -54,3 +54,26 @@ export const workspaceMetricsSchema = z
     workload: z.array(workspaceWorkloadEntrySchema),
   })
   .openapi("WorkspaceMetrics");
+
+export const projectBudgetSchema = z
+  .object({
+    budgetCents: z.number().nullable().openapi({
+      description: "Contracted budget in cents. Null if not set.",
+    }),
+    currency: z.string(),
+    spentCents: z.number().openapi({
+      description:
+        "Cost of billable time logged so far (hours x the rate snapshotted on each entry).",
+    }),
+    billableSeconds: z.number(),
+    nonBillableSeconds: z.number(),
+    unratedBillableSeconds: z.number().openapi({
+      description:
+        "Billable seconds logged by someone with no hourly rate set — not included in spentCents, since there's no rate to cost them with.",
+    }),
+    projectedTotalCents: z.number().nullable().openapi({
+      description:
+        "Simple burn-rate projection (spent so far / % complete). Null until the project has some completed work to project from.",
+    }),
+  })
+  .openapi("ProjectBudget");

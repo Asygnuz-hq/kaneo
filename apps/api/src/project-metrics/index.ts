@@ -5,9 +5,14 @@ import {
   jsonResponse,
 } from "../openapi";
 import { workspaceAccess } from "../utils/workspace-access-middleware";
+import getProjectBudget from "./controllers/get-project-budget";
 import getProjectMetrics from "./controllers/get-project-metrics";
 import getWorkspaceWorkload from "./controllers/get-workspace-workload";
-import { projectMetricsSchema, workspaceMetricsSchema } from "./response";
+import {
+  projectBudgetSchema,
+  projectMetricsSchema,
+  workspaceMetricsSchema,
+} from "./response";
 import { projectIdParam, workspaceIdParam } from "./schema";
 
 const getProjectMetricsRoute = createRoute({
@@ -48,12 +53,34 @@ const getWorkspaceWorkloadRoute = createRoute({
   },
 });
 
+const getProjectBudgetRoute = createRoute({
+  method: "get",
+  operationId: "getProjectBudget",
+  path: "/{projectId}/budget",
+  tags: ["Project Metrics"],
+  summary: "Get project budget vs. spend",
+  description:
+    "Contracted budget alongside spend derived from billable time logged so far, plus a simple burn-rate projection.",
+  middleware: [workspaceAccess.fromProject("projectId")] as const,
+  request: { params: projectIdParam },
+  responses: {
+    200: jsonResponse("The project's budget summary", projectBudgetSchema),
+    400: errorResponse(
+      "Unknown project, or its workspace could not be determined",
+    ),
+    403: errorResponse("No access to the project's workspace"),
+  },
+});
+
 const projectMetrics = apiRouter()
   .openapi(getProjectMetricsRoute, async (c) =>
     c.json(await getProjectMetrics(c.req.valid("param").projectId), 200),
   )
   .openapi(getWorkspaceWorkloadRoute, async (c) =>
     c.json(await getWorkspaceWorkload(c.req.valid("param").workspaceId), 200),
+  )
+  .openapi(getProjectBudgetRoute, async (c) =>
+    c.json(await getProjectBudget(c.req.valid("param").projectId), 200),
   );
 
 export default projectMetrics;

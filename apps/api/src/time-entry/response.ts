@@ -17,6 +17,11 @@ export const timeEntrySchema = z
     }),
     createdAt: responseTimestamp,
     updatedAt: responseTimestamp,
+    billable: z.boolean(),
+    hourlyRateCentsSnapshot: z.number().nullable().openapi({
+      description:
+        "The logger's hourly rate at the moment this entry was created, in cents. Null if no rate was set in the workspace yet — the entry still counts hours, just not cost.",
+    }),
   })
   .openapi("TimeEntry");
 

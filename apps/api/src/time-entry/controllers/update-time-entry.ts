@@ -9,10 +9,11 @@ type UpdateTimeEntryParams = {
   startTime: Date;
   endTime?: Date;
   description?: string;
+  billable?: boolean;
 };
 
 async function updateTimeEntry(params: UpdateTimeEntryParams) {
-  const { timeEntryId, startTime, endTime, description } = params;
+  const { timeEntryId, startTime, endTime, description, billable } = params;
 
   const [existingTimeEntry] = await db
     .select()
@@ -36,6 +37,7 @@ async function updateTimeEntry(params: UpdateTimeEntryParams) {
       endTime: effectiveEndTime,
       duration,
       ...(description !== undefined && { description }),
+      ...(billable !== undefined && { billable }),
     })
     .where(eq(timeEntryTable.id, timeEntryId))
     .returning();

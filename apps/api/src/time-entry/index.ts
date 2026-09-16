@@ -117,7 +117,8 @@ const timeEntry = apiRouter()
     c.json(await getTimeEntry(c.req.valid("param").id), 200),
   )
   .openapi(createTimeEntryRoute, async (c) => {
-    const { taskId, startTime, endTime, description } = c.req.valid("json");
+    const { taskId, startTime, endTime, description, billable } =
+      c.req.valid("json");
     return c.json(
       await createTimeEntry({
         taskId,
@@ -125,19 +126,21 @@ const timeEntry = apiRouter()
         startTime: new Date(startTime),
         endTime: endTime ? new Date(endTime) : undefined,
         description,
+        billable,
       }),
       200,
     );
   })
   .openapi(updateTimeEntryRoute, async (c) => {
     const { id } = c.req.valid("param");
-    const { startTime, endTime, description } = c.req.valid("json");
+    const { startTime, endTime, description, billable } = c.req.valid("json");
     return c.json(
       await updateTimeEntry({
         timeEntryId: id,
         startTime: new Date(startTime),
         endTime: endTime ? new Date(endTime) : undefined,
         description,
+        billable,
       }),
       200,
     );

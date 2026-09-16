@@ -2417,9 +2417,14 @@
 			"columns": {
 				"name": "Name",
 				"role": "Role",
+				"rate": "Rate/hr",
 				"joined": "Joined",
 				"actions": "Actions"
 			},
+			"rateValue": "${{amount}}/hr",
+			"rateEmptyPlaceholder": "Not set",
+			"rateInvalid": "Enter a valid, non-negative rate",
+			"rateUpdateError": "Failed to update rate",
 			"memberRolePending": "{{role}} (Pending)",
 			"ariaCancelInvitation": "Cancel invitation",
 			"ariaInvitationActions": "Invitation actions",
@@ -2491,6 +2496,20 @@
 		"crossProjectTitle": "Workload across the workspace",
 		"crossProjectDescription": "Open tasks per person, summed across every active project — busiest first.",
 		"overdueCount_one": "{{count}} overdue",
-		"overdueCount_other": "{{count}} overdue"
+		"overdueCount_other": "{{count}} overdue",
+		"budget": {
+			"title": "Budget",
+			"description": "Spend is derived from billable time logged so far.",
+			"notSet": "No budget set for this project yet.",
+			"addBudget": "Add budget",
+			"edit": "Edit",
+			"amountLabel": "Amount",
+			"currencyLabel": "Currency",
+			"ofBudget": "of {{amount}}",
+			"projected": "Projected total at this pace: {{amount}}",
+			"unratedWarning": "{{hours}}h of billable time has no rate set yet, so it isn't counted above.",
+			"invalidAmount": "Enter a valid, non-negative amount",
+			"saveError": "Failed to save the budget"
+		}
 	}
 }
