@@ -2329,11 +2329,22 @@
 			"projectStatus": {
 				"notStarted": "Not started",
 				"complete": "Complete",
-				"inProgress": "In progress"
+				"inProgress": "In progress",
+				"overdue": "Overdue"
 			},
 			"noDueDate": "No due date",
 			"reorderHandle": "Reorder project",
-			"reorderError": "Failed to reorder projects"
+			"reorderError": "Failed to reorder projects",
+			"portfolio": {
+				"activeProjects": "Active projects",
+				"overdue": "Overdue",
+				"avgProgress": "Average progress",
+				"dueThisWeek": "Due this week",
+				"distributionTitle": "Portfolio status",
+				"notStarted": "Not started",
+				"inProgress": "In progress",
+				"complete": "Complete"
+			}
 		},
 		"search": {
 			"pageTitle": "Search",
@@ -2476,6 +2487,10 @@
 		"workload": "Workload",
 		"workloadDescription": "Open and total tasks per assignee, busiest first.",
 		"unassigned": "Unassigned",
-		"openOfTotal": "{{open}} open / {{total}} total"
+		"openOfTotal": "{{open}} open / {{total}} total",
+		"crossProjectTitle": "Workload across the workspace",
+		"crossProjectDescription": "Open tasks per person, summed across every active project — busiest first.",
+		"overdueCount_one": "{{count}} overdue",
+		"overdueCount_other": "{{count}} overdue"
 	}
 }

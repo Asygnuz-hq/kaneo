@@ -2328,12 +2328,23 @@
 			"projectStatus": {
 				"notStarted": "Не е започнат",
 				"complete": "Завршен",
-				"inProgress": "Во тек"
+				"inProgress": "Во тек",
+				"overdue": "Overdue"
 			},
 			"noDueDate": "Без краен рок",
 			"reorderHandle": "Прередување на проектот",
 			"reorderError": "Прередувањето на проектите не успеа",
-			"emptyDescriptionReadOnly": "Сè уште нема проекти во овој работен простор. Замоли администратор да креира еден."
+			"emptyDescriptionReadOnly": "Сè уште нема проекти во овој работен простор. Замоли администратор да креира еден.",
+			"portfolio": {
+				"activeProjects": "Active projects",
+				"avgProgress": "Average progress",
+				"complete": "Complete",
+				"distributionTitle": "Portfolio status",
+				"dueThisWeek": "Due this week",
+				"inProgress": "In progress",
+				"notStarted": "Not started",
+				"overdue": "Overdue"
+			}
 		},
 		"search": {
 			"pageTitle": "Пребарување",
@@ -2476,6 +2487,10 @@
 		"totalTasks": "Total tasks",
 		"unassigned": "Unassigned",
 		"workload": "Workload",
-		"workloadDescription": "Open and total tasks per assignee, busiest first."
+		"workloadDescription": "Open and total tasks per assignee, busiest first.",
+		"crossProjectDescription": "Open tasks per person, summed across every active project — busiest first.",
+		"crossProjectTitle": "Workload across the workspace",
+		"overdueCount_one": "{{count}} overdue",
+		"overdueCount_other": "{{count}} overdue"
 	}
 }

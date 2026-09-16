@@ -2328,12 +2328,23 @@
 			"projectStatus": {
 				"notStarted": "Niet gestart",
 				"complete": "Voltooid",
-				"inProgress": "In behandeling"
+				"inProgress": "In behandeling",
+				"overdue": "Overdue"
 			},
 			"noDueDate": "Geen einddatum",
 			"reorderHandle": "Project opnieuw ordenen",
 			"reorderError": "Projecten opnieuw ordenen mislukt",
-			"emptyDescriptionReadOnly": "Er zijn nog geen projecten in deze werkruimte. Vraag een beheerder om er een aan te maken."
+			"emptyDescriptionReadOnly": "Er zijn nog geen projecten in deze werkruimte. Vraag een beheerder om er een aan te maken.",
+			"portfolio": {
+				"activeProjects": "Active projects",
+				"avgProgress": "Average progress",
+				"complete": "Complete",
+				"distributionTitle": "Portfolio status",
+				"dueThisWeek": "Due this week",
+				"inProgress": "In progress",
+				"notStarted": "Not started",
+				"overdue": "Overdue"
+			}
 		},
 		"search": {
 			"pageTitle": "Zoeken",
@@ -2476,6 +2487,10 @@
 		"totalTasks": "Total tasks",
 		"unassigned": "Unassigned",
 		"workload": "Workload",
-		"workloadDescription": "Open and total tasks per assignee, busiest first."
+		"workloadDescription": "Open and total tasks per assignee, busiest first.",
+		"crossProjectDescription": "Open tasks per person, summed across every active project — busiest first.",
+		"crossProjectTitle": "Workload across the workspace",
+		"overdueCount_one": "{{count}} overdue",
+		"overdueCount_other": "{{count}} overdue"
 	}
 }

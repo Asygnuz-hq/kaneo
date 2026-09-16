@@ -2398,12 +2398,23 @@
 			"projectStatus": {
 				"notStarted": "Не начат",
 				"complete": "Завершён",
-				"inProgress": "В работе"
+				"inProgress": "В работе",
+				"overdue": "Overdue"
 			},
 			"noDueDate": "Без срока",
 			"reorderHandle": "Изменить порядок проекта",
 			"reorderError": "Не удалось изменить порядок проектов",
-			"emptyDescriptionReadOnly": "В этой рабочей области пока нет проектов. Попросите администратора создать проект."
+			"emptyDescriptionReadOnly": "В этой рабочей области пока нет проектов. Попросите администратора создать проект.",
+			"portfolio": {
+				"activeProjects": "Active projects",
+				"avgProgress": "Average progress",
+				"complete": "Complete",
+				"distributionTitle": "Portfolio status",
+				"dueThisWeek": "Due this week",
+				"inProgress": "In progress",
+				"notStarted": "Not started",
+				"overdue": "Overdue"
+			}
 		},
 		"search": {
 			"pageTitle": "Поиск",
@@ -2548,6 +2559,12 @@
 		"totalTasks": "Total tasks",
 		"unassigned": "Unassigned",
 		"workload": "Workload",
-		"workloadDescription": "Open and total tasks per assignee, busiest first."
+		"workloadDescription": "Open and total tasks per assignee, busiest first.",
+		"crossProjectDescription": "Open tasks per person, summed across every active project — busiest first.",
+		"crossProjectTitle": "Workload across the workspace",
+		"overdueCount_few": "{{count}} overdue",
+		"overdueCount_many": "{{count}} overdue",
+		"overdueCount_one": "{{count}} overdue",
+		"overdueCount_other": "{{count}} overdue"
 	}
 }

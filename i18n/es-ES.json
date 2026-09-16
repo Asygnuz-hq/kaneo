@@ -2335,12 +2335,23 @@
 			"projectStatus": {
 				"notStarted": "Sin comenzar",
 				"complete": "Completado",
-				"inProgress": "En progreso"
+				"inProgress": "En progreso",
+				"overdue": "Atrasado"
 			},
 			"noDueDate": "Sin fecha de vencimiento",
 			"reorderHandle": "Reordenar proyecto",
 			"reorderError": "No se pudieron reordenar los proyectos",
-			"emptyDescriptionReadOnly": "Todavía no hay proyectos en este espacio de trabajo. Pide a un admin que cree uno."
+			"emptyDescriptionReadOnly": "Todavía no hay proyectos en este espacio de trabajo. Pide a un admin que cree uno.",
+			"portfolio": {
+				"activeProjects": "Proyectos activos",
+				"overdue": "Atrasados",
+				"avgProgress": "Avance promedio",
+				"dueThisWeek": "Vencen esta semana",
+				"distributionTitle": "Estado del portafolio",
+				"notStarted": "Sin comenzar",
+				"inProgress": "En progreso",
+				"complete": "Completos"
+			}
 		},
 		"search": {
 			"pageTitle": "Buscar",
@@ -2484,6 +2495,11 @@
 		"workload": "Carga de trabajo",
 		"workloadDescription": "Tareas abiertas y totales por responsable, de mayor a menor carga.",
 		"unassigned": "Sin asignar",
-		"openOfTotal": "{{open}} abiertas / {{total}} totales"
+		"openOfTotal": "{{open}} abiertas / {{total}} totales",
+		"crossProjectTitle": "Carga de trabajo de todo el workspace",
+		"crossProjectDescription": "Tareas abiertas por persona, sumadas en todos los proyectos activos — de mayor a menor carga.",
+		"overdueCount_one": "{{count}} atrasada",
+		"overdueCount_other": "{{count}} atrasadas",
+		"overdueCount_many": "{{count}} atrasadas"
 	}
 }

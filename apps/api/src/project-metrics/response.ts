@@ -29,3 +29,28 @@ export const projectMetricsSchema = z
     workload: z.array(workloadEntrySchema),
   })
   .openapi("ProjectMetrics");
+
+export const workspaceWorkloadProjectSchema = z.object({
+  projectId: z.string(),
+  projectName: z.string(),
+  openCount: z.number(),
+  totalCount: z.number(),
+});
+
+export const workspaceWorkloadEntrySchema = z.object({
+  userId: z.string().nullable(),
+  userName: z.string().nullable(),
+  userImage: z.string().nullable(),
+  openCount: z.number(),
+  totalCount: z.number(),
+  overdueCount: z.number(),
+  byProject: z.array(workspaceWorkloadProjectSchema),
+});
+
+export const workspaceMetricsSchema = z
+  .object({
+    totalOpenTasks: z.number(),
+    totalOverdueTasks: z.number(),
+    workload: z.array(workspaceWorkloadEntrySchema),
+  })
+  .openapi("WorkspaceMetrics");

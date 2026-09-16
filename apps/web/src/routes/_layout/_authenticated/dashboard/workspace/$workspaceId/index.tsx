@@ -51,10 +51,13 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import PortfolioSummary from "@/components/workspace/portfolio-summary";
+import WorkloadSummary from "@/components/workspace/workload-summary";
 import icons from "@/constants/project-icons";
 import { shortcuts } from "@/constants/shortcuts";
 import useReorderProjects from "@/hooks/mutations/project/use-reorder-projects";
 import useGetProjects from "@/hooks/queries/project/use-get-projects";
+import { useGetWorkspaceWorkload } from "@/hooks/queries/project-metrics/use-get-workspace-workload";
 import { useRegisterShortcuts } from "@/hooks/use-keyboard-shortcuts";
 import { useWorkspacePermission } from "@/hooks/use-workspace-permission";
 import { formatDateMedium } from "@/lib/format";
@@ -129,6 +132,7 @@ function RouteComponent() {
   const { data: projects, isLoading } = useGetProjects({
     workspaceId,
   });
+  const { data: workloadData } = useGetWorkspaceWorkload(workspaceId);
   const reorderProjects = useReorderProjects();
 
   // React state, not the query cache: dnd-kit clears its transforms with a
@@ -359,6 +363,7 @@ function RouteComponent() {
           ) : null
         }
       >
+        <PortfolioSummary projects={projects} />
         <DndContext
           sensors={sensors}
           collisionDetection={closestCenter}
@@ -395,7 +400,14 @@ function RouteComponent() {
                   const IconComponent =
                     icons[project.icon as keyof typeof icons] || icons.Layout;
 
+                  const isOverdue =
+                    project.statistics.dueDate &&
+                    project.statistics.completionPercentage < 100 &&
+                    new Date(project.statistics.dueDate) < new Date();
+
                   const getStatusText = () => {
+                    if (isOverdue)
+                      return t("workspace:projects.projectStatus.overdue");
                     if (project.statistics.totalTasks === 0)
                       return t("workspace:projects.projectStatus.notStarted");
                     if (project.statistics.completionPercentage === 100)
@@ -404,6 +416,7 @@ function RouteComponent() {
                   };
 
                   const getStatusVariant = () => {
+                    if (isOverdue) return "error";
                     if (project.statistics.totalTasks === 0) return "secondary";
                     if (project.statistics.completionPercentage === 100)
                       return "default";
@@ -453,6 +466,10 @@ function RouteComponent() {
             </TableBody>
           </Table>
         </DndContext>
+
+        <div className="mt-6">
+          <WorkloadSummary workload={workloadData?.workload ?? []} />
+        </div>
       </WorkspaceLayout>
 
       <CreateProjectModal

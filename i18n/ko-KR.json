@@ -2321,12 +2321,23 @@
 			"projectStatus": {
 				"notStarted": "시작되지 않음",
 				"complete": "완료",
-				"inProgress": "진행 중"
+				"inProgress": "진행 중",
+				"overdue": "Overdue"
 			},
 			"noDueDate": "마감일 없음",
 			"reorderHandle": "프로젝트 순서 변경",
 			"reorderError": "프로젝트 순서를 변경하지 못했습니다",
-			"emptyDescriptionReadOnly": "이 워크스페이스에 아직 프로젝트가 없습니다. 관리자에게 프로젝트 생성을 요청하세요."
+			"emptyDescriptionReadOnly": "이 워크스페이스에 아직 프로젝트가 없습니다. 관리자에게 프로젝트 생성을 요청하세요.",
+			"portfolio": {
+				"activeProjects": "Active projects",
+				"avgProgress": "Average progress",
+				"complete": "Complete",
+				"distributionTitle": "Portfolio status",
+				"dueThisWeek": "Due this week",
+				"inProgress": "In progress",
+				"notStarted": "Not started",
+				"overdue": "Overdue"
+			}
 		},
 		"search": {
 			"pageTitle": "검색",
@@ -2468,6 +2479,9 @@
 		"totalTasks": "Total tasks",
 		"unassigned": "Unassigned",
 		"workload": "Workload",
-		"workloadDescription": "Open and total tasks per assignee, busiest first."
+		"workloadDescription": "Open and total tasks per assignee, busiest first.",
+		"crossProjectDescription": "Open tasks per person, summed across every active project — busiest first.",
+		"crossProjectTitle": "Workload across the workspace",
+		"overdueCount_other": "{{count}} overdue"
 	}
 }

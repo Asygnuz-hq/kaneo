@@ -6,8 +6,9 @@ import {
 } from "../openapi";
 import { workspaceAccess } from "../utils/workspace-access-middleware";
 import getProjectMetrics from "./controllers/get-project-metrics";
-import { projectMetricsSchema } from "./response";
-import { projectIdParam } from "./schema";
+import getWorkspaceWorkload from "./controllers/get-workspace-workload";
+import { projectMetricsSchema, workspaceMetricsSchema } from "./response";
+import { projectIdParam, workspaceIdParam } from "./schema";
 
 const getProjectMetricsRoute = createRoute({
   method: "get",
@@ -28,8 +29,31 @@ const getProjectMetricsRoute = createRoute({
   },
 });
 
-const projectMetrics = apiRouter().openapi(getProjectMetricsRoute, async (c) =>
-  c.json(await getProjectMetrics(c.req.valid("param").projectId), 200),
-);
+const getWorkspaceWorkloadRoute = createRoute({
+  method: "get",
+  operationId: "getWorkspaceWorkload",
+  path: "/workspace/{workspaceId}",
+  tags: ["Project Metrics"],
+  summary: "Get workspace-wide workload",
+  description:
+    "Per-assignee open/total/overdue task counts summed across every non-archived project in the workspace, each broken down by project — the portfolio-level view of who is overloaded across the whole operation, not just within one board.",
+  middleware: [workspaceAccess.fromParam("workspaceId")] as const,
+  request: { params: workspaceIdParam },
+  responses: {
+    200: jsonResponse(
+      "The workspace's cross-project workload",
+      workspaceMetricsSchema,
+    ),
+    403: errorResponse("No access to the workspace"),
+  },
+});
+
+const projectMetrics = apiRouter()
+  .openapi(getProjectMetricsRoute, async (c) =>
+    c.json(await getProjectMetrics(c.req.valid("param").projectId), 200),
+  )
+  .openapi(getWorkspaceWorkloadRoute, async (c) =>
+    c.json(await getWorkspaceWorkload(c.req.valid("param").workspaceId), 200),
+  );
 
 export default projectMetrics;

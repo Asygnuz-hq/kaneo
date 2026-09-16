@@ -2322,11 +2322,22 @@
 			"projectStatus": {
 				"notStarted": "未着手",
 				"complete": "完了",
-				"inProgress": "進行中"
+				"inProgress": "進行中",
+				"overdue": "Overdue"
 			},
 			"noDueDate": "期限なし",
 			"reorderHandle": "プロジェクトの並び替え",
-			"reorderError": "プロジェクトの並び替えに失敗しました"
+			"reorderError": "プロジェクトの並び替えに失敗しました",
+			"portfolio": {
+				"activeProjects": "Active projects",
+				"avgProgress": "Average progress",
+				"complete": "Complete",
+				"distributionTitle": "Portfolio status",
+				"dueThisWeek": "Due this week",
+				"inProgress": "In progress",
+				"notStarted": "Not started",
+				"overdue": "Overdue"
+			}
 		},
 		"search": {
 			"pageTitle": "検索",
@@ -2468,6 +2479,9 @@
 		"totalTasks": "Total tasks",
 		"unassigned": "Unassigned",
 		"workload": "Workload",
-		"workloadDescription": "Open and total tasks per assignee, busiest first."
+		"workloadDescription": "Open and total tasks per assignee, busiest first.",
+		"crossProjectDescription": "Open tasks per person, summed across every active project — busiest first.",
+		"crossProjectTitle": "Workload across the workspace",
+		"overdueCount_other": "{{count}} overdue"
 	}
 }

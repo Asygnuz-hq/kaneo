@@ -2336,11 +2336,22 @@
 			"projectStatus": {
 				"notStarted": "Non iniziato",
 				"complete": "Completato",
-				"inProgress": "In corso"
+				"inProgress": "In corso",
+				"overdue": "Overdue"
 			},
 			"noDueDate": "Nessuna scadenza",
 			"reorderHandle": "Riordina progetto",
-			"reorderError": "Impossibile riordinare i progetti"
+			"reorderError": "Impossibile riordinare i progetti",
+			"portfolio": {
+				"activeProjects": "Active projects",
+				"avgProgress": "Average progress",
+				"complete": "Complete",
+				"distributionTitle": "Portfolio status",
+				"dueThisWeek": "Due this week",
+				"inProgress": "In progress",
+				"notStarted": "Not started",
+				"overdue": "Overdue"
+			}
 		},
 		"search": {
 			"pageTitle": "Cerca",
@@ -2484,6 +2495,11 @@
 		"totalTasks": "Total tasks",
 		"unassigned": "Unassigned",
 		"workload": "Workload",
-		"workloadDescription": "Open and total tasks per assignee, busiest first."
+		"workloadDescription": "Open and total tasks per assignee, busiest first.",
+		"crossProjectDescription": "Open tasks per person, summed across every active project — busiest first.",
+		"crossProjectTitle": "Workload across the workspace",
+		"overdueCount_many": "{{count}} overdue",
+		"overdueCount_one": "{{count}} overdue",
+		"overdueCount_other": "{{count}} overdue"
 	}
 }
