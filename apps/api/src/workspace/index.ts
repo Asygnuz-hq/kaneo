@@ -5,7 +5,10 @@ import {
   errorResponse,
   jsonResponse,
 } from "../openapi";
-import { requireWorkspacePermission } from "../utils/require-workspace-permission";
+import {
+  hasWorkspacePermission,
+  requireWorkspacePermission,
+} from "../utils/require-workspace-permission";
 import { workspaceAccess } from "../utils/workspace-access-middleware";
 import getWorkspaceMembersCtrl from "./controllers/get-workspace-members";
 import updateMemberRateCtrl from "./controllers/update-member-rate";
@@ -64,9 +67,20 @@ const updateMemberRateRoute = createRoute({
 });
 
 const workspace = apiRouter<BaseVariables & { workspaceId: string }>()
-  .openapi(getWorkspaceMembersRoute, async (c) =>
-    c.json(await getWorkspaceMembersCtrl(c.get("workspaceId")), 200),
-  )
+  .openapi(getWorkspaceMembersRoute, async (c) => {
+    const members = await getWorkspaceMembersCtrl(c.get("workspaceId"));
+    // Hourly rate is payroll-adjacent data — only surfaced to whoever could
+    // also set it, not to every member who can merely list the team.
+    const canSeeRates = await hasWorkspacePermission(c, {
+      workspace: ["manage_settings"],
+    });
+    return c.json(
+      canSeeRates
+        ? members
+        : members.map((m) => ({ ...m, hourlyRateCents: null })),
+      200,
+    );
+  })
   .openapi(updateMemberRateRoute, async (c) => {
     const { workspaceId, userId } = c.req.valid("param");
     const { hourlyRateCents } = c.req.valid("json");

@@ -62,6 +62,23 @@ async function logTime(
   });
 }
 
+async function addPlainMember(workspaceId: string) {
+  const memberUserId = `user-member-${crypto.randomUUID()}`;
+  await db.insert(schema.userTable).values({
+    id: memberUserId,
+    email: `${memberUserId}@example.com`,
+    emailVerified: true,
+    name: "Plain Member",
+  });
+  await db.insert(schema.workspaceUserTable).values({
+    workspaceId,
+    userId: memberUserId,
+    role: "member",
+    joinedAt: new Date(),
+  });
+  return { id: memberUserId };
+}
+
 beforeEach(async () => {
   await resetTestDatabase();
 });
@@ -86,22 +103,9 @@ describe("workspace member hourly rate", () => {
 
   it("rejects a plain member setting a rate (needs workspace:manage_settings)", async () => {
     const owner = await createWorkspaceMember({ role: "owner" });
-    // Add a second, non-privileged member to the same workspace.
-    const memberUserId = `user-member-${crypto.randomUUID()}`;
-    await db.insert(schema.userTable).values({
-      id: memberUserId,
-      email: `${memberUserId}@example.com`,
-      emailVerified: true,
-      name: "Plain Member",
-    });
-    await db.insert(schema.workspaceUserTable).values({
-      workspaceId: owner.workspace.id,
-      userId: memberUserId,
-      role: "member",
-      joinedAt: new Date(),
-    });
+    const member = await addPlainMember(owner.workspace.id);
 
-    mockAuthenticatedSession({ id: memberUserId } as typeof owner.user);
+    mockAuthenticatedSession({ id: member.id } as typeof owner.user);
     const { app } = createApp();
 
     const response = await setRate(
@@ -112,6 +116,40 @@ describe("workspace member hourly rate", () => {
     );
 
     expect(response.status).toBe(403);
+  });
+
+  it("redacts other members' hourly rate for a plain member listing the team", async () => {
+    const owner = await createWorkspaceMember({ role: "owner" });
+    const member = await addPlainMember(owner.workspace.id);
+
+    mockAuthenticatedSession(owner.user);
+    const { app: ownerApp } = createApp();
+    await setRate(ownerApp, owner.workspace.id, owner.user.id, 15000);
+
+    mockAuthenticatedSession({ id: member.id } as typeof owner.user);
+    const { app: memberApp } = createApp();
+    const asMember = await memberApp.request(
+      `/api/workspace/${owner.workspace.id}/members`,
+    );
+    const memberView = await asMember.json();
+    expect(
+      memberView.every(
+        (m: { hourlyRateCents: unknown }) => m.hourlyRateCents === null,
+      ),
+    ).toBe(true);
+
+    mockAuthenticatedSession(owner.user);
+    const { app: ownerApp2 } = createApp();
+    const asOwner = await ownerApp2.request(
+      `/api/workspace/${owner.workspace.id}/members`,
+    );
+    const ownerView = await asOwner.json();
+    expect(
+      ownerView.some(
+        (m: { id: string; hourlyRateCents: unknown }) =>
+          m.id === owner.user.id && m.hourlyRateCents === 15000,
+      ),
+    ).toBe(true);
   });
 });
 
@@ -265,5 +303,29 @@ describe("project budget", () => {
 
     expect(budget.spentCents).toBe(10000);
     expect(budget.projectedTotalCents).toBeNull();
+  });
+
+  it("rejects a plain member viewing the project budget (needs workspace:manage_settings)", async () => {
+    const owner = await createWorkspaceMember({ role: "owner" });
+    const { project } = await createProjectFixture({
+      workspaceId: owner.workspace.id,
+    });
+    const member = await addPlainMember(owner.workspace.id);
+
+    mockAuthenticatedSession(owner.user);
+    const { app: ownerApp } = createApp();
+    await ownerApp.request(`/api/project/${project.id}/budget`, {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ budgetCents: 100000, currency: "USD" }),
+    });
+
+    mockAuthenticatedSession({ id: member.id } as typeof owner.user);
+    const { app: memberApp } = createApp();
+    const response = await memberApp.request(
+      `/api/project-metrics/${project.id}/budget`,
+    );
+
+    expect(response.status).toBe(403);
   });
 });

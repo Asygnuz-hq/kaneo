@@ -15,7 +15,6 @@ import { Progress, ProgressIndicator, ProgressTrack } from "../ui/progress";
 
 type Props = {
   projectId: string;
-  canEdit: boolean;
 };
 
 function formatMoney(cents: number, currency: string) {
@@ -26,7 +25,7 @@ function formatMoney(cents: number, currency: string) {
   }).format(cents / 100);
 }
 
-export default function ProjectBudgetCard({ projectId, canEdit }: Props) {
+export default function ProjectBudgetCard({ projectId }: Props) {
   const { t } = useTranslation();
   const { data: budget, isLoading } = useGetProjectBudget(projectId);
   const { mutateAsync: updateBudget, isPending } = useUpdateProjectBudget();
@@ -72,7 +71,6 @@ export default function ProjectBudgetCard({ projectId, canEdit }: Props) {
   };
 
   if (budget.budgetCents === null && !isEditing) {
-    if (!canEdit) return null;
     return (
       <Card>
         <CardContent className="flex items-center justify-between py-4">
@@ -173,15 +171,13 @@ export default function ProjectBudgetCard({ projectId, canEdit }: Props) {
           </CardTitle>
           <CardDescription>{t("metrics:budget.description")}</CardDescription>
         </div>
-        {canEdit && (
-          <button
-            type="button"
-            className="text-xs text-muted-foreground hover:text-foreground hover:underline"
-            onClick={startEditing}
-          >
-            {t("metrics:budget.edit")}
-          </button>
-        )}
+        <button
+          type="button"
+          className="text-xs text-muted-foreground hover:text-foreground hover:underline"
+          onClick={startEditing}
+        >
+          {t("metrics:budget.edit")}
+        </button>
       </CardHeader>
       <CardContent className="space-y-3">
         <div className="flex items-center justify-between text-sm">

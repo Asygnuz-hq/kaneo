@@ -44,7 +44,7 @@ export default function ProjectMetricsView({
 }: ProjectMetricsViewProps) {
   const { t } = useTranslation();
   const { data: metrics, isLoading } = useGetProjectMetrics(projectId);
-  const { canUpdateProjects } = useWorkspacePermission();
+  const { canManageWorkspace } = useWorkspacePermission();
 
   if (isLoading) {
     return (
@@ -92,7 +92,7 @@ export default function ProjectMetricsView({
         </Card>
       </div>
 
-      <ProjectBudgetCard projectId={projectId} canEdit={canUpdateProjects()} />
+      {canManageWorkspace() && <ProjectBudgetCard projectId={projectId} />}
 
       <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
         <Card>

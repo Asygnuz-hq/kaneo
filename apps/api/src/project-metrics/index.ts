@@ -4,6 +4,7 @@ import {
   errorResponse,
   jsonResponse,
 } from "../openapi";
+import { requireWorkspacePermission } from "../utils/require-workspace-permission";
 import { workspaceAccess } from "../utils/workspace-access-middleware";
 import getProjectBudget from "./controllers/get-project-budget";
 import getProjectMetrics from "./controllers/get-project-metrics";
@@ -60,15 +61,20 @@ const getProjectBudgetRoute = createRoute({
   tags: ["Project Metrics"],
   summary: "Get project budget vs. spend",
   description:
-    "Contracted budget alongside spend derived from billable time logged so far, plus a simple burn-rate projection.",
-  middleware: [workspaceAccess.fromProject("projectId")] as const,
+    "Contracted budget alongside spend derived from billable time logged so far, plus a simple burn-rate projection. Payroll-adjacent data — restricted to workspace:manage_settings, same as setting the budget or a member's rate.",
+  middleware: [
+    workspaceAccess.fromProject("projectId"),
+    requireWorkspacePermission({ workspace: ["manage_settings"] }),
+  ] as const,
   request: { params: projectIdParam },
   responses: {
     200: jsonResponse("The project's budget summary", projectBudgetSchema),
     400: errorResponse(
       "Unknown project, or its workspace could not be determined",
     ),
-    403: errorResponse("No access to the project's workspace"),
+    403: errorResponse(
+      "No workspace access, or missing workspace:manage_settings permission",
+    ),
   },
 });
 
