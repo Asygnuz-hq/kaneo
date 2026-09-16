@@ -4,16 +4,18 @@ async function updateMemberRate({
   workspaceId,
   userId,
   hourlyRateCents,
+  billRateCents,
 }: {
   workspaceId: string;
   userId: string;
-  hourlyRateCents: number | null;
+  hourlyRateCents?: number | null;
+  billRateCents?: number | null;
 }) {
   const response = await client.workspace[":workspaceId"].members[
     ":userId"
   ].rate.$put({
     param: { workspaceId, userId },
-    json: { hourlyRateCents },
+    json: { hourlyRateCents, billRateCents },
   });
 
   if (!response.ok) {

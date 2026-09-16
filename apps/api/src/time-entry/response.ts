@@ -20,7 +20,11 @@ export const timeEntrySchema = z
     billable: z.boolean(),
     hourlyRateCentsSnapshot: z.number().nullable().openapi({
       description:
-        "The logger's hourly rate at the moment this entry was created, in cents. Null if no rate was set in the workspace yet — the entry still counts hours, just not cost.",
+        "The logger's cost rate at the moment this entry was created, in cents. Null if no rate was set in the workspace yet, or redacted for a viewer without workspace:manage_settings — payroll-adjacent data.",
+    }),
+    billRateCentsSnapshot: z.number().nullable().openapi({
+      description:
+        "The logger's client-bill rate at the moment this entry was created, in cents. Null if no rate was set in the workspace yet, or redacted for a viewer without workspace:manage_settings.",
     }),
   })
   .openapi("TimeEntry");

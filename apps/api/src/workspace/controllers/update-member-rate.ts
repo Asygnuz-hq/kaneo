@@ -7,14 +7,20 @@ async function updateMemberRate({
   workspaceId,
   userId,
   hourlyRateCents,
+  billRateCents,
 }: {
   workspaceId: string;
   userId: string;
-  hourlyRateCents: number | null;
+  hourlyRateCents?: number | null;
+  billRateCents?: number | null;
 }) {
+  const updates: Partial<typeof workspaceUserTable.$inferInsert> = {};
+  if (hourlyRateCents !== undefined) updates.hourlyRateCents = hourlyRateCents;
+  if (billRateCents !== undefined) updates.billRateCents = billRateCents;
+
   const [updatedMember] = await db
     .update(workspaceUserTable)
-    .set({ hourlyRateCents })
+    .set(updates)
     .where(
       and(
         eq(workspaceUserTable.workspaceId, workspaceId),

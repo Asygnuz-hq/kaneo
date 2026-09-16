@@ -58,22 +58,34 @@ export const workspaceMetricsSchema = z
 export const projectBudgetSchema = z
   .object({
     budgetCents: z.number().nullable().openapi({
-      description: "Contracted budget in cents. Null if not set.",
+      description:
+        "Contracted budget in cents, agreed with the client. Null if not set.",
     }),
     currency: z.string(),
-    spentCents: z.number().openapi({
+    costCents: z.number().openapi({
       description:
-        "Cost of billable time logged so far (hours x the rate snapshotted on each entry).",
+        "Internal cost of billable time logged so far (hours x each logger's cost rate, snapshotted on their entries) — what this work costs the company.",
+    }),
+    billedCents: z.number().openapi({
+      description:
+        "What should be invoiced to the client for billable time logged so far (hours x each logger's bill rate, snapshotted on their entries). Compared against budgetCents.",
+    }),
+    marginCents: z.number().openapi({
+      description: "billedCents minus costCents.",
     }),
     billableSeconds: z.number(),
     nonBillableSeconds: z.number(),
-    unratedBillableSeconds: z.number().openapi({
+    unratedCostSeconds: z.number().openapi({
       description:
-        "Billable seconds logged by someone with no hourly rate set — not included in spentCents, since there's no rate to cost them with.",
+        "Billable seconds logged by someone with no cost rate set — not included in costCents, since there's no rate to cost them with.",
     }),
-    projectedTotalCents: z.number().nullable().openapi({
+    unratedBillSeconds: z.number().openapi({
       description:
-        "Simple burn-rate projection (spent so far / % complete). Null until the project has some completed work to project from.",
+        "Billable seconds logged by someone with no bill rate set — not included in billedCents.",
+    }),
+    projectedBilledCents: z.number().nullable().openapi({
+      description:
+        "Simple burn-rate projection (billed so far / % complete). Null until the project has some completed work to project from.",
     }),
   })
   .openapi("ProjectBudget");

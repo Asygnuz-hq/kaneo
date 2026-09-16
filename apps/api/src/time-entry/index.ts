@@ -4,7 +4,10 @@ import {
   errorResponse,
   jsonResponse,
 } from "../openapi";
-import { requireWorkspacePermission } from "../utils/require-workspace-permission";
+import {
+  hasWorkspacePermission,
+  requireWorkspacePermission,
+} from "../utils/require-workspace-permission";
 import { workspaceAccess } from "../utils/workspace-access-middleware";
 import createTimeEntry from "./controllers/create-time-entry";
 import getTimeEntriesByTaskId from "./controllers/get-time-entries";
@@ -109,13 +112,34 @@ const updateTimeEntryRoute = createRoute({
   },
 });
 
+function redactRates<
+  T extends {
+    hourlyRateCentsSnapshot?: number | null;
+    billRateCentsSnapshot?: number | null;
+  },
+>(entry: T): T {
+  return {
+    ...entry,
+    hourlyRateCentsSnapshot: null,
+    billRateCentsSnapshot: null,
+  };
+}
+
 const timeEntry = apiRouter()
-  .openapi(getTaskTimeEntriesRoute, async (c) =>
-    c.json(await getTimeEntriesByTaskId(c.req.valid("param").taskId), 200),
-  )
-  .openapi(getTimeEntryRoute, async (c) =>
-    c.json(await getTimeEntry(c.req.valid("param").id), 200),
-  )
+  .openapi(getTaskTimeEntriesRoute, async (c) => {
+    const entries = await getTimeEntriesByTaskId(c.req.valid("param").taskId);
+    const canSeeRates = await hasWorkspacePermission(c, {
+      workspace: ["manage_settings"],
+    });
+    return c.json(canSeeRates ? entries : entries.map(redactRates), 200);
+  })
+  .openapi(getTimeEntryRoute, async (c) => {
+    const entry = await getTimeEntry(c.req.valid("param").id);
+    const canSeeRates = await hasWorkspacePermission(c, {
+      workspace: ["manage_settings"],
+    });
+    return c.json(canSeeRates || !entry ? entry : redactRates(entry), 200);
+  })
   .openapi(createTimeEntryRoute, async (c) => {
     const { taskId, startTime, endTime, description, billable } =
       c.req.valid("json");

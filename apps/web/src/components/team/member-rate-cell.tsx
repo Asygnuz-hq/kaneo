@@ -5,10 +5,13 @@ import { useGetWorkspaceMemberRates } from "@/hooks/queries/workspace/use-get-wo
 import { toast } from "@/lib/toast";
 import { Input } from "../ui/input";
 
+type RateField = "hourlyRateCents" | "billRateCents";
+
 type Props = {
   workspaceId: string;
   userId: string;
   canEdit: boolean;
+  field: RateField;
 };
 
 // Fetches the whole workspace's rates once (react-query dedupes/caches this
@@ -18,14 +21,14 @@ export default function MemberRateCell({
   workspaceId,
   userId,
   canEdit,
+  field,
 }: Props) {
   const { t } = useTranslation();
   const { data: rates } = useGetWorkspaceMemberRates(workspaceId);
   const { mutateAsync: updateRate, isPending } = useUpdateMemberRate();
   const [draft, setDraft] = useState<string | null>(null);
 
-  const currentCents =
-    rates?.find((m) => m.id === userId)?.hourlyRateCents ?? null;
+  const currentCents = rates?.find((m) => m.id === userId)?.[field] ?? null;
 
   if (!canEdit) {
     return (
@@ -58,7 +61,7 @@ export default function MemberRateCell({
     }
 
     try {
-      await updateRate({ workspaceId, userId, hourlyRateCents: cents });
+      await updateRate({ workspaceId, userId, [field]: cents });
       setDraft(null);
     } catch (error) {
       toast.error(

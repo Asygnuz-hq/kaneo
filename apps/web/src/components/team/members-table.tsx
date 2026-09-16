@@ -200,8 +200,13 @@ function MembersTable({ workspaceId, invitations, users }: Props) {
               {t("team:membersTable.columns.role", { defaultValue: "Role" })}
             </TableHead>
             <TableHead className="text-foreground font-medium">
-              {t("team:membersTable.columns.rate", {
-                defaultValue: "Rate/hr",
+              {t("team:membersTable.columns.costRate", {
+                defaultValue: "Cost/hr",
+              })}
+            </TableHead>
+            <TableHead className="text-foreground font-medium">
+              {t("team:membersTable.columns.billRate", {
+                defaultValue: "Bill/hr",
               })}
             </TableHead>
             <TableHead className="text-foreground font-medium">
@@ -304,6 +309,15 @@ function MembersTable({ workspaceId, invitations, users }: Props) {
                     workspaceId={workspaceId}
                     userId={member.userId}
                     canEdit={canManageWorkspace()}
+                    field="hourlyRateCents"
+                  />
+                </TableCell>
+                <TableCell className="py-3">
+                  <MemberRateCell
+                    workspaceId={workspaceId}
+                    userId={member.userId}
+                    canEdit={canManageWorkspace()}
+                    field="billRateCents"
                   />
                 </TableCell>
                 <TableCell className="py-3 text-sm text-muted-foreground tabular-nums">
@@ -380,6 +394,9 @@ function MembersTable({ workspaceId, invitations, users }: Props) {
               <TableCell className="py-3 text-sm text-muted-foreground">
                 –
               </TableCell>
+              <TableCell className="py-3 text-sm text-muted-foreground">
+                –
+              </TableCell>
               <TableCell className="pe-6 py-3 text-right">
                 {canInvite ? (
                   <Menu>
@@ -419,7 +436,7 @@ function MembersTable({ workspaceId, invitations, users }: Props) {
 
           {users.length === 0 && pendingInvitations.length === 0 ? (
             <TableRow>
-              <TableCell colSpan={5} className="py-16 text-center">
+              <TableCell colSpan={6} className="py-16 text-center">
                 <div className="flex flex-col items-center gap-2 text-muted-foreground">
                   <p className="text-sm font-medium text-foreground">
                     {t("team:membersTable.emptyTitle")}

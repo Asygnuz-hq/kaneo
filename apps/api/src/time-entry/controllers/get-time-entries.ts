@@ -17,6 +17,7 @@ async function getTimeEntriesByTaskId(taskId: string) {
       updatedAt: timeEntryTable.updatedAt,
       billable: timeEntryTable.billable,
       hourlyRateCentsSnapshot: timeEntryTable.hourlyRateCentsSnapshot,
+      billRateCentsSnapshot: timeEntryTable.billRateCentsSnapshot,
     })
     .from(timeEntryTable)
     .leftJoin(userTable, eq(timeEntryTable.userId, userTable.id))

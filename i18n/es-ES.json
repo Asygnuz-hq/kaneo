@@ -2290,6 +2290,19 @@
 			"statusCompleted": "Completado",
 			"noTasksInSprint": "Todavía no hay tareas en este sprint",
 			"movedToBacklog": "{{count}} tareas sin terminar volvieron al backlog"
+		},
+		"timeTracker": {
+			"start": "Iniciar",
+			"stop": "Detener",
+			"logTime": {
+				"trigger": "Registrar tiempo",
+				"dateLabel": "Fecha",
+				"hoursLabel": "Horas",
+				"submit": "Registrar tiempo",
+				"invalidHours": "Ingresá un número de horas mayor que cero",
+				"success": "Tiempo registrado",
+				"error": "No se pudo registrar el tiempo"
+			}
 		}
 	},
 	"invitations": {
@@ -2426,7 +2439,8 @@
 			"columns": {
 				"name": "Nombre",
 				"role": "Rol",
-				"rate": "Tarifa/hora",
+				"costRate": "Costo/hora",
+				"billRate": "Tarifa cliente/hora",
 				"joined": "Unido",
 				"actions": "Acciones"
 			},
@@ -2509,7 +2523,7 @@
 		"overdueCount_many": "{{count}} atrasadas",
 		"budget": {
 			"title": "Presupuesto",
-			"description": "El gasto se calcula a partir del tiempo facturable registrado hasta ahora.",
+			"description": "El monto facturado se calcula a partir del tiempo facturable registrado hasta ahora, a la tarifa de cliente de cada persona.",
 			"notSet": "Este proyecto todavía no tiene presupuesto definido.",
 			"addBudget": "Agregar presupuesto",
 			"edit": "Editar",
@@ -2517,7 +2531,10 @@
 			"currencyLabel": "Moneda",
 			"ofBudget": "de {{amount}}",
 			"projected": "Proyectado a este ritmo: {{amount}}",
-			"unratedWarning": "{{hours}}h de tiempo facturable no tienen tarifa definida todavía, así que no están contadas arriba.",
+			"unratedBillWarning": "{{hours}}h de tiempo facturable no tienen tarifa de cliente definida todavía, así que no están contadas arriba.",
+			"unratedCostWarning": "{{hours}}h de tiempo facturable no tienen tarifa de costo definida todavía, así que no están contadas en el costo interno.",
+			"internalCost": "Costo interno",
+			"margin": "Margen",
 			"invalidAmount": "Ingresá un monto válido, no negativo",
 			"saveError": "No se pudo guardar el presupuesto"
 		}

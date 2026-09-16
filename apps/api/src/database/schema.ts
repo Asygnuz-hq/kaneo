@@ -169,11 +169,17 @@ export const workspaceUserTable = pgTable(
       }),
     role: text("role").default("member").notNull(),
     joinedAt: timestamp("joined_at", { mode: "date" }).notNull(),
-    // ASYGNUZ: this person's billing rate within this workspace, in cents —
-    // null means unset (their time can still be logged, just not costed).
-    // Lives on the membership row, not the user, because the same person
-    // can have a different rate in a different workspace.
+    // ASYGNUZ: this person's internal cost rate within this workspace, in
+    // cents — what their time actually costs the company (payroll/contractor
+    // pay). Null means unset (their time can still be logged, just not
+    // costed). Lives on the membership row, not the user, because the same
+    // person can have a different rate in a different workspace.
     hourlyRateCents: integer("hourly_rate_cents"),
+    // ASYGNUZ: this person's client-billing rate within this workspace, in
+    // cents — what gets invoiced to the client for their time. Distinct from
+    // hourlyRateCents (cost) so a project's margin can be computed; null
+    // means unset.
+    billRateCents: integer("bill_rate_cents"),
   },
   (table) => [
     index("workspace_member_workspaceId_idx").on(table.workspaceId),
@@ -996,10 +1002,12 @@ export const timeEntryTable = pgTable(
     // ASYGNUZ: most logged time is billable, so entries default to true
     // rather than forcing every timer start to answer a question upfront.
     billable: boolean("billable").notNull().default(true),
-    // Snapshot of workspaceUserTable.hourlyRateCents at the moment this entry
-    // was logged. Copied rather than joined at read time so a later rate
-    // change never rewrites the cost of work already logged.
+    // Snapshot of workspaceUserTable.hourlyRateCents/billRateCents at the
+    // moment this entry was logged. Copied rather than joined at read time so
+    // a later rate change never rewrites the cost/billing of work already
+    // logged.
     hourlyRateCentsSnapshot: integer("hourly_rate_cents_snapshot"),
+    billRateCentsSnapshot: integer("bill_rate_cents_snapshot"),
   },
   (table) => [
     index("time_entry_taskId_idx").on(table.taskId),

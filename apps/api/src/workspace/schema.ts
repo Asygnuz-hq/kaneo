@@ -8,8 +8,12 @@ export const workspaceMemberRateParam = z.object({
 });
 
 export const updateMemberRateBody = z.object({
-  hourlyRateCents: z.number().int().min(0).nullable().openapi({
+  hourlyRateCents: z.number().int().min(0).nullable().optional().openapi({
     description:
-      "This person's billing rate within this workspace, in cents. Pass null to unset it.",
+      "This person's internal cost rate within this workspace, in cents (what their time costs the company). Pass null to unset it. Omit to leave unchanged.",
+  }),
+  billRateCents: z.number().int().min(0).nullable().optional().openapi({
+    description:
+      "This person's client-billing rate within this workspace, in cents (what gets invoiced for their time). Pass null to unset it. Omit to leave unchanged.",
   }),
 });

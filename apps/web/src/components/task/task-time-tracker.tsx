@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import useCreateTimeEntry from "@/hooks/queries/time-entry/use-create-time-entry";
 import useGetTimeEntriesByTaskId from "@/hooks/queries/time-entry/use-get-time-entries";
 import useUpdateTimeEntry from "@/hooks/queries/time-entry/use-update-time-entry";
+import LogTimeForm from "./log-time-form";
 
 function formatDuration(seconds: number): string {
   const h = Math.floor(seconds / 3600);
@@ -99,7 +100,7 @@ export default function TaskTimeTracker({ taskId }: TaskTimeTrackerProps) {
             {formatDuration(totalTime)}
           </span>
         </div>
-        <div>
+        <div className="flex items-center gap-1">
           {activeEntry ? (
             <Button
               variant="destructive"
@@ -109,19 +110,22 @@ export default function TaskTimeTracker({ taskId }: TaskTimeTrackerProps) {
               disabled={isUpdating}
             >
               <Square className="w-3 h-3 fill-current" />
-              <span>{t("tasks:timeTracker.stop", "Stop")}</span>
+              <span>{t("tasks:timeTracker.stop")}</span>
             </Button>
           ) : (
-            <Button
-              variant="outline"
-              size="sm"
-              className="h-7 gap-1"
-              onClick={handleStartTimer}
-              disabled={isCreating}
-            >
-              <Play className="w-3 h-3 fill-current" />
-              <span>{t("tasks:timeTracker.start", "Start")}</span>
-            </Button>
+            <>
+              <Button
+                variant="outline"
+                size="sm"
+                className="h-7 gap-1"
+                onClick={handleStartTimer}
+                disabled={isCreating}
+              >
+                <Play className="w-3 h-3 fill-current" />
+                <span>{t("tasks:timeTracker.start")}</span>
+              </Button>
+              <LogTimeForm taskId={taskId} />
+            </>
           )}
         </div>
       </div>

@@ -12,7 +12,11 @@ export const workspaceMemberSchema = z
     }),
     hourlyRateCents: z.number().nullable().openapi({
       description:
-        "This person's billing rate within this workspace, in cents. Null if unset.",
+        "This person's internal cost rate within this workspace, in cents. Null if unset.",
+    }),
+    billRateCents: z.number().nullable().openapi({
+      description:
+        "This person's client-billing rate within this workspace, in cents. Null if unset.",
     }),
   })
   .openapi("WorkspaceMember");
@@ -24,5 +28,6 @@ export const workspaceMemberRateSchema = z
     userId: z.string(),
     workspaceId: z.string(),
     hourlyRateCents: z.number().nullable(),
+    billRateCents: z.number().nullable(),
   })
   .openapi("WorkspaceMemberRate");

@@ -10,12 +10,16 @@ import {
 
 const SECONDS_PER_HOUR = 3600;
 
-// ASYGNUZ: a lightweight spend estimate, not a full accounting module —
-// cost is derived from billable time already logged (hours x the rate
-// snapshotted when each entry was created), and the "projected total" is a
-// simple burn-rate heuristic (spend so far / % complete), not a forecast
-// model. Good enough to flag "this project is burning through budget faster
-// than it's finishing" without pretending to be an ERP.
+// ASYGNUZ: a lightweight spend estimate, not a full accounting module.
+// Two figures are tracked from the same billable time, using two different
+// per-person rates: costCents (internal cost — payroll/contractor pay) and
+// billedCents (what should be invoiced to the client). budgetCents is the
+// contracted amount agreed with the client, so it's compared against
+// billedCents; marginCents (billed - cost) is the resulting profitability.
+// The "projected total" is a simple burn-rate heuristic (billed so far / %
+// complete), not a forecast model — good enough to flag "this project is
+// burning through budget faster than it's finishing" without pretending to
+// be an ERP.
 async function getProjectBudget(projectId: string) {
   const [project] = await db
     .select({
@@ -34,6 +38,7 @@ async function getProjectBudget(projectId: string) {
       duration: timeEntryTable.duration,
       billable: timeEntryTable.billable,
       hourlyRateCentsSnapshot: timeEntryTable.hourlyRateCentsSnapshot,
+      billRateCentsSnapshot: timeEntryTable.billRateCentsSnapshot,
     })
     .from(timeEntryTable)
     .innerJoin(taskTable, eq(timeEntryTable.taskId, taskTable.id))
@@ -41,8 +46,10 @@ async function getProjectBudget(projectId: string) {
 
   let billableSeconds = 0;
   let nonBillableSeconds = 0;
-  let unratedBillableSeconds = 0;
-  let spentCents = 0;
+  let unratedCostSeconds = 0;
+  let unratedBillSeconds = 0;
+  let costCents = 0;
+  let billedCents = 0;
 
   for (const entry of entries) {
     const duration = entry.duration ?? 0;
@@ -51,13 +58,23 @@ async function getProjectBudget(projectId: string) {
       continue;
     }
     billableSeconds += duration;
+
     if (entry.hourlyRateCentsSnapshot === null) {
-      unratedBillableSeconds += duration;
-      continue;
+      unratedCostSeconds += duration;
+    } else {
+      costCents +=
+        (duration / SECONDS_PER_HOUR) * entry.hourlyRateCentsSnapshot;
     }
-    spentCents += (duration / SECONDS_PER_HOUR) * entry.hourlyRateCentsSnapshot;
+
+    if (entry.billRateCentsSnapshot === null) {
+      unratedBillSeconds += duration;
+    } else {
+      billedCents +=
+        (duration / SECONDS_PER_HOUR) * entry.billRateCentsSnapshot;
+    }
   }
-  spentCents = Math.round(spentCents);
+  costCents = Math.round(costCents);
+  billedCents = Math.round(billedCents);
 
   const taskRows = await db
     .select({ isFinal: columnTable.isFinal })
@@ -69,19 +86,22 @@ async function getProjectBudget(projectId: string) {
   const completedTasks = taskRows.filter((t) => t.isFinal === true).length;
   const completionPercentage = totalTasks > 0 ? completedTasks / totalTasks : 0;
 
-  const projectedTotalCents =
+  const projectedBilledCents =
     completionPercentage > 0
-      ? Math.round(spentCents / completionPercentage)
+      ? Math.round(billedCents / completionPercentage)
       : null;
 
   return {
     budgetCents: project.budgetCents,
     currency: project.currency,
-    spentCents,
+    costCents,
+    billedCents,
+    marginCents: billedCents - costCents,
     billableSeconds,
     nonBillableSeconds,
-    unratedBillableSeconds,
-    projectedTotalCents,
+    unratedCostSeconds,
+    unratedBillSeconds,
+    projectedBilledCents,
   };
 }
 

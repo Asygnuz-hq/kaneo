@@ -153,14 +153,15 @@ export default function ProjectBudgetCard({ projectId }: Props) {
   }
 
   const budgetCents = budget.budgetCents as number;
-  const spentPct = Math.min(
+  const billedPct = Math.min(
     100,
-    Math.round((budget.spentCents / budgetCents) * 100),
+    Math.round((budget.billedCents / budgetCents) * 100),
   );
-  const isOverBudget = budget.spentCents > budgetCents;
+  const isOverBudget = budget.billedCents > budgetCents;
   const projectedOverBudget =
-    budget.projectedTotalCents !== null &&
-    budget.projectedTotalCents > budgetCents;
+    budget.projectedBilledCents !== null &&
+    budget.projectedBilledCents > budgetCents;
+  const isNegativeMargin = budget.marginCents < 0;
 
   return (
     <Card>
@@ -182,7 +183,7 @@ export default function ProjectBudgetCard({ projectId }: Props) {
       <CardContent className="space-y-3">
         <div className="flex items-center justify-between text-sm">
           <span className={isOverBudget ? "font-medium text-destructive" : ""}>
-            {formatMoney(budget.spentCents, budget.currency)}
+            {formatMoney(budget.billedCents, budget.currency)}
           </span>
           <span className="text-muted-foreground">
             {t("metrics:budget.ofBudget", {
@@ -190,14 +191,14 @@ export default function ProjectBudgetCard({ projectId }: Props) {
             })}
           </span>
         </div>
-        <Progress value={spentPct} className="gap-0">
+        <Progress value={billedPct} className="gap-0">
           <ProgressTrack className="h-2">
             <ProgressIndicator
               className={isOverBudget ? "bg-destructive" : undefined}
             />
           </ProgressTrack>
         </Progress>
-        {budget.projectedTotalCents !== null && (
+        {budget.projectedBilledCents !== null && (
           <p
             className={
               projectedOverBudget
@@ -206,14 +207,43 @@ export default function ProjectBudgetCard({ projectId }: Props) {
             }
           >
             {t("metrics:budget.projected", {
-              amount: formatMoney(budget.projectedTotalCents, budget.currency),
+              amount: formatMoney(budget.projectedBilledCents, budget.currency),
             })}
           </p>
         )}
-        {budget.unratedBillableSeconds > 0 && (
+        {budget.unratedBillSeconds > 0 && (
           <p className="text-xs text-muted-foreground">
-            {t("metrics:budget.unratedWarning", {
-              hours: Math.round(budget.unratedBillableSeconds / 3600),
+            {t("metrics:budget.unratedBillWarning", {
+              hours: Math.round(budget.unratedBillSeconds / 3600),
+            })}
+          </p>
+        )}
+        <div className="flex items-center justify-between border-t pt-3 text-sm">
+          <span className="text-muted-foreground">
+            {t("metrics:budget.internalCost")}
+          </span>
+          <span className="tabular-nums">
+            {formatMoney(budget.costCents, budget.currency)}
+          </span>
+        </div>
+        <div className="flex items-center justify-between text-sm">
+          <span className="text-muted-foreground">
+            {t("metrics:budget.margin")}
+          </span>
+          <span
+            className={
+              isNegativeMargin
+                ? "font-medium text-destructive tabular-nums"
+                : "font-medium text-emerald-600 tabular-nums dark:text-emerald-400"
+            }
+          >
+            {formatMoney(budget.marginCents, budget.currency)}
+          </span>
+        </div>
+        {budget.unratedCostSeconds > 0 && (
+          <p className="text-xs text-muted-foreground">
+            {t("metrics:budget.unratedCostWarning", {
+              hours: Math.round(budget.unratedCostSeconds / 3600),
             })}
           </p>
         )}

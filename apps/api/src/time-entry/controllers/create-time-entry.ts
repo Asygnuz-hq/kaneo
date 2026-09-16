@@ -11,12 +11,16 @@ import {
 import { publishEvent } from "../../events";
 import { resolveDuration } from "../duration";
 
-// Snapshotted at log time so a later rate change never rewrites the cost of
-// work already logged. Null (no rate set yet) is a valid, common result —
-// the entry still counts hours, just not cost until a rate exists.
-async function resolveHourlyRateCentsSnapshot(taskId: string, userId: string) {
+// Snapshotted at log time so a later rate change never rewrites the
+// cost/bill of work already logged. Null (no rate set yet) is a valid,
+// common result — the entry still counts hours, just not costed/billed
+// until a rate exists.
+async function resolveRateSnapshots(taskId: string, userId: string) {
   const [row] = await db
-    .select({ hourlyRateCents: workspaceUserTable.hourlyRateCents })
+    .select({
+      hourlyRateCents: workspaceUserTable.hourlyRateCents,
+      billRateCents: workspaceUserTable.billRateCents,
+    })
     .from(taskTable)
     .innerJoin(projectTable, eq(taskTable.projectId, projectTable.id))
     .innerJoin(
@@ -28,7 +32,10 @@ async function resolveHourlyRateCentsSnapshot(taskId: string, userId: string) {
     )
     .where(eq(taskTable.id, taskId));
 
-  return row?.hourlyRateCents ?? null;
+  return {
+    hourlyRateCentsSnapshot: row?.hourlyRateCents ?? null,
+    billRateCentsSnapshot: row?.billRateCents ?? null,
+  };
 }
 
 async function createTimeEntry({
@@ -47,10 +54,8 @@ async function createTimeEntry({
   billable?: boolean;
 }) {
   const duration = resolveDuration(startTime, endTime);
-  const hourlyRateCentsSnapshot = await resolveHourlyRateCentsSnapshot(
-    taskId,
-    userId,
-  );
+  const { hourlyRateCentsSnapshot, billRateCentsSnapshot } =
+    await resolveRateSnapshots(taskId, userId);
 
   const [createdTimeEntry] = await db
     .insert(timeEntryTable)
@@ -64,6 +69,7 @@ async function createTimeEntry({
       duration,
       billable,
       hourlyRateCentsSnapshot,
+      billRateCentsSnapshot,
     })
     .returning();
 

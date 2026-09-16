@@ -43,9 +43,9 @@ const updateMemberRateRoute = createRoute({
   operationId: "updateMemberRate",
   path: "/{workspaceId}/members/{userId}/rate",
   tags: ["Workspaces"],
-  summary: "Set a member's hourly rate",
+  summary: "Set a member's cost and/or bill rate",
   description:
-    "Set or clear a workspace member's billing rate, used to cost their future time entries. Never rewrites the rate already snapshotted on entries logged before this change.",
+    "Set or clear a workspace member's internal cost rate and/or client-bill rate, used to cost/bill their future time entries. Each field is independently optional — omit one to leave it unchanged. Never rewrites the rates already snapshotted on entries logged before this change.",
   middleware: [
     workspaceAccess.fromParam("workspaceId"),
     requireWorkspacePermission({ workspace: ["manage_settings"] }),
@@ -77,15 +77,24 @@ const workspace = apiRouter<BaseVariables & { workspaceId: string }>()
     return c.json(
       canSeeRates
         ? members
-        : members.map((m) => ({ ...m, hourlyRateCents: null })),
+        : members.map((m) => ({
+            ...m,
+            hourlyRateCents: null,
+            billRateCents: null,
+          })),
       200,
     );
   })
   .openapi(updateMemberRateRoute, async (c) => {
     const { workspaceId, userId } = c.req.valid("param");
-    const { hourlyRateCents } = c.req.valid("json");
+    const { hourlyRateCents, billRateCents } = c.req.valid("json");
     return c.json(
-      await updateMemberRateCtrl({ workspaceId, userId, hourlyRateCents }),
+      await updateMemberRateCtrl({
+        workspaceId,
+        userId,
+        hourlyRateCents,
+        billRateCents,
+      }),
       200,
     );
   });

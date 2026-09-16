@@ -2283,6 +2283,19 @@
 			"statusCompleted": "Completed",
 			"noTasksInSprint": "No tasks in this sprint yet",
 			"movedToBacklog": "{{count}} unfinished tasks moved to the backlog"
+		},
+		"timeTracker": {
+			"start": "Start",
+			"stop": "Stop",
+			"logTime": {
+				"trigger": "Log time",
+				"dateLabel": "Date",
+				"hoursLabel": "Hours",
+				"submit": "Log time",
+				"invalidHours": "Enter a number of hours greater than zero",
+				"success": "Time logged",
+				"error": "Failed to log time"
+			}
 		}
 	},
 	"invitations": {
@@ -2418,7 +2431,8 @@
 			"columns": {
 				"name": "Name",
 				"role": "Role",
-				"rate": "Rate/hr",
+				"costRate": "Cost/hr",
+				"billRate": "Bill/hr",
 				"joined": "Joined",
 				"actions": "Actions"
 			},
@@ -2500,7 +2514,7 @@
 		"overdueCount_other": "{{count}} overdue",
 		"budget": {
 			"title": "Budget",
-			"description": "Spend is derived from billable time logged so far.",
+			"description": "Billed amount is derived from billable time logged so far, at each person's client-bill rate.",
 			"notSet": "No budget set for this project yet.",
 			"addBudget": "Add budget",
 			"edit": "Edit",
@@ -2508,7 +2522,10 @@
 			"currencyLabel": "Currency",
 			"ofBudget": "of {{amount}}",
 			"projected": "Projected total at this pace: {{amount}}",
-			"unratedWarning": "{{hours}}h of billable time has no rate set yet, so it isn't counted above.",
+			"unratedBillWarning": "{{hours}}h of billable time has no bill rate set yet, so it isn't counted above.",
+			"unratedCostWarning": "{{hours}}h of billable time has no cost rate set yet, so it isn't counted in internal cost.",
+			"internalCost": "Internal cost",
+			"margin": "Margin",
 			"invalidAmount": "Enter a valid, non-negative amount",
 			"saveError": "Failed to save the budget"
 		}

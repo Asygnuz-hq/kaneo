@@ -2290,6 +2290,19 @@
 			"statusPlanned": "Planned",
 			"updateError": "Couldn't move the task",
 			"updateSuccess": "Task moved"
+		},
+		"timeTracker": {
+			"logTime": {
+				"dateLabel": "Date",
+				"error": "Failed to log time",
+				"hoursLabel": "Hours",
+				"invalidHours": "Enter a number of hours greater than zero",
+				"submit": "Log time",
+				"success": "Time logged",
+				"trigger": "Log time"
+			},
+			"start": "Start",
+			"stop": "Stop"
 		}
 	},
 	"invitations": {
@@ -2428,7 +2441,8 @@
 				"role": "Função",
 				"joined": "Entrou em",
 				"actions": "Ações",
-				"rate": "Rate/hr"
+				"billRate": "Bill/hr",
+				"costRate": "Cost/hr"
 			},
 			"memberRolePending": "{{role}} (Pendente)",
 			"ariaCancelInvitation": "Cancelar convite",
@@ -2519,7 +2533,10 @@
 			"projected": "Projected total at this pace: {{amount}}",
 			"saveError": "Failed to save the budget",
 			"title": "Budget",
-			"unratedWarning": "{{hours}}h of billable time has no rate set yet, so it isn't counted above."
+			"internalCost": "Internal cost",
+			"margin": "Margin",
+			"unratedBillWarning": "{{hours}}h of billable time has no bill rate set yet, so it isn't counted above.",
+			"unratedCostWarning": "{{hours}}h of billable time has no cost rate set yet, so it isn't counted in internal cost."
 		}
 	}
 }
