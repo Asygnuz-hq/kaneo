@@ -13,7 +13,8 @@
 			"filter": "Φίλτρο",
 			"clearAllFilters": "Εκκαθάριση όλων των φίλτρων",
 			"add": "Add",
-			"edit": "Edit"
+			"edit": "Edit",
+			"save": "Save"
 		},
 		"a11y": {
 			"toggleSidebar": "Εναλλαγή πλαϊνής μπάρας"

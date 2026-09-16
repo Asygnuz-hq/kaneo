@@ -13,7 +13,8 @@
 			"filter": "Филтрирај",
 			"clearAllFilters": "Исчисти ги сите филтри",
 			"add": "Add",
-			"edit": "Edit"
+			"edit": "Edit",
+			"save": "Save"
 		},
 		"a11y": {
 			"toggleSidebar": "Вклучи/исклучи странична лента"

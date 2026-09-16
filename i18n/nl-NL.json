@@ -13,7 +13,8 @@
 			"filter": "Filteren",
 			"clearAllFilters": "Alle filters wissen",
 			"add": "Add",
-			"edit": "Edit"
+			"edit": "Edit",
+			"save": "Save"
 		},
 		"a11y": {
 			"toggleSidebar": "Zijbalk in-/uitschakelen"

@@ -13,7 +13,8 @@
 			"filter": "筛选",
 			"clearAllFilters": "清除全部筛选",
 			"add": "Add",
-			"edit": "Edit"
+			"edit": "Edit",
+			"save": "Save"
 		},
 		"a11y": {
 			"toggleSidebar": "切换侧边栏"

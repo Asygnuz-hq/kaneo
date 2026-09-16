@@ -13,7 +13,8 @@
 			"filter": "Фильтр",
 			"clearAllFilters": "Сбросить все фильтры",
 			"add": "Add",
-			"edit": "Edit"
+			"edit": "Edit",
+			"save": "Save"
 		},
 		"a11y": {
 			"toggleSidebar": "Переключить боковую панель"

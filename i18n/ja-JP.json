@@ -13,7 +13,8 @@
 			"filter": "フィルター",
 			"clearAllFilters": "すべてのフィルターをクリア",
 			"add": "Add",
-			"edit": "Edit"
+			"edit": "Edit",
+			"save": "Save"
 		},
 		"a11y": {
 			"toggleSidebar": "サイドバーを切り替え"

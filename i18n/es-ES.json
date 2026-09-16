@@ -3,6 +3,7 @@
 		"appName": "Kaneo",
 		"actions": {
 			"cancel": "Cancelar",
+			"save": "Guardar",
 			"add": "Agregar",
 			"close": "Cerrar",
 			"edit": "Editar",

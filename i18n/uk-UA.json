@@ -13,7 +13,8 @@
 			"filter": "Фільтр",
 			"clearAllFilters": "Очистити всі фільтри",
 			"add": "Add",
-			"edit": "Edit"
+			"edit": "Edit",
+			"save": "Save"
 		},
 		"a11y": {
 			"toggleSidebar": "Перемикач бічної панелі"

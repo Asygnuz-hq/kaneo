@@ -140,14 +140,14 @@ export default function ProjectBudgetCard({ projectId, canEdit }: Props) {
             className="h-8 rounded-md bg-primary px-3 text-sm font-medium text-primary-foreground disabled:opacity-50"
             onClick={save}
           >
-            {t("common:actions.save", { defaultValue: "Save" })}
+            {t("common:actions.save")}
           </button>
           <button
             type="button"
             className="h-8 rounded-md px-3 text-sm text-muted-foreground hover:bg-accent"
             onClick={() => setIsEditing(false)}
           >
-            {t("common:actions.cancel", { defaultValue: "Cancel" })}
+            {t("common:actions.cancel")}
           </button>
         </CardContent>
       </Card>

@@ -13,7 +13,8 @@
 			"filter": "Filtrar",
 			"clearAllFilters": "Limpar todos os filtros",
 			"add": "Add",
-			"edit": "Edit"
+			"edit": "Edit",
+			"save": "Save"
 		},
 		"a11y": {
 			"toggleSidebar": "Alternar barra lateral"

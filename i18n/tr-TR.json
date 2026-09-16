@@ -13,7 +13,8 @@
 			"filter": "Filtrele",
 			"clearAllFilters": "Tüm filtreleri temizle",
 			"add": "Add",
-			"edit": "Edit"
+			"edit": "Edit",
+			"save": "Save"
 		},
 		"a11y": {
 			"toggleSidebar": "Kenar çubuğunu aç/kapat"

@@ -13,7 +13,8 @@
 			"filter": "Filter",
 			"clearAllFilters": "Hapus semua filter",
 			"add": "Add",
-			"edit": "Edit"
+			"edit": "Edit",
+			"save": "Save"
 		},
 		"a11y": {
 			"toggleSidebar": "Tampilkan/sembunyikan panel samping"

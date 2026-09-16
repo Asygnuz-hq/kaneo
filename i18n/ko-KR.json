@@ -13,7 +13,8 @@
 			"filter": "필터",
 			"clearAllFilters": "모든 필터 지우기",
 			"add": "Add",
-			"edit": "Edit"
+			"edit": "Edit",
+			"save": "Save"
 		},
 		"a11y": {
 			"toggleSidebar": "사이드바 토글"

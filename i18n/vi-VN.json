@@ -13,7 +13,8 @@
 			"filter": "Lọc",
 			"clearAllFilters": "Xóa tất cả bộ lọc",
 			"add": "Add",
-			"edit": "Edit"
+			"edit": "Edit",
+			"save": "Save"
 		},
 		"a11y": {
 			"toggleSidebar": "Bật/tắt thanh bên"

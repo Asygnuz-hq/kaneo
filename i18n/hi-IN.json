@@ -13,7 +13,8 @@
 			"filter": "फ़िल्टर",
 			"clearAllFilters": "सभी फ़िल्टर साफ़ करें",
 			"add": "Add",
-			"edit": "Edit"
+			"edit": "Edit",
+			"save": "Save"
 		},
 		"a11y": {
 			"toggleSidebar": "साइडबार टॉगल करें"
