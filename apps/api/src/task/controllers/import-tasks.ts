@@ -93,6 +93,7 @@ async function importTasks(
             title: taskData.title,
             status,
             columnId: column?.id ?? null,
+            completedAt: column?.isFinal ? new Date() : null,
             startDate: taskData.startDate ? new Date(taskData.startDate) : null,
             dueDate: taskData.dueDate ? new Date(taskData.dueDate) : null,
             description: taskData.description || "",

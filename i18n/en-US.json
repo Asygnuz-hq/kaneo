@@ -2512,6 +2512,27 @@
 		"crossProjectDescription": "Open tasks per person, summed across every active project — busiest first.",
 		"overdueCount_one": "{{count}} overdue",
 		"overdueCount_other": "{{count}} overdue",
+		"recentlyClosed": {
+			"title_one": "{{count}} closed recently",
+			"title_other": "{{count}} closed recently",
+			"description": "Tasks closed in the last {{days}} days across the workspace.",
+			"empty": "Nothing closed in the last few days yet.",
+			"andMore": "+{{count}} more"
+		},
+		"upcomingWorkload": {
+			"title": "Upcoming workload",
+			"description": "Open tasks due in the next {{days}} days, by assignee.",
+			"empty": "Nothing due in this window yet.",
+			"taskCount_one": "{{count}} task",
+			"taskCount_other": "{{count}} tasks"
+		},
+		"scheduleCompliance": {
+			"title": "Schedule compliance",
+			"description": "Closed, dated tasks compared against their estimated due date.",
+			"empty": "No closed tasks with a due date yet to measure.",
+			"onTime": "on time or early, of {{count}} measured",
+			"avgDeviation": "avg. days off schedule"
+		},
 		"budget": {
 			"title": "Budget",
 			"description": "Billed amount is derived from billable time logged so far, at each person's client-bill rate.",

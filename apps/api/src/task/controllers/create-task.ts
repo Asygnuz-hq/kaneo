@@ -100,6 +100,7 @@ async function createTask({
         title: title || "",
         status: resolvedStatus,
         columnId: column?.id ?? null,
+        completedAt: column?.isFinal ? new Date() : null,
         startDate: startDate || null,
         dueDate: dueDate || null,
         description: resolvedDescription,

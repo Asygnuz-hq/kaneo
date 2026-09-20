@@ -2537,6 +2537,29 @@
 			"margin": "Margin",
 			"unratedBillWarning": "{{hours}}h of billable time has no bill rate set yet, so it isn't counted above.",
 			"unratedCostWarning": "{{hours}}h of billable time has no cost rate set yet, so it isn't counted in internal cost."
+		},
+		"recentlyClosed": {
+			"andMore": "+{{count}} more",
+			"description": "Tasks closed in the last {{days}} days across the workspace.",
+			"empty": "Nothing closed in the last few days yet.",
+			"title_many": "{{count}} closed recently",
+			"title_one": "{{count}} closed recently",
+			"title_other": "{{count}} closed recently"
+		},
+		"scheduleCompliance": {
+			"avgDeviation": "avg. days off schedule",
+			"description": "Closed, dated tasks compared against their estimated due date.",
+			"empty": "No closed tasks with a due date yet to measure.",
+			"onTime": "on time or early, of {{count}} measured",
+			"title": "Schedule compliance"
+		},
+		"upcomingWorkload": {
+			"description": "Open tasks due in the next {{days}} days, by assignee.",
+			"empty": "Nothing due in this window yet.",
+			"taskCount_many": "{{count}} tasks",
+			"taskCount_one": "{{count}} task",
+			"taskCount_other": "{{count}} tasks",
+			"title": "Upcoming workload"
 		}
 	}
 }

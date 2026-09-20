@@ -8,13 +8,19 @@ import { requireWorkspacePermission } from "../utils/require-workspace-permissio
 import { workspaceAccess } from "../utils/workspace-access-middleware";
 import getProjectBudget from "./controllers/get-project-budget";
 import getProjectMetrics from "./controllers/get-project-metrics";
+import getWorkspaceRecentlyClosed from "./controllers/get-workspace-recently-closed";
+import getWorkspaceScheduleCompliance from "./controllers/get-workspace-schedule-compliance";
+import getWorkspaceUpcomingWorkload from "./controllers/get-workspace-upcoming-workload";
 import getWorkspaceWorkload from "./controllers/get-workspace-workload";
 import {
   projectBudgetSchema,
   projectMetricsSchema,
   workspaceMetricsSchema,
+  workspaceRecentlyClosedSchema,
+  workspaceScheduleComplianceSchema,
+  workspaceUpcomingWorkloadSchema,
 } from "./response";
-import { projectIdParam, workspaceIdParam } from "./schema";
+import { daysQuery, projectIdParam, workspaceIdParam } from "./schema";
 
 const getProjectMetricsRoute = createRoute({
   method: "get",
@@ -54,6 +60,63 @@ const getWorkspaceWorkloadRoute = createRoute({
   },
 });
 
+const getWorkspaceRecentlyClosedRoute = createRoute({
+  method: "get",
+  operationId: "getWorkspaceRecentlyClosed",
+  path: "/workspace/{workspaceId}/recently-closed",
+  tags: ["Project Metrics"],
+  summary: "Get recently closed tasks",
+  description:
+    "Tasks closed in the last N days (default 7) across every project in the workspace, newest first — the weekly 'what shipped' report.",
+  middleware: [workspaceAccess.fromParam("workspaceId")] as const,
+  request: { params: workspaceIdParam, query: daysQuery },
+  responses: {
+    200: jsonResponse(
+      "Recently closed tasks in the workspace",
+      workspaceRecentlyClosedSchema,
+    ),
+    403: errorResponse("No access to the workspace"),
+  },
+});
+
+const getWorkspaceUpcomingWorkloadRoute = createRoute({
+  method: "get",
+  operationId: "getWorkspaceUpcomingWorkload",
+  path: "/workspace/{workspaceId}/upcoming-workload",
+  tags: ["Project Metrics"],
+  summary: "Get upcoming workload projection",
+  description:
+    "Open tasks due within the next N days (default 30) across the workspace, grouped by assignee — for planning whether the team can handle what's coming.",
+  middleware: [workspaceAccess.fromParam("workspaceId")] as const,
+  request: { params: workspaceIdParam, query: daysQuery },
+  responses: {
+    200: jsonResponse(
+      "Upcoming workload projection",
+      workspaceUpcomingWorkloadSchema,
+    ),
+    403: errorResponse("No access to the workspace"),
+  },
+});
+
+const getWorkspaceScheduleComplianceRoute = createRoute({
+  method: "get",
+  operationId: "getWorkspaceScheduleCompliance",
+  path: "/workspace/{workspaceId}/schedule-compliance",
+  tags: ["Project Metrics"],
+  summary: "Get schedule compliance",
+  description:
+    "Across every closed, dated task in the workspace: the percentage delivered on time or early, and the average deviation in days versus each task's dueDate.",
+  middleware: [workspaceAccess.fromParam("workspaceId")] as const,
+  request: { params: workspaceIdParam },
+  responses: {
+    200: jsonResponse(
+      "Workspace schedule compliance",
+      workspaceScheduleComplianceSchema,
+    ),
+    403: errorResponse("No access to the workspace"),
+  },
+});
+
 const getProjectBudgetRoute = createRoute({
   method: "get",
   operationId: "getProjectBudget",
@@ -84,6 +147,22 @@ const projectMetrics = apiRouter()
   )
   .openapi(getWorkspaceWorkloadRoute, async (c) =>
     c.json(await getWorkspaceWorkload(c.req.valid("param").workspaceId), 200),
+  )
+  .openapi(getWorkspaceRecentlyClosedRoute, async (c) => {
+    const { workspaceId } = c.req.valid("param");
+    const { days } = c.req.valid("query");
+    return c.json(await getWorkspaceRecentlyClosed(workspaceId, days), 200);
+  })
+  .openapi(getWorkspaceUpcomingWorkloadRoute, async (c) => {
+    const { workspaceId } = c.req.valid("param");
+    const { days } = c.req.valid("query");
+    return c.json(await getWorkspaceUpcomingWorkload(workspaceId, days), 200);
+  })
+  .openapi(getWorkspaceScheduleComplianceRoute, async (c) =>
+    c.json(
+      await getWorkspaceScheduleCompliance(c.req.valid("param").workspaceId),
+      200,
+    ),
   )
   .openapi(getProjectBudgetRoute, async (c) =>
     c.json(await getProjectBudget(c.req.valid("param").projectId), 200),

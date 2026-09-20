@@ -2521,6 +2521,29 @@
 		"overdueCount_one": "{{count}} atrasada",
 		"overdueCount_other": "{{count}} atrasadas",
 		"overdueCount_many": "{{count}} atrasadas",
+		"recentlyClosed": {
+			"title_one": "{{count}} cerrada recientemente",
+			"title_other": "{{count}} cerradas recientemente",
+			"title_many": "{{count}} cerradas recientemente",
+			"description": "Tareas cerradas en los últimos {{days}} días en todo el workspace.",
+			"empty": "Todavía no se ha cerrado nada en los últimos días.",
+			"andMore": "+{{count}} más"
+		},
+		"upcomingWorkload": {
+			"title": "Carga próxima",
+			"description": "Tareas abiertas que vencen en los próximos {{days}} días, por persona asignada.",
+			"empty": "Todavía no hay nada por vencer en esta ventana.",
+			"taskCount_one": "{{count}} tarea",
+			"taskCount_other": "{{count}} tareas",
+			"taskCount_many": "{{count}} tareas"
+		},
+		"scheduleCompliance": {
+			"title": "Cumplimiento de cronograma",
+			"description": "Tareas cerradas y con fecha, comparadas contra su fecha de vencimiento estimada.",
+			"empty": "Todavía no hay tareas cerradas con fecha para medir.",
+			"onTime": "a tiempo o antes, de {{count}} medidas",
+			"avgDeviation": "días de desviación promedio"
+		},
 		"budget": {
 			"title": "Presupuesto",
 			"description": "El monto facturado se calcula a partir del tiempo facturable registrado hasta ahora, a la tarifa de cliente de cada persona.",

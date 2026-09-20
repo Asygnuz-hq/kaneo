@@ -791,6 +791,13 @@ export const taskTable = pgTable(
     // aparte del status para no perder en qué columna iba; se muestra como
     // una insignia roja en la tarjeta y se cuenta en las métricas.
     isBlocked: boolean("is_blocked").default(false).notNull(),
+    // ASYGNUZ: cuándo la tarea entró por última vez a una columna marcada
+    // isFinal. Null si nunca ha estado en una columna final, o si salió de
+    // una y volvió a estar abierta. Se recalcula (nunca se acumula) cada vez
+    // que cambia de columna -- ver resolveCompletedAt en task/. Es la base
+    // de datos que faltaba para reportes de "cerrado en los últimos N días"
+    // y de cumplimiento de cronograma (completedAt vs dueDate).
+    completedAt: timestamp("completed_at", { mode: "date" }),
     // ASYGNUZ: campos estructurados por issueType. null para task/bug/epic.
     //  - issueType "requirement": { traceabilityStatus, plannedPct,
     //    implementationPhase, platform, changeType }. El % ejecutado NO se

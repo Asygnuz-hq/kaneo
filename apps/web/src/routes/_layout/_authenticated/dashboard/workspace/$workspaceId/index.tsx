@@ -52,11 +52,17 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import PortfolioSummary from "@/components/workspace/portfolio-summary";
+import RecentlyClosedSummary from "@/components/workspace/recently-closed-summary";
+import ScheduleComplianceSummary from "@/components/workspace/schedule-compliance-summary";
+import UpcomingWorkloadSummary from "@/components/workspace/upcoming-workload-summary";
 import WorkloadSummary from "@/components/workspace/workload-summary";
 import icons from "@/constants/project-icons";
 import { shortcuts } from "@/constants/shortcuts";
 import useReorderProjects from "@/hooks/mutations/project/use-reorder-projects";
 import useGetProjects from "@/hooks/queries/project/use-get-projects";
+import { useGetWorkspaceRecentlyClosed } from "@/hooks/queries/project-metrics/use-get-workspace-recently-closed";
+import { useGetWorkspaceScheduleCompliance } from "@/hooks/queries/project-metrics/use-get-workspace-schedule-compliance";
+import { useGetWorkspaceUpcomingWorkload } from "@/hooks/queries/project-metrics/use-get-workspace-upcoming-workload";
 import { useGetWorkspaceWorkload } from "@/hooks/queries/project-metrics/use-get-workspace-workload";
 import { useRegisterShortcuts } from "@/hooks/use-keyboard-shortcuts";
 import { useWorkspacePermission } from "@/hooks/use-workspace-permission";
@@ -134,6 +140,12 @@ function RouteComponent() {
     workspaceId,
   });
   const { data: workloadData } = useGetWorkspaceWorkload(workspaceId);
+  const { data: recentlyClosedData } =
+    useGetWorkspaceRecentlyClosed(workspaceId);
+  const { data: upcomingWorkloadData } =
+    useGetWorkspaceUpcomingWorkload(workspaceId);
+  const { data: scheduleComplianceData } =
+    useGetWorkspaceScheduleCompliance(workspaceId);
   const reorderProjects = useReorderProjects();
 
   // React state, not the query cache: dnd-kit clears its transforms with a
@@ -465,8 +477,24 @@ function RouteComponent() {
           </Table>
         </DndContext>
 
-        <div className="mt-6">
+        <div className="mt-6 grid grid-cols-1 gap-4 lg:grid-cols-2">
           <WorkloadSummary workload={workloadData?.workload ?? []} />
+          <UpcomingWorkloadSummary
+            people={upcomingWorkloadData?.people ?? []}
+            days={upcomingWorkloadData?.windowDays ?? 30}
+          />
+          <RecentlyClosedSummary
+            totalCount={recentlyClosedData?.totalCount ?? 0}
+            tasks={recentlyClosedData?.tasks ?? []}
+            days={7}
+          />
+          <ScheduleComplianceSummary
+            totalMeasured={scheduleComplianceData?.totalMeasured ?? 0}
+            onTimePercentage={scheduleComplianceData?.onTimePercentage ?? null}
+            averageDeviationDays={
+              scheduleComplianceData?.averageDeviationDays ?? null
+            }
+          />
         </div>
       </WorkspaceLayout>
 

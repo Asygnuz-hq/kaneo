@@ -1,4 +1,4 @@
-import { z } from "../openapi";
+import { nullableResponseTimestamp, z } from "../openapi";
 
 export const statusCountSchema = z.object({
   status: z.string(),
@@ -54,6 +54,65 @@ export const workspaceMetricsSchema = z
     workload: z.array(workspaceWorkloadEntrySchema),
   })
   .openapi("WorkspaceMetrics");
+
+export const recentlyClosedTaskSchema = z.object({
+  id: z.string(),
+  number: z.number().nullable(),
+  title: z.string(),
+  projectId: z.string(),
+  projectName: z.string(),
+  closedAt: nullableResponseTimestamp,
+  assigneeId: z.string().nullable(),
+  assigneeName: z.string().nullable(),
+});
+
+export const workspaceRecentlyClosedSchema = z
+  .object({
+    totalCount: z.number(),
+    tasks: z.array(recentlyClosedTaskSchema),
+  })
+  .openapi("WorkspaceRecentlyClosed");
+
+export const upcomingTaskSchema = z.object({
+  id: z.string(),
+  number: z.number().nullable(),
+  title: z.string(),
+  projectId: z.string(),
+  projectName: z.string(),
+  dueDate: nullableResponseTimestamp,
+});
+
+export const upcomingWorkloadPersonSchema = z.object({
+  userId: z.string().nullable(),
+  userName: z.string().nullable(),
+  userImage: z.string().nullable(),
+  taskCount: z.number(),
+  tasks: z.array(upcomingTaskSchema),
+});
+
+export const workspaceUpcomingWorkloadSchema = z
+  .object({
+    windowDays: z.number(),
+    people: z.array(upcomingWorkloadPersonSchema),
+  })
+  .openapi("WorkspaceUpcomingWorkload");
+
+export const workspaceScheduleComplianceSchema = z
+  .object({
+    totalMeasured: z.number().openapi({
+      description:
+        "Closed tasks that had a dueDate before closing — the only ones that can be measured for on-time delivery.",
+    }),
+    onTimeCount: z.number(),
+    onTimePercentage: z.number().nullable().openapi({
+      description: "Null until there is at least one measurable task.",
+    }),
+    averageDeviationDays: z.number().nullable().openapi({
+      description:
+        "Average calendar days between dueDate and actual close. Positive = late on average, negative = early on average. Null until there is at least one measurable task.",
+    }),
+  })
+  .openapi("WorkspaceScheduleCompliance");
 
 export const projectBudgetSchema = z
   .object({

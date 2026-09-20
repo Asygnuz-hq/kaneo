@@ -1,4 +1,4 @@
-import { and, eq, inArray } from "drizzle-orm";
+import { and, eq, inArray, sql } from "drizzle-orm";
 import { HTTPException } from "hono/http-exception";
 import db from "../../database";
 import {
@@ -116,7 +116,17 @@ async function bulkUpdateTasks({
 
         const result = await db
           .update(taskTable)
-          .set({ status: value, columnId: column?.id ?? null })
+          .set({
+            status: value,
+            columnId: column?.id ?? null,
+            // Entering a final column keeps each task's own completedAt if
+            // it already had one, else stamps "now" -- can't use a single
+            // scalar here since the batch may mix already-final and
+            // still-open tasks under one target status.
+            completedAt: column?.isFinal
+              ? sql`coalesce(${taskTable.completedAt}, now())`
+              : null,
+          })
           .where(inArray(taskTable.id, projectTaskIds));
 
         updatedCount += result.rowCount ?? projectTaskIds.length;

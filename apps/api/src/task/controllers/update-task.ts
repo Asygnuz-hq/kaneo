@@ -8,6 +8,7 @@ import {
   assertAssignableUser,
   getProjectWorkspaceId,
 } from "../../utils/assert-assignable-user";
+import { resolveCompletedAt } from "../resolve-completed-at";
 import { assertValidTaskStatus } from "../validate-task-fields";
 
 async function updateTask(
@@ -31,6 +32,7 @@ async function updateTask(
       description: taskTable.description,
       status: taskTable.status,
       projectId: taskTable.projectId,
+      completedAt: taskTable.completedAt,
     })
     .from(taskTable)
     .where(eq(taskTable.id, id))
@@ -72,6 +74,10 @@ async function updateTask(
       title,
       status,
       columnId: column?.id ?? null,
+      completedAt: resolveCompletedAt(
+        column?.isFinal ?? false,
+        existingTask.completedAt,
+      ),
       startDate: startDate || null,
       dueDate: dueDate || null,
       projectId,
