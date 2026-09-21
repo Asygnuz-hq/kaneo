@@ -832,6 +832,41 @@ export const taskTable = pgTable(
   ],
 );
 
+// ASYGNUZ: mapea una tarea externa (recibida por el receptor de espejo,
+// apps/api/src/external-mirror/) a la tarea local que la refleja. Sin esto
+// no hay forma de saber, cuando llega un evento "status_changed" o
+// "deleted", a cuál tarea local corresponde -- el emisor (otro Kaneo) no
+// conoce nuestros IDs. Única por (source, externalTaskId): una tarea
+// externa nunca tiene más de un espejo local.
+export const externalTaskMirrorTable = pgTable(
+  "external_task_mirror",
+  {
+    id: text("id")
+      .$defaultFn(() => createId())
+      .primaryKey(),
+    source: text("source").notNull(),
+    externalTaskId: text("external_task_id").notNull(),
+    localTaskId: text("local_task_id")
+      .notNull()
+      .references(() => taskTable.id, {
+        onDelete: "cascade",
+        onUpdate: "cascade",
+      }),
+    createdAt: timestamp("created_at", { mode: "date" }).defaultNow().notNull(),
+    updatedAt: timestamp("updated_at", { mode: "date" })
+      .defaultNow()
+      .$onUpdate(() => new Date())
+      .notNull(),
+  },
+  (table) => [
+    unique("external_task_mirror_source_external_id_unique").on(
+      table.source,
+      table.externalTaskId,
+    ),
+    index("external_task_mirror_localTaskId_idx").on(table.localTaskId),
+  ],
+);
+
 export const taskAssigneeTable = pgTable(
   "task_assignee",
   {

@@ -37,6 +37,7 @@ import docPage from "./doc-page";
 import { eventContext } from "./events";
 import externalContact from "./external-contact";
 import externalLink from "./external-link";
+import externalMirror from "./external-mirror";
 import genericWebhookIntegration from "./generic-webhook-integration";
 import giteaIntegration, { handleGiteaWebhookRoute } from "./gitea-integration";
 import githubIntegration, {
@@ -563,6 +564,10 @@ export function createApp() {
       path.startsWith("/api/mcp") ||
       path.startsWith("/api/.well-known/") ||
       path === "/api/billing/webhook" ||
+      // ASYGNUZ: kaneo-mia's Generic Webhook plugin calls this to mirror
+      // Financieramente tasks -- authenticated by X-Kaneo-Signature, not a
+      // session (external-mirror/index.ts).
+      path === "/api/external-mirror/financieramente" ||
       // ASYGNUZ: the Service Desk client portal has its own, separate
       // session mechanism (client-auth/middleware.ts) -- these callers are
       // never a workspace user, so authenticateApiRequest would always
@@ -644,6 +649,7 @@ export function createApp() {
   const taskTemplateApi = api.route("/task-template", taskTemplate);
   const externalLinkApi = api.route("/external-link", externalLink);
   const externalContactApi = api.route("/external-contact", externalContact);
+  const externalMirrorApi = api.route("/external-mirror", externalMirror);
   const workflowRuleApi = api.route("/workflow-rule", workflowRule);
   const automationApi = api.route("/automation", automation);
   const invitationApi = api.route("/invitation", invitation);
@@ -889,6 +895,7 @@ export function createApp() {
     docPageApi,
     externalLinkApi,
     externalContactApi,
+    externalMirrorApi,
     genericWebhookIntegrationApi,
     githubIntegrationApi,
     giteaIntegrationApi,
@@ -1019,6 +1026,7 @@ const {
   docPageApi,
   externalLinkApi,
   externalContactApi,
+  externalMirrorApi,
   genericWebhookIntegrationApi,
   githubIntegrationApi,
   giteaIntegrationApi,
@@ -1089,6 +1097,7 @@ export type AppType =
   | typeof taskTemplateApi
   | typeof externalLinkApi
   | typeof externalContactApi
+  | typeof externalMirrorApi
   | typeof workflowRuleApi
   | typeof automationApi
   | typeof invitationApi
