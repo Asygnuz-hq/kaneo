@@ -10,6 +10,7 @@ import {
   getValidTaskStatuses,
 } from "../../task/validate-task-fields";
 import { mirrorSource, mirrorTargetProjectId } from "../config";
+import { registerReverseMirror } from "../register-reverse-mirror";
 import type { MirrorTaskPayload } from "../schema";
 
 async function findMirroredTaskId(
@@ -67,6 +68,12 @@ async function ensureLocalTask(payload: MirrorTaskPayload): Promise<string> {
     localTaskId: created.id,
   });
 
+  // Lets our team's later status changes on this task find their way back to
+  // kaneo-mia. Best-effort (never throws) -- see handleMirrorEvent's
+  // idempotency check below, which is what stops that path from looping
+  // back here indefinitely once both sides agree.
+  await registerReverseMirror(created.id, payload.task.id);
+
   return created.id;
 }
 
@@ -87,6 +94,19 @@ export async function handleMirrorEvent(
         payload.task.status ?? "to-do",
         validStatuses,
       );
+
+      // Idempotency is what stops the reverse sync from echoing forever:
+      // when OUR team moves this task, that update is sent back to
+      // kaneo-mia, which sends it right back here as this same event. Once
+      // both sides already agree, stop instead of writing and re-publishing.
+      const [current] = await db
+        .select({ status: taskTable.status })
+        .from(taskTable)
+        .where(eq(taskTable.id, localTaskId));
+      if (current?.status === status) {
+        return;
+      }
+
       await updateTaskStatus({ id: localTaskId, status, currentUserId: "" });
       return;
     }

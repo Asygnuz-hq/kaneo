@@ -1,6 +1,6 @@
 import { createHmac } from "node:crypto";
 import { eq } from "drizzle-orm";
-import { afterEach, beforeEach, describe, expect, it } from "vitest";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import db, { schema } from "../../apps/api/src/database";
 import { createApp } from "../../apps/api/src/index";
 import { resetTestDatabase } from "./helpers/database";
@@ -73,8 +73,8 @@ beforeEach(async () => {
 });
 
 afterEach(() => {
-  process.env.FINANCIEREMENTE_MIRROR_SECRET = undefined;
-  process.env.FINANCIEREMENTE_MIRROR_PROJECT_ID = undefined;
+  delete process.env.FINANCIEREMENTE_MIRROR_SECRET;
+  delete process.env.FINANCIEREMENTE_MIRROR_PROJECT_ID;
 });
 
 describe("external mirror webhook", () => {
@@ -295,5 +295,113 @@ describe("external mirror webhook", () => {
       .from(schema.taskTable)
       .where(eq(schema.taskTable.projectId, project.id));
     expect(tasks).toHaveLength(0);
+  });
+
+  it("is a no-op (breaks the echo loop) when the incoming status already matches", async () => {
+    const owner = await createWorkspaceMember({ role: "owner" });
+    const { project, columns } = await createProjectFixture({
+      workspaceId: owner.workspace.id,
+    });
+    process.env.FINANCIEREMENTE_MIRROR_PROJECT_ID = project.id;
+
+    const { app } = createApp();
+    await postEvent(app, taskEvent("task.created", { id: "ext-task-echo" }));
+    const mirror = await findMirroredTask("ext-task-echo");
+
+    const [before] = await db
+      .select()
+      .from(schema.taskTable)
+      .where(eq(schema.taskTable.id, mirror?.localTaskId ?? ""));
+
+    const response = await postEvent(
+      app,
+      taskEvent("task.status_changed", {
+        id: "ext-task-echo",
+        status: "to-do",
+      }),
+    );
+    expect(response.status).toBe(200);
+
+    const [after] = await db
+      .select()
+      .from(schema.taskTable)
+      .where(eq(schema.taskTable.id, mirror?.localTaskId ?? ""));
+    expect(after?.updatedAt.getTime()).toBe(before?.updatedAt.getTime());
+    expect(columns.todo.id).toBe(after?.columnId);
+  });
+
+  it("registers the reverse mapping with kaneo-mia right after creating a mirror", async () => {
+    const owner = await createWorkspaceMember({ role: "owner" });
+    const { project } = await createProjectFixture({
+      workspaceId: owner.workspace.id,
+    });
+    process.env.FINANCIEREMENTE_MIRROR_PROJECT_ID = project.id;
+    process.env.FINANCIEREMENTE_BASE_URL = "http://kaneo-mia.test";
+    process.env.KANEO_ALLOW_PRIVATE_WEBHOOK_DESTINATIONS = "true";
+
+    const fetchMock = vi
+      .fn()
+      .mockResolvedValue(
+        new Response(JSON.stringify({ registered: true }), { status: 200 }),
+      );
+    vi.stubGlobal("fetch", fetchMock as unknown as typeof fetch);
+
+    const { app } = createApp();
+    await postEvent(
+      app,
+      taskEvent("task.created", { id: "ext-task-callback" }),
+    );
+
+    const mirror = await findMirroredTask("ext-task-callback");
+    expect(fetchMock).toHaveBeenCalledTimes(1);
+    const [calledUrl, calledInit] = fetchMock.mock.calls[0] as [
+      string,
+      { body: string; headers: Record<string, string> },
+    ];
+    expect(calledUrl).toBe(
+      "http://kaneo-mia.test/api/external-mirror/register",
+    );
+    expect(JSON.parse(calledInit.body)).toEqual({
+      externalTaskId: mirror?.localTaskId,
+      localTaskId: "ext-task-callback",
+    });
+    expect(calledInit.headers["X-Kaneo-Signature"]).toBe(
+      createHmac("sha256", SECRET).update(calledInit.body).digest("hex"),
+    );
+
+    vi.unstubAllGlobals();
+    delete process.env.FINANCIEREMENTE_BASE_URL;
+    delete process.env.KANEO_ALLOW_PRIVATE_WEBHOOK_DESTINATIONS;
+  });
+
+  it("does not fail the mirror event when the reverse-registration callback fails", async () => {
+    const owner = await createWorkspaceMember({ role: "owner" });
+    const { project } = await createProjectFixture({
+      workspaceId: owner.workspace.id,
+    });
+    process.env.FINANCIEREMENTE_MIRROR_PROJECT_ID = project.id;
+    process.env.FINANCIEREMENTE_BASE_URL = "http://kaneo-mia.test";
+    process.env.KANEO_ALLOW_PRIVATE_WEBHOOK_DESTINATIONS = "true";
+
+    vi.stubGlobal(
+      "fetch",
+      vi
+        .fn()
+        .mockRejectedValue(
+          new Error("connection refused"),
+        ) as unknown as typeof fetch,
+    );
+
+    const { app } = createApp();
+    const response = await postEvent(
+      app,
+      taskEvent("task.created", { id: "ext-task-callback-fails" }),
+    );
+    expect(response.status).toBe(200);
+    expect(await findMirroredTask("ext-task-callback-fails")).not.toBeNull();
+
+    vi.unstubAllGlobals();
+    delete process.env.FINANCIEREMENTE_BASE_URL;
+    delete process.env.KANEO_ALLOW_PRIVATE_WEBHOOK_DESTINATIONS;
   });
 });

@@ -19,3 +19,11 @@ export function mirrorTargetProjectId(): string {
 export function isMirrorEnabled(): boolean {
   return Boolean(mirrorSecret() && mirrorTargetProjectId());
 }
+
+// Base URL of kaneo-mia's own instance, so the mirror can call back and
+// register the reverse mapping (see register-reverse-mirror.ts) right after
+// creating a local copy. Reverse sync degrades gracefully without this: the
+// forward mirror still works, updates on our side just never propagate back.
+export function financieramenteBaseUrl(): string {
+  return process.env.FINANCIEREMENTE_BASE_URL ?? "";
+}
