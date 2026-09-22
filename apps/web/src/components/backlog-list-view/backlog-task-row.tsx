@@ -207,11 +207,11 @@ export default function BacklogTaskRow({
                 {task.userId ? (
                   <Avatar className="h-6 w-6">
                     <AvatarImage
-                      src={assignee?.user?.image ?? ""}
-                      alt={assignee?.user?.name || ""}
+                      src={assignee?.user?.image ?? task.assigneeImage ?? ""}
+                      alt={assignee?.user?.name || task.assigneeName || ""}
                     />
                     <AvatarFallback className="text-xs font-medium border border-border/30">
-                      {getInitials(assignee?.user?.name)}
+                      {getInitials(assignee?.user?.name ?? task.assigneeName)}
                     </AvatarFallback>
                   </Avatar>
                 ) : (

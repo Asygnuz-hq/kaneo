@@ -33,6 +33,7 @@ async function updateTask(
       status: taskTable.status,
       projectId: taskTable.projectId,
       completedAt: taskTable.completedAt,
+      userId: taskTable.userId,
     })
     .from(taskTable)
     .where(eq(taskTable.id, id))
@@ -54,7 +55,13 @@ async function updateTask(
 
   const normalizedUserId = userId?.trim() || undefined;
 
-  if (normalizedUserId) {
+  // Only re-validate when the assignee is actually changing. An unrelated
+  // edit (drag to another column, priority, title...) re-sends the task's
+  // CURRENT assignee unchanged -- revalidating it here means a task whose
+  // assignee later left the workspace (or, for a mirrored task, was never a
+  // member of it to begin with) becomes permanently un-editable, since every
+  // edit keeps failing on an assignment nobody is trying to change.
+  if (normalizedUserId && normalizedUserId !== existingTask.userId) {
     await assertAssignableUser(
       normalizedUserId,
       await getProjectWorkspaceId(projectId),
