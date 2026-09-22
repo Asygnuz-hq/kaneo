@@ -1,6 +1,7 @@
 import { and, eq } from "drizzle-orm";
 import db from "../../database";
 import { externalTaskMirrorTable, taskTable } from "../../database/schema";
+import createLabel from "../../label/controllers/create-label";
 import createTask from "../../task/controllers/create-task";
 import deleteTask from "../../task/controllers/delete-task";
 import updateTaskStatus from "../../task/controllers/update-task-status";
@@ -9,6 +10,7 @@ import {
   coerceStatus,
   getValidTaskStatuses,
 } from "../../task/validate-task-fields";
+import { getProjectWorkspaceId } from "../../utils/assert-assignable-user";
 import { mirrorSource, mirrorTargetProjectId } from "../config";
 import { registerReverseMirror } from "../register-reverse-mirror";
 import type { MirrorTaskPayload } from "../schema";
@@ -32,6 +34,50 @@ function mirrorFootnote(payload: MirrorTaskPayload): string {
   return payload.task.url
     ? `Reflejado desde Kaneo Mia: ${payload.task.url}`
     : "Reflejado desde Kaneo Mia.";
+}
+
+// Several kaneo-mia projects (Tecnología, Comisiones, Service Desk, UAT...)
+// all land in this one target project here, so the origin project's name
+// becomes a label -- the team tells them apart with the board's existing
+// Filtrar control instead of a project switcher. Colors are picked by
+// hashing the name so a newly added source project on their side gets a
+// stable color automatically, with no config change needed on ours.
+const LABEL_COLORS = [
+  "gray",
+  "dark-gray",
+  "purple",
+  "teal",
+  "green",
+  "yellow",
+  "orange",
+  "pink",
+  "red",
+] as const;
+
+function colorForOrigin(name: string): string {
+  let hash = 0;
+  for (let i = 0; i < name.length; i++) {
+    hash = (hash * 31 + name.charCodeAt(i)) | 0;
+  }
+  return LABEL_COLORS[Math.abs(hash) % LABEL_COLORS.length] ?? "gray";
+}
+
+async function labelWithOrigin(
+  taskId: string,
+  projectId: string,
+  originName: string | undefined,
+): Promise<void> {
+  if (!originName) {
+    return;
+  }
+  const workspaceId = await getProjectWorkspaceId(projectId);
+  await createLabel(
+    originName,
+    colorForOrigin(originName),
+    taskId,
+    workspaceId,
+    "",
+  );
 }
 
 // Creates the local task the first time we hear about an external one, and
@@ -67,6 +113,8 @@ async function ensureLocalTask(payload: MirrorTaskPayload): Promise<string> {
     externalTaskId: payload.task.id,
     localTaskId: created.id,
   });
+
+  await labelWithOrigin(created.id, projectId, payload.project?.name);
 
   // Lets our team's later status changes on this task find their way back to
   // kaneo-mia. Best-effort (never throws) -- see handleMirrorEvent's

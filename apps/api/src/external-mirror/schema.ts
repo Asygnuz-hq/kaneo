@@ -7,6 +7,10 @@ import { z } from "../openapi";
 export const mirrorTaskPayloadSchema = z
   .object({
     event: z.string(),
+    // Which kaneo-mia project this task came from -- used to label the
+    // mirrored task here, since several of their projects share one target
+    // project on our side (see ensureLocalTask's originLabel).
+    project: z.object({ name: z.string().optional() }).partial().optional(),
     task: z.object({
       id: z.string(),
       title: z.string().optional(),

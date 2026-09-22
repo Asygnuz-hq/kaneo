@@ -37,6 +37,7 @@ function taskEvent(
     title?: string;
     status?: string;
     priority?: string;
+    projectName?: string;
     data?: Record<string, unknown>;
   },
 ) {
@@ -44,7 +45,11 @@ function taskEvent(
     event,
     timestamp: new Date().toISOString(),
     integration: { type: "generic-webhook" },
-    project: { id: "ext-project", name: "Tecnología", workspaceId: "ext-ws" },
+    project: {
+      id: "ext-project",
+      name: overrides?.projectName ?? "Tecnología",
+      workspaceId: "ext-ws",
+    },
     task: {
       id: overrides?.id ?? "ext-task-1",
       number: 42,
@@ -403,5 +408,71 @@ describe("external mirror webhook", () => {
     vi.unstubAllGlobals();
     delete process.env.FINANCIEREMENTE_BASE_URL;
     delete process.env.KANEO_ALLOW_PRIVATE_WEBHOOK_DESTINATIONS;
+  });
+
+  it("labels a mirrored task with its origin project so multiple kaneo-mia projects stay distinguishable", async () => {
+    const owner = await createWorkspaceMember({ role: "owner" });
+    const { project } = await createProjectFixture({
+      workspaceId: owner.workspace.id,
+    });
+    process.env.FINANCIEREMENTE_MIRROR_PROJECT_ID = project.id;
+
+    const { app } = createApp();
+    await postEvent(
+      app,
+      taskEvent("task.created", {
+        id: "ext-task-comisiones",
+        projectName: "Comisiones",
+      }),
+    );
+    await postEvent(
+      app,
+      taskEvent("task.created", {
+        id: "ext-task-tecnologia",
+        projectName: "Tecnología",
+      }),
+    );
+
+    const comisiones = await findMirroredTask("ext-task-comisiones");
+    const tecnologia = await findMirroredTask("ext-task-tecnologia");
+
+    const comisionesLabels = await db
+      .select()
+      .from(schema.labelTable)
+      .where(eq(schema.labelTable.taskId, comisiones?.localTaskId ?? ""));
+    const tecnologiaLabels = await db
+      .select()
+      .from(schema.labelTable)
+      .where(eq(schema.labelTable.taskId, tecnologia?.localTaskId ?? ""));
+
+    expect(comisionesLabels.map((l) => l.name)).toEqual(["Comisiones"]);
+    expect(tecnologiaLabels.map((l) => l.name)).toEqual(["Tecnología"]);
+    // Same project name must always resolve to the same color, run after run.
+    expect(comisionesLabels[0]?.color).not.toBe(tecnologiaLabels[0]?.color);
+  });
+
+  it("does not duplicate the origin label on a repeated task.created", async () => {
+    const owner = await createWorkspaceMember({ role: "owner" });
+    const { project } = await createProjectFixture({
+      workspaceId: owner.workspace.id,
+    });
+    process.env.FINANCIEREMENTE_MIRROR_PROJECT_ID = project.id;
+
+    const { app } = createApp();
+    await postEvent(
+      app,
+      taskEvent("task.created", { id: "ext-task-label-dup" }),
+    );
+    await postEvent(
+      app,
+      taskEvent("task.created", { id: "ext-task-label-dup" }),
+    );
+
+    const mirror = await findMirroredTask("ext-task-label-dup");
+    const labels = await db
+      .select()
+      .from(schema.labelTable)
+      .where(eq(schema.labelTable.taskId, mirror?.localTaskId ?? ""));
+    expect(labels).toHaveLength(1);
   });
 });
