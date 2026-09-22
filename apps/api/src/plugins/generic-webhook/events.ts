@@ -3,6 +3,7 @@ import db from "../../database";
 import {
   columnTable,
   integrationTable,
+  labelTable,
   projectTable,
   taskTable,
   userTable,
@@ -37,6 +38,7 @@ type GenericWebhookTaskData = {
   projectName: string;
   workspaceId: string;
   taskUrl: string;
+  labels: string[];
 };
 
 function isEnabled(
@@ -81,11 +83,17 @@ async function getTaskData(
 
   const clientUrl = process.env.KANEO_CLIENT_URL || "http://localhost:5173";
 
+  const labels = await db
+    .select({ name: labelTable.name })
+    .from(labelTable)
+    .where(eq(labelTable.taskId, taskId));
+
   return {
     ...taskRow,
     status: taskRow.status,
     statusName: taskRow.columnName ?? taskRow.status,
     taskUrl: `${clientUrl}/dashboard/workspace/${taskRow.workspaceId}/project/${taskRow.projectId}/task/${taskId}`,
+    labels: labels.map((label) => label.name),
   };
 }
 
@@ -232,6 +240,7 @@ async function sendEvent(
       statusName: task.statusName,
       priority: task.priority,
       url: task.taskUrl,
+      labels: task.labels,
     },
     actor,
     data,
