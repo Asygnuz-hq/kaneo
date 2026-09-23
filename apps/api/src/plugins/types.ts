@@ -75,6 +75,14 @@ export type TaskMovedEvent = {
   newStatus: string;
 };
 
+export type TaskParentLinkedEvent = {
+  // The child: the task that just became a subtask of `parentTaskId`.
+  taskId: string;
+  projectId: string;
+  userId: string | null;
+  parentTaskId: string;
+};
+
 export type TaskDueDateChangedEvent = {
   taskId: string;
   projectId: string;
@@ -110,6 +118,7 @@ export type TaskEvent =
   | TaskCommentCreatedEvent
   | TaskDeletedEvent
   | TaskMovedEvent
+  | TaskParentLinkedEvent
   | TaskDueDateChangedEvent
   | TaskAssigneeChangedEvent
   | TaskUnassignedEvent;
@@ -155,6 +164,7 @@ export type IntegrationPlugin = {
   onTaskCommentCreated?: TaskEventHandler<TaskCommentCreatedEvent>;
   onTaskDeleted?: TaskEventHandler<TaskDeletedEvent>;
   onTaskMoved?: TaskEventHandler<TaskMovedEvent>;
+  onTaskParentLinked?: TaskEventHandler<TaskParentLinkedEvent>;
   onTaskDueDateChanged?: TaskEventHandler<TaskDueDateChangedEvent>;
   onTaskAssigneeChanged?: TaskEventHandler<TaskAssigneeChangedEvent>;
   onTaskUnassigned?: TaskEventHandler<TaskUnassignedEvent>;

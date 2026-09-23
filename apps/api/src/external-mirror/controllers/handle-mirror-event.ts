@@ -1,4 +1,4 @@
-import { and, eq } from "drizzle-orm";
+import { and, eq, sql } from "drizzle-orm";
 import createComment from "../../activity/controllers/create-comment";
 import db from "../../database";
 import {
@@ -6,24 +6,32 @@ import {
   externalContactTable,
   externalTaskMirrorTable,
   taskExternalAssigneeTable,
+  taskRelationTable,
   taskTable,
+  userTable,
 } from "../../database/schema";
 import createLabel from "../../label/controllers/create-label";
 import createTask from "../../task/controllers/create-task";
 import deleteTask from "../../task/controllers/delete-task";
+import updateTaskAssignee from "../../task/controllers/update-task-assignee";
 import updateTaskStatus from "../../task/controllers/update-task-status";
 import {
   coercePriority,
   coerceStatus,
   getValidTaskStatuses,
 } from "../../task/validate-task-fields";
-import { getProjectWorkspaceId } from "../../utils/assert-assignable-user";
+import createTaskRelation from "../../task-relation/controllers/create-task-relation";
+import {
+  filterAssignableUsers,
+  getProjectWorkspaceId,
+} from "../../utils/assert-assignable-user";
 import { localizeAssetLinks, mirrorAsset, ownApiBase } from "../assets";
 import {
   financieramenteBaseUrl,
   mirrorSource,
   mirrorTargetProjectId,
 } from "../config";
+import { runAsMirror } from "../context";
 import { registerReverseMirror } from "../register-reverse-mirror";
 import type { MirrorTaskPayload } from "../schema";
 
@@ -156,6 +164,101 @@ async function syncExternalAssignee(
     });
 }
 
+// A real assignment when the person also exists here (matched by email and
+// actually a member of this workspace); otherwise the name-only external
+// assignee. The email match is what makes "assigned to Juan" on their side
+// show up as the real Juan here, with his avatar and workload.
+async function syncAssignee(
+  taskId: string,
+  projectId: string,
+  assignee: { name?: string | null; email?: string | null } | null | undefined,
+): Promise<void> {
+  if (!assignee?.name && !assignee?.email) {
+    return;
+  }
+  const email = assignee.email?.trim();
+  if (email) {
+    const [user] = await db
+      .select({ id: userTable.id })
+      .from(userTable)
+      .where(sql`lower(${userTable.email}) = ${email.toLowerCase()}`)
+      .limit(1);
+    if (user) {
+      const workspaceId = await getProjectWorkspaceId(projectId);
+      const assignable = await filterAssignableUsers([user.id], workspaceId);
+      if (assignable.has(user.id)) {
+        await updateTaskAssignee({
+          id: taskId,
+          userId: user.id,
+          currentUserId: "",
+        });
+        return;
+      }
+    }
+  }
+  await syncExternalAssignee(taskId, projectId, assignee.name);
+}
+
+// kaneo-mia's story is the top of its tree, which is what an epic is here.
+// Everything else is a plain task: the nesting itself lives in the
+// "subtask" relation below, not in the type.
+function issueTypeFor(type: string | null | undefined): string {
+  return type === "story" ? "epic" : "task";
+}
+
+// Hangs the local child under the local copy of its kaneo-mia parent,
+// creating that copy first if the parent was never mirrored (it predates the
+// integration, or its event arrived out of order).
+async function linkParent(
+  childLocalId: string,
+  projectId: string,
+  payload: MirrorTaskPayload,
+): Promise<void> {
+  const parent = payload.task.parent;
+  if (!parent) {
+    return;
+  }
+  const parentLocalId = await ensureLocalTask({
+    ...payload,
+    event: "task.created",
+    task: {
+      id: parent.id,
+      title: parent.title,
+      type: parent.type,
+      status: "to-do",
+      priority: "no-priority",
+      parent: null,
+      assignee: null,
+    },
+    data: {},
+  });
+
+  const [existing] = await db
+    .select({ id: taskRelationTable.id })
+    .from(taskRelationTable)
+    .where(
+      and(
+        eq(taskRelationTable.relationType, "subtask"),
+        eq(taskRelationTable.sourceTaskId, parentLocalId),
+        eq(taskRelationTable.targetTaskId, childLocalId),
+      ),
+    );
+  if (existing) {
+    return;
+  }
+
+  await createTaskRelation({
+    sourceTaskId: parentLocalId,
+    targetTaskId: childLocalId,
+    relationType: "subtask",
+    userId: "",
+    workspaceId: await getProjectWorkspaceId(projectId),
+  }).catch((error) => {
+    // 409 = it already exists in the reverse direction; nothing to do.
+    console.error("external-mirror: could not link subtask", error);
+  });
+}
+
 // Creates the local task the first time we hear about an external one, and
 // is safe to call again for any later event on the same external task --
 // used as a get-or-create so a status/move event that arrives before we
@@ -182,6 +285,7 @@ async function ensureLocalTask(payload: MirrorTaskPayload): Promise<string> {
     status,
     priority,
     description: mirrorFootnote(payload),
+    issueType: issueTypeFor(payload.task.type),
   });
 
   await db.insert(externalTaskMirrorTable).values({
@@ -190,26 +294,62 @@ async function ensureLocalTask(payload: MirrorTaskPayload): Promise<string> {
     localTaskId: created.id,
   });
 
+  // Registered before anything else is attached: the task we just created
+  // already emits its own events towards kaneo-mia, and those must find the
+  // mapping instead of being mistaken for a brand-new task over there.
+  // Best-effort (never throws).
+  await registerReverseMirror(created.id, payload.task.id);
+
   await syncDescription(created.id, payload);
   await labelWithOrigin(created.id, projectId, payload.project?.name);
-  await syncExternalAssignee(
-    created.id,
-    projectId,
-    payload.task.assignee?.name,
-  );
-
-  // Lets our team's later status changes on this task find their way back to
-  // kaneo-mia. Best-effort (never throws) -- see handleMirrorEvent's
-  // idempotency check below, which is what stops that path from looping
-  // back here indefinitely once both sides agree.
-  await registerReverseMirror(created.id, payload.task.id);
+  await syncAssignee(created.id, projectId, payload.task.assignee);
+  await linkParent(created.id, projectId, payload);
 
   return created.id;
 }
 
-export async function handleMirrorEvent(
-  payload: MirrorTaskPayload,
-): Promise<void> {
+export function handleMirrorEvent(payload: MirrorTaskPayload): Promise<void> {
+  return runAsMirror(() => applyMirrorEvent(payload));
+}
+
+// A kaneo-mia task that is the mirror of one of OUR tasks (it was created
+// there from ours) reports its own id here; recording the pair is what lets
+// their team's changes reach the original instead of spawning a duplicate.
+async function adoptMirroredFrom(payload: MirrorTaskPayload): Promise<void> {
+  const ours = payload.task.mirroredFrom;
+  if (!ours) {
+    return;
+  }
+  const [task] = await db
+    .select({ id: taskTable.id })
+    .from(taskTable)
+    .where(eq(taskTable.id, ours));
+  if (!task) {
+    return;
+  }
+  await db
+    .insert(externalTaskMirrorTable)
+    .values({
+      source: mirrorSource(),
+      externalTaskId: payload.task.id,
+      localTaskId: task.id,
+    })
+    .onConflictDoNothing();
+}
+
+async function applyMirrorEvent(payload: MirrorTaskPayload): Promise<void> {
+  await adoptMirroredFrom(payload);
+  // Our own task, echoed back: destructive or text-overwriting changes made
+  // on their copy must never rewrite the original.
+  const isOurs = Boolean(payload.task.mirroredFrom);
+  if (
+    isOurs &&
+    (payload.event === "task.deleted" ||
+      payload.event === "task.description_changed")
+  ) {
+    return;
+  }
+
   switch (payload.event) {
     case "task.created": {
       await ensureLocalTask(payload);
@@ -219,6 +359,9 @@ export async function handleMirrorEvent(
     case "task.status_changed":
     case "task.moved": {
       const localTaskId = await ensureLocalTask(payload);
+      // Tasks mirrored before subtasks were supported have no link yet; any
+      // later event is a chance to add it.
+      await linkParent(localTaskId, mirrorTargetProjectId(), payload);
       const validStatuses = await getValidTaskStatuses(mirrorTargetProjectId());
       const { status } = coerceStatus(
         payload.task.status ?? "to-do",
@@ -298,11 +441,21 @@ export async function handleMirrorEvent(
       if (!localTaskId) {
         return;
       }
-      await syncExternalAssignee(
+      await syncAssignee(
         localTaskId,
         mirrorTargetProjectId(),
-        payload.task.assignee?.name,
+        payload.task.assignee,
       );
+      return;
+    }
+
+    // Moved under (or to) another parent on kaneo-mia's side.
+    case "task.parent_changed": {
+      const localTaskId = await findMirroredTaskId(payload.task.id);
+      if (!localTaskId) {
+        return;
+      }
+      await linkParent(localTaskId, mirrorTargetProjectId(), payload);
       return;
     }
 

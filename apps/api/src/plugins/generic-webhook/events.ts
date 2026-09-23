@@ -5,10 +5,12 @@ import {
   integrationTable,
   labelTable,
   projectTable,
+  taskRelationTable,
   taskTable,
   userTable,
   workspaceTable,
 } from "../../database/schema";
+import { isApplyingMirror } from "../../external-mirror/context";
 import type {
   PluginContext,
   TaskAssigneeChangedEvent,
@@ -18,6 +20,7 @@ import type {
   TaskDescriptionChangedEvent,
   TaskDueDateChangedEvent,
   TaskMovedEvent,
+  TaskParentLinkedEvent,
   TaskPriorityChangedEvent,
   TaskStatusChangedEvent,
   TaskTitleChangedEvent,
@@ -39,6 +42,9 @@ type GenericWebhookTaskData = {
   workspaceId: string;
   taskUrl: string;
   labels: string[];
+  issueType: string;
+  assignee: { name: string | null; email: string | null } | null;
+  parent: { id: string; title: string; type: string } | null;
 };
 
 function isEnabled(
@@ -63,10 +69,14 @@ async function getTaskData(
       projectId: projectTable.id,
       projectName: projectTable.name,
       workspaceId: workspaceTable.id,
+      issueType: taskTable.issueType,
+      assigneeName: userTable.name,
+      assigneeEmail: userTable.email,
     })
     .from(taskTable)
     .innerJoin(projectTable, eq(taskTable.projectId, projectTable.id))
     .innerJoin(workspaceTable, eq(projectTable.workspaceId, workspaceTable.id))
+    .leftJoin(userTable, eq(taskTable.userId, userTable.id))
     .leftJoin(
       columnTable,
       and(
@@ -88,12 +98,48 @@ async function getTaskData(
     .from(labelTable)
     .where(eq(labelTable.taskId, taskId));
 
+  // The tree is built from "subtask" relations (source = parent), so the
+  // parent is whichever task points at this one.
+  const [parentRow] = await db
+    .select({
+      id: taskTable.id,
+      title: taskTable.title,
+      type: taskTable.issueType,
+    })
+    .from(taskRelationTable)
+    .innerJoin(taskTable, eq(taskRelationTable.sourceTaskId, taskTable.id))
+    .where(
+      and(
+        eq(taskRelationTable.targetTaskId, taskId),
+        eq(taskRelationTable.relationType, "subtask"),
+      ),
+    )
+    .limit(1);
+
+  // A subtask rarely carries the origin label itself; borrowing its parent's
+  // is what lets the other side know which project it belongs to.
+  const ownLabels = labels.map((label) => label.name);
+  const effectiveLabels =
+    ownLabels.length === 0 && parentRow
+      ? (
+          await db
+            .select({ name: labelTable.name })
+            .from(labelTable)
+            .where(eq(labelTable.taskId, parentRow.id))
+        ).map((label) => label.name)
+      : ownLabels;
+
+  const { assigneeName, assigneeEmail, ...rest } = taskRow;
   return {
-    ...taskRow,
+    ...rest,
+    assignee: assigneeName
+      ? { name: assigneeName, email: assigneeEmail }
+      : null,
+    parent: parentRow ?? null,
     status: taskRow.status,
     statusName: taskRow.columnName ?? taskRow.status,
     taskUrl: `${clientUrl}/dashboard/workspace/${taskRow.workspaceId}/project/${taskRow.projectId}/task/${taskId}`,
-    labels: labels.map((label) => label.name),
+    labels: effectiveLabels,
   };
 }
 
@@ -216,6 +262,8 @@ async function sendEvent(
   userId: string | null,
   data: Record<string, unknown>,
 ): Promise<boolean> {
+  if (isApplyingMirror()) return false;
+
   const task = await getTaskData(taskId, projectId);
   if (!task) return false;
 
@@ -241,6 +289,9 @@ async function sendEvent(
       priority: task.priority,
       url: task.taskUrl,
       labels: task.labels,
+      type: task.issueType,
+      assignee: task.assignee,
+      parent: task.parent,
     },
     actor,
     data,
@@ -485,6 +536,28 @@ export async function handleTaskMoved(
       oldStatus: event.oldStatus,
       newStatus: event.newStatus,
     },
+  );
+}
+
+// Gated by the same switch as moves: turning a task into a subtask is a
+// structural move, and reusing the key means integrations that already
+// exist don't need to be reconfigured to get it.
+export async function handleTaskParentLinked(
+  event: TaskParentLinkedEvent,
+  context: PluginContext,
+): Promise<void> {
+  const config = normalizeGenericWebhookConfig(
+    context.config as GenericWebhookConfig,
+  );
+  if (!isEnabled(config, "taskMoved")) return;
+
+  await sendEvent(
+    config,
+    "task.parent_changed",
+    event.taskId,
+    event.projectId,
+    event.userId,
+    { parentTaskId: event.parentTaskId },
   );
 }
 

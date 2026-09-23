@@ -12,6 +12,7 @@ import type {
   TaskDescriptionChangedEvent,
   TaskDueDateChangedEvent,
   TaskMovedEvent,
+  TaskParentLinkedEvent,
   TaskPriorityChangedEvent,
   TaskStatusChangedEvent,
   TaskTitleChangedEvent,
@@ -172,6 +173,24 @@ export function initializeEventSubscriptions(): void {
       toProjectName: data.toProjectName,
       oldStatus: data.oldStatus,
       newStatus: data.newStatus,
+    });
+  });
+
+  // A subtask relation is created AFTER the child task exists, so
+  // "task.created" never carries its parent; this is the only signal.
+  subscribeToEvent<{
+    sourceTaskId: string;
+    targetTaskId: string;
+    relationType: string;
+    projectId: string;
+    userId: string | null;
+  }>("task-relation.created", async (data) => {
+    if (data.relationType !== "subtask") return;
+    await broadcastTaskParentLinked({
+      taskId: data.targetTaskId,
+      projectId: data.projectId,
+      userId: data.userId,
+      parentTaskId: data.sourceTaskId,
     });
   });
 
@@ -421,6 +440,28 @@ export async function broadcastTaskMoved(event: TaskMovedEvent): Promise<void> {
       await plugin.onTaskMoved(event, context);
     } catch (error) {
       console.error(`Plugin ${plugin.type} error on task.moved:`, error);
+    }
+  }
+}
+
+export async function broadcastTaskParentLinked(
+  event: TaskParentLinkedEvent,
+): Promise<void> {
+  const integrations = await getActiveIntegrations(event.projectId);
+
+  for (const integration of integrations) {
+    const plugin = getPlugin(integration.type);
+    if (!plugin?.onTaskParentLinked) continue;
+
+    const context = createContext(integration);
+
+    try {
+      await plugin.onTaskParentLinked(event, context);
+    } catch (error) {
+      console.error(
+        `Plugin ${plugin.type} error on task-relation.created:`,
+        error,
+      );
     }
   }
 }

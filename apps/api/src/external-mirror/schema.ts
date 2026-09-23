@@ -17,6 +17,21 @@ export const mirrorTaskPayloadSchema = z
       status: z.string().nullable().optional(),
       priority: z.string().nullable().optional(),
       url: z.string().optional(),
+      // kaneo-mia's hierarchy is story > task > subtask, and `parent` is the
+      // task this one hangs from (sent on every event, so the parent can be
+      // created here too if we never saw it).
+      type: z.string().nullable().optional(),
+      // Set when this kaneo-mia task is itself the mirror of one of OUR
+      // tasks: the id of ours. Lets their later changes find it here.
+      mirroredFrom: z.string().nullable().optional(),
+      parent: z
+        .object({
+          id: z.string(),
+          title: z.string().optional(),
+          type: z.string().nullable().optional(),
+        })
+        .nullable()
+        .optional(),
       assignee: z
         .object({
           name: z.string().nullable().optional(),

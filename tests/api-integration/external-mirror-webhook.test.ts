@@ -851,4 +851,218 @@ describe("external mirror webhook", () => {
       expect(missing.status).toBe(404);
     });
   });
+
+  describe("hierarchy, assignee and echoes", () => {
+    async function setup() {
+      const owner = await createWorkspaceMember({ role: "owner" });
+      const { project } = await createProjectFixture({
+        workspaceId: owner.workspace.id,
+      });
+      process.env.FINANCIEREMENTE_MIRROR_PROJECT_ID = project.id;
+      return { owner, project };
+    }
+
+    async function localOf(externalId: string) {
+      const mirror = await findMirroredTask(externalId);
+      const [task] = await db
+        .select()
+        .from(schema.taskTable)
+        .where(eq(schema.taskTable.id, mirror?.localTaskId ?? ""));
+      return task;
+    }
+
+    function withTask(
+      event: string,
+      id: string,
+      extra: Record<string, unknown>,
+    ) {
+      const base = taskEvent(event, { id });
+      return { ...base, task: { ...base.task, ...extra } };
+    }
+
+    it("mirrors a story as an epic", async () => {
+      await setup();
+      const { app } = createApp();
+      await postEvent(app, withTask("task.created", "st-1", { type: "story" }));
+      expect((await localOf("st-1"))?.issueType).toBe("epic");
+    });
+
+    it("hangs a child under its parent, creating the parent when never seen", async () => {
+      await setup();
+      const { app } = createApp();
+      await postEvent(
+        app,
+        withTask("task.created", "child-1", {
+          type: "task",
+          parent: { id: "story-9", title: "Historia madre", type: "story" },
+        }),
+      );
+
+      const parent = await localOf("story-9");
+      const child = await localOf("child-1");
+      expect(parent?.title).toBe("Historia madre");
+      expect(parent?.issueType).toBe("epic");
+      const [relation] = await db
+        .select()
+        .from(schema.taskRelationTable)
+        .where(eq(schema.taskRelationTable.targetTaskId, child?.id ?? ""));
+      expect(relation?.sourceTaskId).toBe(parent?.id);
+      expect(relation?.relationType).toBe("subtask");
+    });
+
+    it("does not duplicate the link or the parent on repeated events", async () => {
+      await setup();
+      const { app } = createApp();
+      const event = withTask("task.created", "child-2", {
+        parent: { id: "story-2", title: "Madre", type: "story" },
+      });
+      await postEvent(app, event);
+      await postEvent(app, { ...event, event: "task.status_changed" });
+      await postEvent(app, { ...event, event: "task.parent_changed" });
+
+      const relations = await db.select().from(schema.taskRelationTable);
+      expect(relations).toHaveLength(1);
+      const tasks = await db.select().from(schema.taskTable);
+      expect(tasks).toHaveLength(2);
+    });
+
+    it("links a task that already existed once its parent arrives", async () => {
+      await setup();
+      const { app } = createApp();
+      await postEvent(app, withTask("task.created", "late-1", {}));
+      await postEvent(
+        app,
+        withTask("task.parent_changed", "late-1", {
+          parent: { id: "story-3", title: "Llegó después", type: "story" },
+        }),
+      );
+      const relations = await db.select().from(schema.taskRelationTable);
+      expect(relations).toHaveLength(1);
+    });
+
+    it("assigns the real member when the email matches, instead of an external contact", async () => {
+      const { owner } = await setup();
+      const { app } = createApp();
+      await postEvent(
+        app,
+        taskEvent("task.created", {
+          id: "as-1",
+          assignee: { name: "Otro Nombre", email: owner.user.email },
+        }),
+      );
+      const task = await localOf("as-1");
+      expect(task?.userId).toBe(owner.user.id);
+      const contacts = await db.select().from(schema.externalContactTable);
+      expect(contacts).toHaveLength(0);
+    });
+
+    it("falls back to an external contact when the email is not a member", async () => {
+      await setup();
+      const { app } = createApp();
+      await postEvent(
+        app,
+        taskEvent("task.created", {
+          id: "as-2",
+          assignee: { name: "Nadie Aquí", email: "nadie@otra-empresa.com" },
+        }),
+      );
+      const task = await localOf("as-2");
+      expect(task?.userId).toBeNull();
+      const contacts = await db.select().from(schema.externalContactTable);
+      expect(contacts.map((c) => c.name)).toEqual(["Nadie Aquí"]);
+    });
+
+    it("attaches their changes to OUR task when it reports being a mirror of it", async () => {
+      const { owner, project } = await setup();
+      const [ours] = await db
+        .insert(schema.taskTable)
+        .values({
+          projectId: project.id,
+          title: "Nacida en Asygnuz",
+          description: "Descripción original",
+          status: "to-do",
+          priority: "low",
+          number: 900,
+          position: 1,
+        })
+        .returning();
+      if (!ours) throw new Error("seed failed");
+      void owner;
+
+      const { app } = createApp();
+      await postEvent(
+        app,
+        withTask("task.status_changed", "mia-copy-1", {
+          status: "done",
+          mirroredFrom: ours.id,
+        }),
+      );
+
+      const tasks = await db.select().from(schema.taskTable);
+      expect(tasks).toHaveLength(1);
+      expect((await findMirroredTask("mia-copy-1"))?.localTaskId).toBe(ours.id);
+      const [after] = await db
+        .select()
+        .from(schema.taskTable)
+        .where(eq(schema.taskTable.id, ours.id));
+      expect(after?.status).toBe("done");
+
+      // their copy being deleted or re-described must not touch the original
+      await postEvent(
+        app,
+        withTask("task.description_changed", "mia-copy-1", {
+          mirroredFrom: ours.id,
+        }),
+      );
+      await postEvent(
+        app,
+        withTask("task.deleted", "mia-copy-1", { mirroredFrom: ours.id }),
+      );
+      const [still] = await db
+        .select()
+        .from(schema.taskTable)
+        .where(eq(schema.taskTable.id, ours.id));
+      expect(still?.description).toBe("Descripción original");
+    });
+
+    it("does not send the comment it mirrors back out to kaneo-mia", async () => {
+      const { project } = await setup();
+      process.env.FINANCIEREMENTE_BASE_URL = "http://kaneo-mia.test";
+      process.env.KANEO_ALLOW_PRIVATE_WEBHOOK_DESTINATIONS = "true";
+      await db.insert(schema.integrationTable).values({
+        projectId: project.id,
+        type: "generic-webhook",
+        isActive: true,
+        config: JSON.stringify({
+          webhookUrl: "http://kaneo-mia.test/api/external-mirror/asygnuz",
+          events: { taskCommentCreated: true, taskCreated: true },
+        }),
+      });
+      const fetchMock = vi
+        .fn()
+        .mockResolvedValue(new Response("{}", { status: 200 }));
+      vi.stubGlobal("fetch", fetchMock as unknown as typeof fetch);
+
+      const { app } = createApp();
+      await postEvent(app, taskEvent("task.created", { id: "echo-1" }));
+      await postEvent(
+        app,
+        taskEvent("task.comment_created", {
+          id: "echo-1",
+          data: { comment: "**Ana** commented:\n> hola" },
+        }),
+      );
+      // let any fire-and-forget event handlers run
+      await new Promise((resolve) => setTimeout(resolve, 200));
+
+      const toWebhook = fetchMock.mock.calls.filter((c) =>
+        String(c[0]).endsWith("/api/external-mirror/asygnuz"),
+      );
+      expect(toWebhook).toHaveLength(0);
+
+      vi.unstubAllGlobals();
+      delete process.env.FINANCIEREMENTE_BASE_URL;
+      delete process.env.KANEO_ALLOW_PRIVATE_WEBHOOK_DESTINATIONS;
+    });
+  });
 });
