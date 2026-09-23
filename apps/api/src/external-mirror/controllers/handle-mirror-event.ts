@@ -1,6 +1,13 @@
 import { and, eq } from "drizzle-orm";
+import createComment from "../../activity/controllers/create-comment";
 import db from "../../database";
-import { externalTaskMirrorTable, taskTable } from "../../database/schema";
+import {
+  activityTable,
+  externalContactTable,
+  externalTaskMirrorTable,
+  taskExternalAssigneeTable,
+  taskTable,
+} from "../../database/schema";
 import createLabel from "../../label/controllers/create-label";
 import createTask from "../../task/controllers/create-task";
 import deleteTask from "../../task/controllers/delete-task";
@@ -11,7 +18,12 @@ import {
   getValidTaskStatuses,
 } from "../../task/validate-task-fields";
 import { getProjectWorkspaceId } from "../../utils/assert-assignable-user";
-import { mirrorSource, mirrorTargetProjectId } from "../config";
+import { localizeAssetLinks, mirrorAsset, ownApiBase } from "../assets";
+import {
+  financieramenteBaseUrl,
+  mirrorSource,
+  mirrorTargetProjectId,
+} from "../config";
 import { registerReverseMirror } from "../register-reverse-mirror";
 import type { MirrorTaskPayload } from "../schema";
 
@@ -34,6 +46,29 @@ function mirrorFootnote(payload: MirrorTaskPayload): string {
   return payload.task.url
     ? `Reflejado desde Kaneo Mia: ${payload.task.url}`
     : "Reflejado desde Kaneo Mia.";
+}
+
+// The task is first created with just the footnote (a real task id is needed
+// before any file can be attached to it); this then swaps in kaneo-mia's
+// actual description, with its files copied over and its links rewritten.
+async function syncDescription(
+  taskId: string,
+  payload: MirrorTaskPayload,
+  raw?: string,
+): Promise<void> {
+  const original = raw ?? payload.data?.description;
+  if (typeof original !== "string" || !original.trim()) {
+    return;
+  }
+  const localized = await localizeAssetLinks(
+    original,
+    financieramenteBaseUrl(),
+    { taskId, surface: "description" },
+  );
+  await db
+    .update(taskTable)
+    .set({ description: `${localized}\n\n${mirrorFootnote(payload)}` })
+    .where(eq(taskTable.id, taskId));
 }
 
 // Several kaneo-mia projects (Tecnología, Comisiones, Service Desk, UAT...)
@@ -80,6 +115,47 @@ async function labelWithOrigin(
   );
 }
 
+// kaneo-mia's assignee is a real account over there with nothing matching
+// it here -- assigning our own userId column would either fail (not a
+// member) or silently point at the wrong person. The external-assignee
+// feature already exists for exactly this (a named responsible party with
+// no Kaneo account of their own), so the mirrored task gets that instead of
+// a real assignment. Additive only: past assignees accumulate rather than
+// being removed, since we can't tell "no longer assigned" from "removed by
+// someone else" here.
+async function syncExternalAssignee(
+  taskId: string,
+  projectId: string,
+  assigneeName: string | null | undefined,
+): Promise<void> {
+  if (!assigneeName) {
+    return;
+  }
+  const workspaceId = await getProjectWorkspaceId(projectId);
+
+  const [contact] = await db
+    .insert(externalContactTable)
+    .values({ workspaceId, name: assigneeName })
+    .onConflictDoUpdate({
+      target: [externalContactTable.workspaceId, externalContactTable.name],
+      set: { name: assigneeName },
+    })
+    .returning();
+  if (!contact) {
+    return;
+  }
+
+  await db
+    .insert(taskExternalAssigneeTable)
+    .values({ taskId, externalContactId: contact.id })
+    .onConflictDoNothing({
+      target: [
+        taskExternalAssigneeTable.taskId,
+        taskExternalAssigneeTable.externalContactId,
+      ],
+    });
+}
+
 // Creates the local task the first time we hear about an external one, and
 // is safe to call again for any later event on the same external task --
 // used as a get-or-create so a status/move event that arrives before we
@@ -114,7 +190,13 @@ async function ensureLocalTask(payload: MirrorTaskPayload): Promise<string> {
     localTaskId: created.id,
   });
 
+  await syncDescription(created.id, payload);
   await labelWithOrigin(created.id, projectId, payload.project?.name);
+  await syncExternalAssignee(
+    created.id,
+    projectId,
+    payload.task.assignee?.name,
+  );
 
   // Lets our team's later status changes on this task find their way back to
   // kaneo-mia. Best-effort (never throws) -- see handleMirrorEvent's
@@ -177,10 +259,7 @@ export async function handleMirrorEvent(
       if (!localTaskId || typeof newDescription !== "string") {
         return;
       }
-      await db
-        .update(taskTable)
-        .set({ description: newDescription })
-        .where(eq(taskTable.id, localTaskId));
+      await syncDescription(localTaskId, payload, newDescription);
       return;
     }
 
@@ -210,6 +289,81 @@ export async function handleMirrorEvent(
       await db
         .update(taskTable)
         .set({ dueDate })
+        .where(eq(taskTable.id, localTaskId));
+      return;
+    }
+
+    case "task.assignee_changed": {
+      const localTaskId = await findMirroredTaskId(payload.task.id);
+      if (!localTaskId) {
+        return;
+      }
+      await syncExternalAssignee(
+        localTaskId,
+        mirrorTargetProjectId(),
+        payload.task.assignee?.name,
+      );
+      return;
+    }
+
+    case "task.comment_created": {
+      const localTaskId = await findMirroredTaskId(payload.task.id);
+      // The comment text kaneo-mia's own webhook sends is already formatted
+      // as "**<real name>** commented: > <text>" -- the actual author is in
+      // there, so external.userName below only needs to say where it came
+      // from, not who wrote it.
+      const comment = payload.data?.comment;
+      if (!localTaskId || typeof comment !== "string") {
+        return;
+      }
+      const activity = await createComment(localTaskId, null, comment, {
+        userName: "Kaneo Mia",
+        source: "kaneo-mia",
+      });
+      const localized = await localizeAssetLinks(
+        comment,
+        financieramenteBaseUrl(),
+        { taskId: localTaskId, activityId: activity.id, surface: "comment" },
+      );
+      if (localized !== comment) {
+        await db
+          .update(activityTable)
+          .set({ content: localized })
+          .where(eq(activityTable.id, activity.id));
+      }
+      return;
+    }
+
+    // kaneo-mia keeps attachments as their own list, with nothing in the
+    // description to hang a link on -- here the only place a file can live is
+    // the description text, so the copied file is appended to it as a link.
+    case "task.attachment_added": {
+      const localTaskId = await ensureLocalTask(payload);
+      const asset = payload.data?.asset as { id?: string } | undefined;
+      if (!asset?.id) {
+        return;
+      }
+      const copied = await mirrorAsset(financieramenteBaseUrl(), asset.id, {
+        taskId: localTaskId,
+        surface: "description",
+      });
+      if (!copied) {
+        return;
+      }
+      const [current] = await db
+        .select({ description: taskTable.description })
+        .from(taskTable)
+        .where(eq(taskTable.id, localTaskId));
+      const url = `${ownApiBase()}/asset/${copied.id}`;
+      if (current?.description?.includes(url)) {
+        return;
+      }
+      const line = copied.isImage
+        ? `![${copied.filename}](${url})`
+        : `[${copied.filename}](${url} "${copied.filename}")`;
+      await db
+        .update(taskTable)
+        .set({ description: `${current?.description ?? ""}\n\n${line}` })
         .where(eq(taskTable.id, localTaskId));
       return;
     }

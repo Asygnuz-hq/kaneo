@@ -17,7 +17,21 @@ export const mirrorTaskPayloadSchema = z
       status: z.string().nullable().optional(),
       priority: z.string().nullable().optional(),
       url: z.string().optional(),
+      assignee: z
+        .object({
+          name: z.string().nullable().optional(),
+          email: z.string().nullable().optional(),
+        })
+        .nullable()
+        .optional(),
     }),
+    // Who performed the action on kaneo-mia's side -- used to attribute a
+    // mirrored comment, since it was never actually written by anyone in
+    // this workspace.
+    actor: z
+      .object({ name: z.string().nullable().optional() })
+      .nullable()
+      .optional(),
     data: z.record(z.string(), z.unknown()).optional(),
   })
   .passthrough();

@@ -568,6 +568,7 @@ export function createApp() {
       // Financieramente tasks -- authenticated by X-Kaneo-Signature, not a
       // session (external-mirror/index.ts).
       path === "/api/external-mirror/financieramente" ||
+      path.startsWith("/api/external-mirror/asset/") ||
       // ASYGNUZ: the Service Desk client portal has its own, separate
       // session mechanism (client-auth/middleware.ts) -- these callers are
       // never a workspace user, so authenticateApiRequest would always

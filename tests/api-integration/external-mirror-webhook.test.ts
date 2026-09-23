@@ -1,6 +1,32 @@
 import { createHmac } from "node:crypto";
 import { eq } from "drizzle-orm";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+
+const s3 = vi.hoisted(() => ({
+  store: new Map<string, { body: Buffer; contentType: string }>(),
+}));
+
+vi.mock("../../apps/api/src/storage/s3", async (importOriginal) => {
+  const actual =
+    await importOriginal<typeof import("../../apps/api/src/storage/s3")>();
+  return {
+    ...actual,
+    putObjectAtKey: vi.fn(
+      async (key: string, body: Buffer, contentType: string) => {
+        s3.store.set(key, { body, contentType });
+      },
+    ),
+    getPrivateObject: vi.fn(async (key: string) => {
+      const found = s3.store.get(key);
+      if (!found) throw new Error("missing object");
+      return {
+        body: new Blob([new Uint8Array(found.body)]).stream(),
+        contentType: found.contentType,
+      };
+    }),
+  };
+});
+
 import db, { schema } from "../../apps/api/src/database";
 import { createApp } from "../../apps/api/src/index";
 import { resetTestDatabase } from "./helpers/database";
@@ -38,6 +64,7 @@ function taskEvent(
     status?: string;
     priority?: string;
     projectName?: string;
+    assignee?: { name: string | null; email?: string | null } | null;
     data?: Record<string, unknown>;
   },
 ) {
@@ -58,6 +85,7 @@ function taskEvent(
       statusName: "Recibida",
       priority: overrides?.priority ?? "medium",
       url: "https://to-do.financieramentecu.com/task/ext-task-1",
+      assignee: overrides?.assignee ?? null,
     },
     actor: { id: "ext-user-1", name: "Andrés Agudelo" },
     data: overrides?.data ?? {},
@@ -250,7 +278,8 @@ describe("external mirror webhook", () => {
       .from(schema.taskTable)
       .where(eq(schema.taskTable.id, mirror?.localTaskId ?? ""));
     expect(localTask?.title).toBe("Nuevo título");
-    expect(localTask?.description).toBe("Nueva descripción");
+    expect(localTask?.description).toContain("Nueva descripción");
+    expect(localTask?.description).toContain("Reflejado desde Kaneo Mia");
     expect(localTask?.priority).toBe("urgent");
     expect(localTask?.dueDate?.toISOString()).toBe("2026-10-01T00:00:00.000Z");
   });
@@ -474,5 +503,352 @@ describe("external mirror webhook", () => {
       .from(schema.labelTable)
       .where(eq(schema.labelTable.taskId, mirror?.localTaskId ?? ""));
     expect(labels).toHaveLength(1);
+  });
+
+  it("mirrors a comment onto the mirrored task, attributed to kaneo-mia", async () => {
+    const owner = await createWorkspaceMember({ role: "owner" });
+    const { project } = await createProjectFixture({
+      workspaceId: owner.workspace.id,
+    });
+    process.env.FINANCIEREMENTE_MIRROR_PROJECT_ID = project.id;
+
+    const { app } = createApp();
+    await postEvent(app, taskEvent("task.created", { id: "ext-task-comment" }));
+    const mirror = await findMirroredTask("ext-task-comment");
+
+    const response = await postEvent(
+      app,
+      taskEvent("task.comment_created", {
+        id: "ext-task-comment",
+        data: { comment: "**Andrés Agudelo** commented:\n> Ya casi queda" },
+      }),
+    );
+    expect(response.status).toBe(200);
+
+    const activities = await db
+      .select()
+      .from(schema.activityTable)
+      .where(eq(schema.activityTable.taskId, mirror?.localTaskId ?? ""));
+    const comment = activities.find((a) => a.type === "comment");
+    expect(comment?.content).toBe(
+      "**Andrés Agudelo** commented:\n> Ya casi queda",
+    );
+    expect(comment?.userId).toBeNull();
+    expect(comment?.externalUserName).toBe("Kaneo Mia");
+  });
+
+  it("attaches the kaneo-mia assignee as an external assignee on creation", async () => {
+    const owner = await createWorkspaceMember({ role: "owner" });
+    const { project } = await createProjectFixture({
+      workspaceId: owner.workspace.id,
+    });
+    process.env.FINANCIEREMENTE_MIRROR_PROJECT_ID = project.id;
+
+    const { app } = createApp();
+    await postEvent(
+      app,
+      taskEvent("task.created", {
+        id: "ext-task-assignee",
+        assignee: {
+          name: "Jorge Agudelo",
+          email: "jorge@financieramentecu.com",
+        },
+      }),
+    );
+
+    const mirror = await findMirroredTask("ext-task-assignee");
+    const assignees = await db
+      .select({ name: schema.externalContactTable.name })
+      .from(schema.taskExternalAssigneeTable)
+      .innerJoin(
+        schema.externalContactTable,
+        eq(
+          schema.externalContactTable.id,
+          schema.taskExternalAssigneeTable.externalContactId,
+        ),
+      )
+      .where(
+        eq(schema.taskExternalAssigneeTable.taskId, mirror?.localTaskId ?? ""),
+      );
+    expect(assignees.map((a) => a.name)).toEqual(["Jorge Agudelo"]);
+  });
+
+  it("reuses the same external contact across mirrored tasks instead of duplicating it", async () => {
+    const owner = await createWorkspaceMember({ role: "owner" });
+    const { project } = await createProjectFixture({
+      workspaceId: owner.workspace.id,
+    });
+    process.env.FINANCIEREMENTE_MIRROR_PROJECT_ID = project.id;
+
+    const { app } = createApp();
+    await postEvent(
+      app,
+      taskEvent("task.created", {
+        id: "ext-task-assignee-a",
+        assignee: { name: "Jorge Agudelo" },
+      }),
+    );
+    await postEvent(
+      app,
+      taskEvent("task.created", {
+        id: "ext-task-assignee-b",
+        assignee: { name: "Jorge Agudelo" },
+      }),
+    );
+
+    const contacts = await db
+      .select()
+      .from(schema.externalContactTable)
+      .where(eq(schema.externalContactTable.workspaceId, owner.workspace.id));
+    expect(contacts).toHaveLength(1);
+  });
+
+  it("updates the external assignee on task.assignee_changed", async () => {
+    const owner = await createWorkspaceMember({ role: "owner" });
+    const { project } = await createProjectFixture({
+      workspaceId: owner.workspace.id,
+    });
+    process.env.FINANCIEREMENTE_MIRROR_PROJECT_ID = project.id;
+
+    const { app } = createApp();
+    await postEvent(
+      app,
+      taskEvent("task.created", { id: "ext-task-reassign" }),
+    );
+    const response = await postEvent(
+      app,
+      taskEvent("task.assignee_changed", {
+        id: "ext-task-reassign",
+        assignee: { name: "Andrés Agudelo" },
+      }),
+    );
+    expect(response.status).toBe(200);
+
+    const mirror = await findMirroredTask("ext-task-reassign");
+    const assignees = await db
+      .select({ name: schema.externalContactTable.name })
+      .from(schema.taskExternalAssigneeTable)
+      .innerJoin(
+        schema.externalContactTable,
+        eq(
+          schema.externalContactTable.id,
+          schema.taskExternalAssigneeTable.externalContactId,
+        ),
+      )
+      .where(
+        eq(schema.taskExternalAssigneeTable.taskId, mirror?.localTaskId ?? ""),
+      );
+    expect(assignees.map((a) => a.name)).toContain("Andrés Agudelo");
+  });
+
+  describe("descriptions and files", () => {
+    async function setup() {
+      const owner = await createWorkspaceMember({ role: "owner" });
+      const { project } = await createProjectFixture({
+        workspaceId: owner.workspace.id,
+      });
+      process.env.FINANCIEREMENTE_MIRROR_PROJECT_ID = project.id;
+      process.env.FINANCIEREMENTE_BASE_URL = "http://kaneo-mia.test";
+      process.env.KANEO_API_URL = "http://asygnuz.test/api";
+      process.env.KANEO_ALLOW_PRIVATE_WEBHOOK_DESTINATIONS = "true";
+      process.env.S3_ENDPOINT = "http://s3.test";
+      process.env.S3_BUCKET = "test-bucket";
+      s3.store.clear();
+      return { project };
+    }
+
+    function stubSender(files: Record<string, string>) {
+      const fetchMock = vi.fn(async (url: string) => {
+        const id = String(url).split("/").pop() ?? "";
+        const content = files[id];
+        if (content === undefined) return new Response("no", { status: 404 });
+        return new Response(content, {
+          status: 200,
+          headers: {
+            "Content-Type": "application/pdf",
+            "X-Kaneo-Filename": encodeURIComponent("informe final.pdf"),
+          },
+        });
+      });
+      vi.stubGlobal("fetch", fetchMock as unknown as typeof fetch);
+      return fetchMock;
+    }
+
+    afterEach(() => {
+      vi.unstubAllGlobals();
+      delete process.env.FINANCIEREMENTE_BASE_URL;
+      delete process.env.KANEO_API_URL;
+      delete process.env.KANEO_ALLOW_PRIVATE_WEBHOOK_DESTINATIONS;
+      delete process.env.S3_ENDPOINT;
+      delete process.env.S3_BUCKET;
+    });
+
+    async function localTask(externalId: string) {
+      const mirror = await findMirroredTask(externalId);
+      const [task] = await db
+        .select()
+        .from(schema.taskTable)
+        .where(eq(schema.taskTable.id, mirror?.localTaskId ?? ""));
+      return task;
+    }
+
+    it("copies the full description on create and localizes its file links", async () => {
+      await setup();
+      const fetchMock = stubSender({ abc123: "PDFBYTES" });
+      const { app } = createApp();
+      await postEvent(
+        app,
+        taskEvent("task.created", {
+          id: "ext-desc",
+          data: {
+            description:
+              "Ver [informe](http://kaneo-mia.test/api/asset/abc123) y de nuevo http://kaneo-mia.test/api/asset/abc123",
+          },
+        }),
+      );
+
+      const task = await localTask("ext-desc");
+      const [asset] = await db
+        .select()
+        .from(schema.assetTable)
+        .where(eq(schema.assetTable.taskId, task?.id ?? ""));
+      expect(asset?.filename).toBe("informe final.pdf");
+      expect(asset?.kind).toBe("attachment");
+      expect(s3.store.size).toBe(1);
+      // the same file linked twice is fetched and stored once
+      const assetCalls = fetchMock.mock.calls.filter((c) =>
+        String(c[0]).includes("/external-mirror/asset/"),
+      );
+      expect(assetCalls).toHaveLength(1);
+      expect(task?.description).toContain(
+        `http://asygnuz.test/api/asset/${asset?.id}`,
+      );
+      expect(task?.description).not.toContain("kaneo-mia.test/api/asset");
+      expect(task?.description).toContain("Reflejado desde Kaneo Mia");
+    });
+
+    it("keeps the original link when the file can't be fetched", async () => {
+      await setup();
+      stubSender({});
+      const { app } = createApp();
+      const response = await postEvent(
+        app,
+        taskEvent("task.created", {
+          id: "ext-broken",
+          data: {
+            description: "[x](http://kaneo-mia.test/api/asset/gone999)",
+          },
+        }),
+      );
+      expect(response.status).toBe(200);
+      const task = await localTask("ext-broken");
+      expect(task?.description).toContain("kaneo-mia.test/api/asset/gone999");
+    });
+
+    it("rewrites file links inside a mirrored comment", async () => {
+      await setup();
+      stubSender({ zzz1: "IMG" });
+      const { app } = createApp();
+      await postEvent(app, taskEvent("task.created", { id: "ext-c" }));
+      await postEvent(
+        app,
+        taskEvent("task.comment_created", {
+          id: "ext-c",
+          data: {
+            comment:
+              "**Ana** commented:\n> mira [foto](http://kaneo-mia.test/api/asset/zzz1)",
+          },
+        }),
+      );
+      const task = await localTask("ext-c");
+      const activities = await db
+        .select()
+        .from(schema.activityTable)
+        .where(eq(schema.activityTable.taskId, task?.id ?? ""));
+      const comment = activities.find((a) => a.type === "comment");
+      expect(comment?.content).toContain("http://asygnuz.test/api/asset/");
+      expect(comment?.content).not.toContain("kaneo-mia.test");
+      const [asset] = await db
+        .select()
+        .from(schema.assetTable)
+        .where(eq(schema.assetTable.taskId, task?.id ?? ""));
+      expect(asset?.activityId).toBe(comment?.id);
+    });
+
+    it("appends a file to the description on task.attachment_added, once", async () => {
+      await setup();
+      stubSender({ att77: "DATA" });
+      const { app } = createApp();
+      await postEvent(app, taskEvent("task.created", { id: "ext-att" }));
+      for (let i = 0; i < 2; i++) {
+        await postEvent(
+          app,
+          taskEvent("task.attachment_added", {
+            id: "ext-att",
+            data: { asset: { id: "att77", filename: "informe final.pdf" } },
+          }),
+        );
+      }
+      const task = await localTask("ext-att");
+      const links = task?.description?.match(/asygnuz\.test\/api\/asset\//g);
+      expect(links).toHaveLength(1);
+      const assets = await db
+        .select()
+        .from(schema.assetTable)
+        .where(eq(schema.assetTable.taskId, task?.id ?? ""));
+      expect(assets).toHaveLength(1);
+    });
+
+    it("serves an asset to a correctly signed request and refuses others", async () => {
+      const { project } = await setup();
+      const { app } = createApp();
+      await postEvent(app, taskEvent("task.created", { id: "ext-serve" }));
+      const task = await localTask("ext-serve");
+      const key = `t/${project.id}/${task?.id}/file.pdf`;
+      s3.store.set(key, {
+        body: Buffer.from("HELLO"),
+        contentType: "application/pdf",
+      });
+      const [asset] = await db
+        .insert(schema.assetTable)
+        .values({
+          workspaceId: project.workspaceId,
+          projectId: project.id,
+          taskId: task?.id ?? "",
+          objectKey: key,
+          filename: "ñandú.pdf",
+          mimeType: "application/pdf",
+          size: 5,
+          kind: "attachment",
+          surface: "description",
+        })
+        .returning();
+      const id = asset?.id ?? "";
+      const sig = createHmac("sha256", SECRET).update(id).digest("hex");
+
+      const ok = await app.request(`/api/external-mirror/asset/${id}`, {
+        headers: { "X-Kaneo-Signature": sig },
+      });
+      expect(ok.status).toBe(200);
+      expect(await ok.text()).toBe("HELLO");
+      expect(decodeURIComponent(ok.headers.get("x-kaneo-filename") ?? "")).toBe(
+        "ñandú.pdf",
+      );
+
+      const bad = await app.request(`/api/external-mirror/asset/${id}`, {
+        headers: { "X-Kaneo-Signature": "00".repeat(32) },
+      });
+      expect(bad.status).toBe(400);
+      const none = await app.request(`/api/external-mirror/asset/${id}`);
+      expect(none.status).toBe(400);
+      const missing = await app.request("/api/external-mirror/asset/nope", {
+        headers: {
+          "X-Kaneo-Signature": createHmac("sha256", SECRET)
+            .update("nope")
+            .digest("hex"),
+        },
+      });
+      expect(missing.status).toBe(404);
+    });
   });
 });

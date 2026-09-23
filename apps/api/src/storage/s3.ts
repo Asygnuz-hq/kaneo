@@ -373,3 +373,38 @@ export async function deleteS3Object(key: string): Promise<void> {
     }),
   );
 }
+
+// Server-side upload for bytes the API already holds -- used by the
+// Asygnuz <-> kaneo-mia mirror, which copies a file from the other
+// instance's storage instead of having a browser presign-upload it.
+// `stableId` makes the object key deterministic, so copying the same source
+// file twice lands on the same key and can be detected instead of duplicated.
+export function buildMirroredObjectKey(
+  context: TaskImageUploadContext,
+  stableId: string,
+): string {
+  const extension = getFileExtension(context.filename);
+  const config = getStorageConfig();
+  const name = `mirror-${sanitizePathSegment(stableId)}`;
+  return applyKeyPrefix(
+    config.keyPrefix,
+    `${buildObjectKeyPrefix(context)}/${extension ? `${name}.${extension}` : name}`,
+  );
+}
+
+export async function putObjectAtKey(
+  key: string,
+  body: Buffer,
+  contentType: string,
+): Promise<void> {
+  const config = getStorageConfig();
+  const client = getClient(config);
+  await client.send(
+    new PutObjectCommand({
+      Bucket: config.bucket,
+      Key: key,
+      Body: body,
+      ContentType: contentType,
+    }),
+  );
+}

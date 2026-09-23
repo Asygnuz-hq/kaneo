@@ -6,6 +6,7 @@ import {
   errorResponse,
   jsonResponse,
 } from "../openapi";
+import { readAssetForMirror, verifyAssetSignature } from "./assets";
 import { isMirrorEnabled, mirrorSecret } from "./config";
 import { handleMirrorEvent } from "./controllers/handle-mirror-event";
 import { mirrorWebhookResultSchema } from "./response";
@@ -35,9 +36,8 @@ const webhookRoute = createRoute({
   },
 });
 
-const externalMirror = apiRouter<BaseVariables>().openapi(
-  webhookRoute,
-  async (c) => {
+const externalMirror = apiRouter<BaseVariables>()
+  .openapi(webhookRoute, async (c) => {
     if (!isMirrorEnabled()) {
       throw new HTTPException(404, { message: "Not found" });
     }
@@ -73,7 +73,25 @@ const externalMirror = apiRouter<BaseVariables>().openapi(
     }
 
     return c.json({ received: true }, 200);
-  },
-);
+  })
+  .get("/asset/:id", async (c) => {
+    if (!isMirrorEnabled()) {
+      throw new HTTPException(404, { message: "Not found" });
+    }
+    const id = c.req.param("id");
+    if (!verifyAssetSignature(id, c.req.header("X-Kaneo-Signature"))) {
+      throw new HTTPException(400, { message: "Invalid signature" });
+    }
+    const asset = await readAssetForMirror(id);
+    if (!asset) {
+      throw new HTTPException(404, { message: "Asset not found" });
+    }
+    return new Response(asset.body, {
+      headers: {
+        "Content-Type": asset.mimeType,
+        "X-Kaneo-Filename": encodeURIComponent(asset.filename),
+      },
+    });
+  });
 
 export default externalMirror;
