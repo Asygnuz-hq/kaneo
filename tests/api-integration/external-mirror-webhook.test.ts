@@ -1,6 +1,14 @@
 import { createHmac } from "node:crypto";
 import { eq } from "drizzle-orm";
-import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+import {
+  afterEach,
+  beforeAll,
+  beforeEach,
+  describe,
+  expect,
+  it,
+  vi,
+} from "vitest";
 
 const s3 = vi.hoisted(() => ({
   store: new Map<string, { body: Buffer; contentType: string }>(),
@@ -29,6 +37,8 @@ vi.mock("../../apps/api/src/storage/s3", async (importOriginal) => {
 
 import db, { schema } from "../../apps/api/src/database";
 import { createApp } from "../../apps/api/src/index";
+import { initializePlugins } from "../../apps/api/src/plugins";
+import updateTaskTitle from "../../apps/api/src/task/controllers/update-task-title";
 import { resetTestDatabase } from "./helpers/database";
 import {
   createProjectFixture,
@@ -99,6 +109,12 @@ async function findMirroredTask(externalTaskId: string) {
     .where(eq(schema.externalTaskMirrorTable.externalTaskId, externalTaskId));
   return row ?? null;
 }
+
+// The event -> plugin wiring only exists once the server starts; without it
+// the "nothing is sent back out" test below would pass without proving a thing.
+beforeAll(() => {
+  initializePlugins();
+});
 
 beforeEach(async () => {
   await resetTestDatabase();
@@ -1028,7 +1044,7 @@ describe("external mirror webhook", () => {
     });
 
     it("does not send the comment it mirrors back out to kaneo-mia", async () => {
-      const { project } = await setup();
+      const { owner, project } = await setup();
       process.env.FINANCIEREMENTE_BASE_URL = "http://kaneo-mia.test";
       process.env.KANEO_ALLOW_PRIVATE_WEBHOOK_DESTINATIONS = "true";
       await db.insert(schema.integrationTable).values({
@@ -1037,7 +1053,11 @@ describe("external mirror webhook", () => {
         isActive: true,
         config: JSON.stringify({
           webhookUrl: "http://kaneo-mia.test/api/external-mirror/asygnuz",
-          events: { taskCommentCreated: true, taskCreated: true },
+          events: {
+            taskCommentCreated: true,
+            taskCreated: true,
+            taskTitleChanged: true,
+          },
         }),
       });
       const fetchMock = vi
@@ -1057,10 +1077,22 @@ describe("external mirror webhook", () => {
       // let any fire-and-forget event handlers run
       await new Promise((resolve) => setTimeout(resolve, 200));
 
-      const toWebhook = fetchMock.mock.calls.filter((c) =>
-        String(c[0]).endsWith("/api/external-mirror/asygnuz"),
-      );
-      expect(toWebhook).toHaveLength(0);
+      const toWebhook = () =>
+        fetchMock.mock.calls.filter((c) =>
+          String(c[0]).endsWith("/api/external-mirror/asygnuz"),
+        );
+      // everything the mirror itself applied stayed silent...
+      expect(toWebhook()).toHaveLength(0);
+
+      // ...while a person's own edit on the same task does go out (control:
+      // proves the wiring is live, so the silence above means something)
+      const mirror = await findMirroredTask("echo-1");
+      await updateTaskTitle({
+        id: mirror?.localTaskId ?? "",
+        title: "Editado por una persona",
+        currentUserId: owner.user.id,
+      });
+      await vi.waitFor(() => expect(toWebhook()).toHaveLength(1));
 
       vi.unstubAllGlobals();
       delete process.env.FINANCIEREMENTE_BASE_URL;

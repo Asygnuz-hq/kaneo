@@ -219,6 +219,24 @@ export function initializeEventSubscriptions(): void {
     });
   });
 
+  // Picking a label that already exists in the workspace (the usual way in
+  // the UI) is a different event from creating a brand-new one.
+  subscribeToEvent<{
+    taskId: string;
+    projectId: string;
+    userId: string | null;
+    label?: { name?: string };
+  }>("task.label_assigned", async (data) => {
+    const labelName = data.label?.name;
+    if (!labelName) return;
+    await broadcastTaskLabeled({
+      taskId: data.taskId,
+      projectId: data.projectId,
+      userId: data.userId,
+      labelName,
+    });
+  });
+
   subscribeToEvent<{
     taskId: string;
     userId: string | null;
