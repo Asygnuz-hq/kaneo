@@ -11,6 +11,7 @@ import type {
   TaskDeletedEvent,
   TaskDescriptionChangedEvent,
   TaskDueDateChangedEvent,
+  TaskLabeledEvent,
   TaskMovedEvent,
   TaskParentLinkedEvent,
   TaskPriorityChangedEvent,
@@ -196,6 +197,25 @@ export function initializeEventSubscriptions(): void {
       projectId: data.projectId,
       userId: data.userId,
       parentTaskId: data.sourceTaskId,
+    });
+  });
+
+  // A label added AFTER the task was created (the usual case) is the only
+  // signal that a task now belongs to one of the mirrored projects.
+  subscribeToEvent<{
+    taskId: string;
+    projectId: string;
+    userId: string | null;
+    name?: string;
+    labelName?: string;
+  }>("task.label_created", async (data) => {
+    const labelName = data.name ?? data.labelName;
+    if (!labelName) return;
+    await broadcastTaskLabeled({
+      taskId: data.taskId,
+      projectId: data.projectId,
+      userId: data.userId,
+      labelName,
     });
   });
 
@@ -445,6 +465,28 @@ export async function broadcastTaskMoved(event: TaskMovedEvent): Promise<void> {
       await plugin.onTaskMoved(event, context);
     } catch (error) {
       console.error(`Plugin ${plugin.type} error on task.moved:`, error);
+    }
+  }
+}
+
+export async function broadcastTaskLabeled(
+  event: TaskLabeledEvent,
+): Promise<void> {
+  const integrations = await getActiveIntegrations(event.projectId);
+
+  for (const integration of integrations) {
+    const plugin = getPlugin(integration.type);
+    if (!plugin?.onTaskLabeled) continue;
+
+    const context = createContext(integration);
+
+    try {
+      await plugin.onTaskLabeled(event, context);
+    } catch (error) {
+      console.error(
+        `Plugin ${plugin.type} error on task.label_created:`,
+        error,
+      );
     }
   }
 }

@@ -4,6 +4,7 @@ import { runAsMirror } from "../../apps/api/src/external-mirror/context";
 import createLabel from "../../apps/api/src/label/controllers/create-label";
 import {
   handleTaskCreated,
+  handleTaskLabeled,
   handleTaskParentLinked,
 } from "../../apps/api/src/plugins/generic-webhook/events";
 import { resetTestDatabase } from "./helpers/database";
@@ -211,5 +212,39 @@ describe("generic webhook: assignee, type and parent in the envelope", () => {
       ),
     );
     expect(fetchMock).not.toHaveBeenCalled();
+  });
+
+  it("emits task.labeled with the label and the description when a label is added", async () => {
+    const owner = await createWorkspaceMember({ role: "owner" });
+    const { project, columns } = await createProjectFixture({
+      workspaceId: owner.workspace.id,
+    });
+    const task = await seedTask(project.id, columns.todo.id, {
+      description: "Descripción completa",
+    });
+    await createLabel(
+      "Comisiones",
+      "gray",
+      task.id,
+      owner.workspace.id,
+      owner.user.id,
+    );
+
+    const fetchMock = stubFetch();
+    await handleTaskLabeled(
+      {
+        taskId: task.id,
+        projectId: project.id,
+        userId: owner.user.id,
+        labelName: "Comisiones",
+      },
+      context(project.id, { taskMoved: true }),
+    );
+
+    const body = sentBody(fetchMock);
+    expect(body.event).toBe("task.labeled");
+    expect(body.data.label).toBe("Comisiones");
+    expect(body.data.description).toBe("Descripción completa");
+    expect(body.task.labels).toEqual(["Comisiones"]);
   });
 });

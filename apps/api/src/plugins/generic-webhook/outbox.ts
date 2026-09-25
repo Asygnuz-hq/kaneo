@@ -21,6 +21,7 @@ const STATE_EVENTS = new Set([
   "task.assignee_changed",
   "task.unassigned",
   "task.parent_changed",
+  "task.labeled",
 ]);
 
 export type RetryEntry = {

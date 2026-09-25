@@ -67,6 +67,7 @@ async function createLabel(
         projectId: task.projectId,
         taskId: task.id,
         userId: userId,
+        name,
         type: "label_created",
       });
     }

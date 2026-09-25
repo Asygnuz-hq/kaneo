@@ -87,6 +87,13 @@ export type TaskParentLinkedEvent = {
   parentTaskId: string;
 };
 
+export type TaskLabeledEvent = {
+  taskId: string;
+  projectId: string;
+  userId: string | null;
+  labelName: string;
+};
+
 export type TaskDueDateChangedEvent = {
   taskId: string;
   projectId: string;
@@ -123,6 +130,7 @@ export type TaskEvent =
   | TaskDeletedEvent
   | TaskMovedEvent
   | TaskParentLinkedEvent
+  | TaskLabeledEvent
   | TaskDueDateChangedEvent
   | TaskAssigneeChangedEvent
   | TaskUnassignedEvent;
@@ -169,6 +177,7 @@ export type IntegrationPlugin = {
   onTaskDeleted?: TaskEventHandler<TaskDeletedEvent>;
   onTaskMoved?: TaskEventHandler<TaskMovedEvent>;
   onTaskParentLinked?: TaskEventHandler<TaskParentLinkedEvent>;
+  onTaskLabeled?: TaskEventHandler<TaskLabeledEvent>;
   onTaskDueDateChanged?: TaskEventHandler<TaskDueDateChangedEvent>;
   onTaskAssigneeChanged?: TaskEventHandler<TaskAssigneeChangedEvent>;
   onTaskUnassigned?: TaskEventHandler<TaskUnassignedEvent>;

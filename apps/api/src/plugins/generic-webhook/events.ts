@@ -20,6 +20,7 @@ import type {
   TaskDeletedEvent,
   TaskDescriptionChangedEvent,
   TaskDueDateChangedEvent,
+  TaskLabeledEvent,
   TaskMovedEvent,
   TaskParentLinkedEvent,
   TaskPriorityChangedEvent,
@@ -726,6 +727,35 @@ export async function handleTaskMoved(
       oldStatus: event.oldStatus,
       newStatus: event.newStatus,
     },
+  );
+}
+
+// Gated by the same switch as moves. The label is what tells the other side
+// which of its projects a task belongs to, so adding one has to reach it;
+// the description rides along so a task labeled after creation still arrives
+// complete.
+export async function handleTaskLabeled(
+  event: TaskLabeledEvent,
+  context: PluginContext,
+): Promise<void> {
+  const config = normalizeGenericWebhookConfig(
+    context.config as GenericWebhookConfig,
+  );
+  if (!isEnabled(config, "taskMoved")) return;
+
+  const [row] = await db
+    .select({ description: taskTable.description })
+    .from(taskTable)
+    .where(eq(taskTable.id, event.taskId))
+    .limit(1);
+
+  await sendEvent(
+    config,
+    "task.labeled",
+    event.taskId,
+    event.projectId,
+    event.userId,
+    { label: event.labelName, description: row?.description ?? "" },
   );
 }
 
