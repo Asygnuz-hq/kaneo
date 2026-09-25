@@ -55,6 +55,8 @@ type GenericWebhookTaskData = {
   parent: { id: string; title: string; type: string } | null;
   // The kaneo-mia task this one was mirrored from, when it was born there.
   mirroredFrom: string | null;
+  startDate: Date | null;
+  dueDate: Date | null;
 };
 
 function isEnabled(
@@ -80,6 +82,8 @@ async function getTaskData(
       projectName: projectTable.name,
       workspaceId: workspaceTable.id,
       issueType: taskTable.issueType,
+      startDate: taskTable.startDate,
+      dueDate: taskTable.dueDate,
       assigneeName: userTable.name,
       assigneeEmail: userTable.email,
     })
@@ -315,6 +319,8 @@ async function attemptSend(
         assignee: task.assignee,
         parent: task.parent,
         mirroredFrom: task.mirroredFrom,
+        startDate: task.startDate?.toISOString() ?? null,
+        dueDate: task.dueDate?.toISOString() ?? null,
       },
       actor,
       data,

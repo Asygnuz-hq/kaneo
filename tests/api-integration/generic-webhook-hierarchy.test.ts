@@ -108,6 +108,8 @@ describe("generic webhook: assignee, type and parent in the envelope", () => {
       email: owner.user.email,
     });
     expect(body.task.type).toBe("task");
+    expect(body.task.startDate).toBeNull();
+    expect(body.task.dueDate).toBeNull();
     expect(body.task.parent).toEqual({
       id: epic.id,
       title: "Épica",

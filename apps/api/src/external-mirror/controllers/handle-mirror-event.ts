@@ -278,6 +278,43 @@ async function linkParent(
   });
 }
 
+function asDate(value: string | null | undefined): Date | undefined {
+  if (!value) {
+    return undefined;
+  }
+  const date = new Date(value);
+  return Number.isNaN(date.getTime()) ? undefined : date;
+}
+
+// Dates only fill a gap, never overwrite: a task that already carries its own
+// dates keeps them, and an explicit change arrives as its own due-date event.
+async function fillMissingDates(
+  taskId: string,
+  payload: MirrorTaskPayload,
+): Promise<void> {
+  const start = asDate(payload.task.startDate);
+  const due = asDate(payload.task.dueDate);
+  if (!start && !due) {
+    return;
+  }
+  const [current] = await db
+    .select({ startDate: taskTable.startDate, dueDate: taskTable.dueDate })
+    .from(taskTable)
+    .where(eq(taskTable.id, taskId));
+  if (!current) {
+    return;
+  }
+  if (due && !current.dueDate) {
+    await updateTaskDueDate({ id: taskId, dueDate: due, currentUserId: "" });
+  }
+  if (start && !current.startDate) {
+    await db
+      .update(taskTable)
+      .set({ startDate: start })
+      .where(eq(taskTable.id, taskId));
+  }
+}
+
 // Creates the local task the first time we hear about an external one, and
 // is safe to call again for any later event on the same external task --
 // used as a get-or-create so a status/move event that arrives before we
@@ -286,6 +323,7 @@ async function linkParent(
 async function ensureLocalTask(payload: MirrorTaskPayload): Promise<string> {
   const existingId = await findMirroredTaskId(payload.task.id);
   if (existingId) {
+    await fillMissingDates(existingId, payload);
     return existingId;
   }
 
@@ -305,6 +343,8 @@ async function ensureLocalTask(payload: MirrorTaskPayload): Promise<string> {
     priority,
     description: mirrorFootnote(payload),
     issueType: issueTypeFor(payload.task.type),
+    startDate: asDate(payload.task.startDate),
+    dueDate: asDate(payload.task.dueDate),
   });
 
   await db.insert(externalTaskMirrorTable).values({

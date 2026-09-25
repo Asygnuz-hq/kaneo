@@ -1177,5 +1177,45 @@ describe("external mirror webhook", () => {
         .where(eq(schema.taskTable.id, ours.id));
       expect(after?.description).toBe("Editado en Mía");
     });
+
+    it("carries start and due dates on creation, and fills them in on a task that lacks them", async () => {
+      await setup();
+      const { app } = createApp();
+      await postEvent(
+        app,
+        withTask("task.created", "dt-1", {
+          startDate: "2026-09-24T12:00:00.000Z",
+          dueDate: "2026-09-26T12:00:00.000Z",
+        }),
+      );
+      const created = await localOf("dt-1");
+      expect(created?.startDate?.toISOString()).toBe(
+        "2026-09-24T12:00:00.000Z",
+      );
+      expect(created?.dueDate?.toISOString()).toBe("2026-09-26T12:00:00.000Z");
+
+      // a task mirrored earlier with no dates gets them on the next snapshot,
+      // but a date it already has is never overwritten
+      await postEvent(app, withTask("task.created", "dt-2", {}));
+      await postEvent(
+        app,
+        withTask("task.status_changed", "dt-2", {
+          startDate: "2026-10-01T12:00:00.000Z",
+          dueDate: "2026-10-03T12:00:00.000Z",
+        }),
+      );
+      expect((await localOf("dt-2"))?.dueDate?.toISOString()).toBe(
+        "2026-10-03T12:00:00.000Z",
+      );
+      await postEvent(
+        app,
+        withTask("task.status_changed", "dt-2", {
+          dueDate: "2027-01-01T12:00:00.000Z",
+        }),
+      );
+      expect((await localOf("dt-2"))?.dueDate?.toISOString()).toBe(
+        "2026-10-03T12:00:00.000Z",
+      );
+    });
   });
 });

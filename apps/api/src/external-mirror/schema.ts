@@ -24,6 +24,8 @@ export const mirrorTaskPayloadSchema = z
       // Set when this kaneo-mia task is itself the mirror of one of OUR
       // tasks: the id of ours. Lets their later changes find it here.
       mirroredFrom: z.string().nullable().optional(),
+      startDate: z.string().nullable().optional(),
+      dueDate: z.string().nullable().optional(),
       parent: z
         .object({
           id: z.string(),
