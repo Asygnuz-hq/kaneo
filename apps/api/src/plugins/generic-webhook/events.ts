@@ -2,6 +2,7 @@ import { and, eq } from "drizzle-orm";
 import db from "../../database";
 import {
   columnTable,
+  externalTaskMirrorTable,
   integrationTable,
   labelTable,
   projectTable,
@@ -29,6 +30,12 @@ import type {
 import { postToGenericWebhook } from "./client";
 import type { GenericWebhookConfig, GenericWebhookEventKey } from "./config";
 import { normalizeGenericWebhookConfig } from "./config";
+import {
+  claimDueRetries,
+  enqueueRetry,
+  finishRetry,
+  rescheduleRetry,
+} from "./outbox";
 
 type GenericWebhookTaskData = {
   id: string;
@@ -45,6 +52,8 @@ type GenericWebhookTaskData = {
   issueType: string;
   assignee: { name: string | null; email: string | null } | null;
   parent: { id: string; title: string; type: string } | null;
+  // The kaneo-mia task this one was mirrored from, when it was born there.
+  mirroredFrom: string | null;
 };
 
 function isEnabled(
@@ -129,9 +138,16 @@ async function getTaskData(
         ).map((label) => label.name)
       : ownLabels;
 
+  const [origin] = await db
+    .select({ externalTaskId: externalTaskMirrorTable.externalTaskId })
+    .from(externalTaskMirrorTable)
+    .where(eq(externalTaskMirrorTable.localTaskId, taskId))
+    .limit(1);
+
   const { assigneeName, assigneeEmail, ...rest } = taskRow;
   return {
     ...rest,
+    mirroredFrom: origin?.externalTaskId ?? null,
     assignee: assigneeName
       ? { name: assigneeName, email: assigneeEmail }
       : null,
@@ -254,6 +270,63 @@ async function deliverWebhookEvent(
   }
 }
 
+async function attemptSend(
+  config: GenericWebhookConfig,
+  eventName: string,
+  taskId: string,
+  projectId: string,
+  userId: string | null,
+  data: Record<string, unknown>,
+): Promise<SendOutcome> {
+  if (isApplyingMirror()) return "skipped";
+
+  const task = await getTaskData(taskId, projectId);
+  if (!task) return "skipped";
+
+  const actor = await getActor(userId);
+
+  const delivered = await deliverWebhookEvent(
+    config,
+    eventName,
+    taskId,
+    projectId,
+    {
+      event: eventName,
+      timestamp: new Date().toISOString(),
+      integration: {
+        type: "generic-webhook",
+      },
+      project: {
+        id: task.projectId,
+        name: task.projectName,
+        workspaceId: task.workspaceId,
+      },
+      task: {
+        id: task.id,
+        number: task.number,
+        title: task.title,
+        status: task.status,
+        statusName: task.statusName,
+        priority: task.priority,
+        url: task.taskUrl,
+        labels: task.labels,
+        type: task.issueType,
+        assignee: task.assignee,
+        parent: task.parent,
+        mirroredFrom: task.mirroredFrom,
+      },
+      actor,
+      data,
+    },
+  );
+  return delivered ? "sent" : "failed";
+}
+
+type SendOutcome = "sent" | "failed" | "skipped";
+
+// A failed delivery is not lost: it is queued and retried (see
+// processWebhookRetries), so the other side being down for a deploy or a
+// reboot only delays the change instead of dropping it.
 async function sendEvent(
   config: GenericWebhookConfig,
   eventName: string,
@@ -262,40 +335,155 @@ async function sendEvent(
   userId: string | null,
   data: Record<string, unknown>,
 ): Promise<boolean> {
-  if (isApplyingMirror()) return false;
-
-  const task = await getTaskData(taskId, projectId);
-  if (!task) return false;
-
-  const actor = await getActor(userId);
-
-  return deliverWebhookEvent(config, eventName, taskId, projectId, {
-    event: eventName,
-    timestamp: new Date().toISOString(),
-    integration: {
-      type: "generic-webhook",
-    },
-    project: {
-      id: task.projectId,
-      name: task.projectName,
-      workspaceId: task.workspaceId,
-    },
-    task: {
-      id: task.id,
-      number: task.number,
-      title: task.title,
-      status: task.status,
-      statusName: task.statusName,
-      priority: task.priority,
-      url: task.taskUrl,
-      labels: task.labels,
-      type: task.issueType,
-      assignee: task.assignee,
-      parent: task.parent,
-    },
-    actor,
+  const outcome = await attemptSend(
+    config,
+    eventName,
+    taskId,
+    projectId,
+    userId,
     data,
-  });
+  );
+  if (outcome === "failed") {
+    await enqueueRetry({ projectId, eventName, taskId, userId, data });
+  }
+  return outcome === "sent";
+}
+
+export async function processWebhookRetries(): Promise<void> {
+  const due = await claimDueRetries();
+  for (const retry of due) {
+    const integration = await db.query.integrationTable.findFirst({
+      where: and(
+        eq(integrationTable.projectId, retry.projectId),
+        eq(integrationTable.type, "generic-webhook"),
+      ),
+    });
+    if (!integration || integration.isActive === false) {
+      await finishRetry(retry.id);
+      continue;
+    }
+
+    let outcome: SendOutcome = "failed";
+    try {
+      const config = normalizeGenericWebhookConfig(
+        JSON.parse(integration.config) as GenericWebhookConfig,
+      );
+      outcome = await attemptSend(
+        config,
+        retry.eventName,
+        retry.taskId,
+        retry.projectId,
+        retry.userId,
+        retry.data,
+      );
+    } catch (error) {
+      console.error("generic webhook: retry crashed", error);
+    }
+
+    if (outcome === "failed") {
+      await rescheduleRetry(retry, "delivery failed");
+    } else {
+      await finishRetry(retry.id);
+    }
+  }
+}
+
+const RETRY_TICK_MS = 30_000;
+
+export function startWebhookRetryWorker(): void {
+  const timer = setInterval(() => {
+    processWebhookRetries().catch((error) => {
+      console.error("generic webhook: retry pass failed", error);
+    });
+  }, RETRY_TICK_MS);
+  timer.unref?.();
+}
+
+// Top-level tasks first, then the ones that hang from another.
+async function listBackfillTasks(projectId: string) {
+  const tasks = await db
+    .select({
+      id: taskTable.id,
+      title: taskTable.title,
+      description: taskTable.description,
+      priority: taskTable.priority,
+      status: taskTable.status,
+      number: taskTable.number,
+    })
+    .from(taskTable)
+    .where(eq(taskTable.projectId, projectId));
+  const children = new Set(
+    (
+      await db
+        .select({ id: taskRelationTable.targetTaskId })
+        .from(taskRelationTable)
+        .innerJoin(taskTable, eq(taskRelationTable.targetTaskId, taskTable.id))
+        .where(
+          and(
+            eq(taskRelationTable.relationType, "subtask"),
+            eq(taskTable.projectId, projectId),
+          ),
+        )
+    ).map((row) => row.id),
+  );
+  return [
+    ...tasks.filter((task) => !children.has(task.id)),
+    ...tasks.filter((task) => children.has(task.id)),
+  ];
+}
+
+let backfillRunning = false;
+
+const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
+
+// One-time catch-up: sends every task of every project that has an active
+// Generic Webhook as a "task.created". The other side treats that as
+// get-or-create, so tasks that already exist there are left alone and the ones
+// that predate the integration finally show up. Parents go first, and it is
+// paced so it never floods the other instance. Returns immediately; the work
+// runs in the background.
+export async function runWebhookBackfill(): Promise<{
+  started: boolean;
+  projects: number;
+}> {
+  if (backfillRunning) {
+    return { started: false, projects: 0 };
+  }
+
+  const integrations = await db
+    .select()
+    .from(integrationTable)
+    .where(eq(integrationTable.type, "generic-webhook"));
+  const active = integrations.filter((row) => row.isActive !== false);
+  backfillRunning = true;
+
+  void (async () => {
+    try {
+      for (const integration of active) {
+        const config = normalizeGenericWebhookConfig(
+          JSON.parse(integration.config) as GenericWebhookConfig,
+        );
+        const projectId = integration.projectId;
+        const tasks = await listBackfillTasks(projectId);
+        for (const task of tasks) {
+          await sendEvent(config, "task.created", task.id, projectId, null, {
+            title: task.title,
+            description: task.description,
+            priority: task.priority,
+            status: task.status,
+            number: task.number,
+          });
+          await sleep(120);
+        }
+      }
+    } catch (error) {
+      console.error("generic webhook: backfill failed", error);
+    } finally {
+      backfillRunning = false;
+    }
+  })();
+
+  return { started: true, projects: active.length };
 }
 
 export async function sendDueDateReminder(
@@ -453,6 +641,8 @@ export async function handleTaskCommentCreated(
     event.userId,
     {
       comment: event.comment,
+      content: event.content ?? null,
+      authorName: event.authorName ?? null,
     },
   );
 }

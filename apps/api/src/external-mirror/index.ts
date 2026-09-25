@@ -6,6 +6,7 @@ import {
   errorResponse,
   jsonResponse,
 } from "../openapi";
+import { runWebhookBackfill } from "../plugins/generic-webhook/events";
 import { readAssetForMirror, verifyAssetSignature } from "./assets";
 import { isMirrorEnabled, mirrorSecret } from "./config";
 import { handleMirrorEvent } from "./controllers/handle-mirror-event";
@@ -73,6 +74,24 @@ const externalMirror = apiRouter<BaseVariables>()
     }
 
     return c.json({ received: true }, 200);
+  })
+  .post("/backfill", async (c) => {
+    // Sender-side only: it needs the shared secret, not the target project.
+    if (!mirrorSecret()) {
+      throw new HTTPException(404, { message: "Not found" });
+    }
+    const rawBody = await c.req.text();
+    if (
+      !verifyMirrorSignature(
+        rawBody,
+        c.req.header("X-Kaneo-Signature"),
+        mirrorSecret(),
+      )
+    ) {
+      throw new HTTPException(400, { message: "Invalid signature" });
+    }
+    const result = await runWebhookBackfill();
+    return c.json(result, 202);
   })
   .get("/asset/:id", async (c) => {
     if (!isMirrorEnabled()) {

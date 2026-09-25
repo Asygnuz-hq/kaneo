@@ -1,5 +1,6 @@
 import { discordPlugin } from "./discord";
 import { genericWebhookPlugin } from "./generic-webhook";
+import { startWebhookRetryWorker } from "./generic-webhook/events";
 import { giteaPlugin } from "./gitea";
 import { githubPlugin, initializeGitHubPlugin } from "./github";
 import { initializeEventSubscriptions, registerPlugin } from "./registry";
@@ -17,6 +18,7 @@ export function initializePlugins() {
   registerPlugin(telegramPlugin);
   initializeGitHubPlugin();
   initializeEventSubscriptions();
+  startWebhookRetryWorker();
 
   console.log("✅ Plugins initialized");
 }

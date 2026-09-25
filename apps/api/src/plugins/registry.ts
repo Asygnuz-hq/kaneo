@@ -130,12 +130,17 @@ export function initializeEventSubscriptions(): void {
     userId: string;
     comment: string;
     projectId: string;
+    content?: string;
+    externalUserName?: string | null;
+    authorName?: string | null;
   }>("comment.created", async (data) => {
     await broadcastTaskCommentCreated({
       taskId: data.taskId,
       projectId: data.projectId,
       userId: data.userId,
       comment: data.comment,
+      content: data.content,
+      authorName: data.externalUserName ?? data.authorName ?? null,
     });
   });
 

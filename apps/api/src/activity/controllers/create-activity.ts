@@ -13,7 +13,9 @@ async function createActivity(
     .values({
       taskId,
       type,
-      userId,
+      // The mirror acts with no user of its own (""); a blank id would break
+      // the foreign key and silently drop the history row.
+      userId: userId || null,
       content,
       eventData: eventData ?? null,
     })

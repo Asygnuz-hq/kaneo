@@ -14,7 +14,11 @@ import createLabel from "../../label/controllers/create-label";
 import createTask from "../../task/controllers/create-task";
 import deleteTask from "../../task/controllers/delete-task";
 import updateTaskAssignee from "../../task/controllers/update-task-assignee";
+import updateTaskDescription from "../../task/controllers/update-task-description";
+import updateTaskDueDate from "../../task/controllers/update-task-due-date";
+import updateTaskPriority from "../../task/controllers/update-task-priority";
 import updateTaskStatus from "../../task/controllers/update-task-status";
+import updateTaskTitle from "../../task/controllers/update-task-title";
 import {
   coercePriority,
   coerceStatus,
@@ -32,6 +36,7 @@ import {
   mirrorTargetProjectId,
 } from "../config";
 import { runAsMirror } from "../context";
+import { stripMirrorFootnote } from "../footnote";
 import { registerReverseMirror } from "../register-reverse-mirror";
 import type { MirrorTaskPayload } from "../schema";
 
@@ -63,20 +68,25 @@ async function syncDescription(
   taskId: string,
   payload: MirrorTaskPayload,
   raw?: string,
+  // False for a task that is OURS: it has no "reflejado" note to keep.
+  withFootnote = true,
 ): Promise<void> {
   const original = raw ?? payload.data?.description;
   if (typeof original !== "string" || !original.trim()) {
     return;
   }
   const localized = await localizeAssetLinks(
-    original,
+    stripMirrorFootnote(original),
     financieramenteBaseUrl(),
     { taskId, surface: "description" },
   );
-  await db
-    .update(taskTable)
-    .set({ description: `${localized}\n\n${mirrorFootnote(payload)}` })
-    .where(eq(taskTable.id, taskId));
+  await updateTaskDescription({
+    id: taskId,
+    description: withFootnote
+      ? `${localized}\n\n${mirrorFootnote(payload)}`
+      : localized,
+    currentUserId: "",
+  });
 }
 
 // Several kaneo-mia projects (Tecnología, Comisiones, Service Desk, UAT...)
@@ -164,6 +174,12 @@ async function syncExternalAssignee(
     });
 }
 
+async function clearMirroredAssignee(taskId: string): Promise<void> {
+  await db
+    .delete(taskExternalAssigneeTable)
+    .where(eq(taskExternalAssigneeTable.taskId, taskId));
+}
+
 // A real assignment when the person also exists here (matched by email and
 // actually a member of this workspace); otherwise the name-only external
 // assignee. The email match is what makes "assigned to Juan" on their side
@@ -176,6 +192,9 @@ async function syncAssignee(
   if (!assignee?.name && !assignee?.email) {
     return;
   }
+  // kaneo-mia has exactly one assignee, so the mirror holds exactly one too:
+  // whoever was mirrored before is replaced, not kept alongside.
+  await clearMirroredAssignee(taskId);
   const email = assignee.email?.trim();
   if (email) {
     const [user] = await db
@@ -199,11 +218,11 @@ async function syncAssignee(
   await syncExternalAssignee(taskId, projectId, assignee.name);
 }
 
-// kaneo-mia's story is the top of its tree, which is what an epic is here.
+// kaneo-mia's story is its historia de usuario, which is a story here too.
 // Everything else is a plain task: the nesting itself lives in the
 // "subtask" relation below, not in the type.
 function issueTypeFor(type: string | null | undefined): string {
-  return type === "story" ? "epic" : "task";
+  return type === "story" ? "story" : "task";
 }
 
 // Hangs the local child under the local copy of its kaneo-mia parent,
@@ -339,14 +358,10 @@ async function adoptMirroredFrom(payload: MirrorTaskPayload): Promise<void> {
 
 async function applyMirrorEvent(payload: MirrorTaskPayload): Promise<void> {
   await adoptMirroredFrom(payload);
-  // Our own task, echoed back: destructive or text-overwriting changes made
-  // on their copy must never rewrite the original.
+  // Our own task, echoed back: their copy being deleted must never take the
+  // original with it. Everything else they edit flows through.
   const isOurs = Boolean(payload.task.mirroredFrom);
-  if (
-    isOurs &&
-    (payload.event === "task.deleted" ||
-      payload.event === "task.description_changed")
-  ) {
+  if (isOurs && payload.event === "task.deleted") {
     return;
   }
 
@@ -389,10 +404,11 @@ async function applyMirrorEvent(payload: MirrorTaskPayload): Promise<void> {
       if (!localTaskId || !payload.task.title) {
         return;
       }
-      await db
-        .update(taskTable)
-        .set({ title: payload.task.title })
-        .where(eq(taskTable.id, localTaskId));
+      await updateTaskTitle({
+        id: localTaskId,
+        title: payload.task.title,
+        currentUserId: "",
+      });
       return;
     }
 
@@ -402,7 +418,7 @@ async function applyMirrorEvent(payload: MirrorTaskPayload): Promise<void> {
       if (!localTaskId || typeof newDescription !== "string") {
         return;
       }
-      await syncDescription(localTaskId, payload, newDescription);
+      await syncDescription(localTaskId, payload, newDescription, !isOurs);
       return;
     }
 
@@ -414,10 +430,11 @@ async function applyMirrorEvent(payload: MirrorTaskPayload): Promise<void> {
       const { priority } = coercePriority(
         payload.task.priority ?? "no-priority",
       );
-      await db
-        .update(taskTable)
-        .set({ priority })
-        .where(eq(taskTable.id, localTaskId));
+      await updateTaskPriority({
+        id: localTaskId,
+        priority,
+        currentUserId: "",
+      });
       return;
     }
 
@@ -429,10 +446,11 @@ async function applyMirrorEvent(payload: MirrorTaskPayload): Promise<void> {
       const rawDueDate = payload.data?.newDueDate;
       const dueDate =
         typeof rawDueDate === "string" ? new Date(rawDueDate) : null;
-      await db
-        .update(taskTable)
-        .set({ dueDate })
-        .where(eq(taskTable.id, localTaskId));
+      await updateTaskDueDate({
+        id: localTaskId,
+        dueDate,
+        currentUserId: "",
+      });
       return;
     }
 
@@ -449,6 +467,20 @@ async function applyMirrorEvent(payload: MirrorTaskPayload): Promise<void> {
       return;
     }
 
+    case "task.unassigned": {
+      const localTaskId = await findMirroredTaskId(payload.task.id);
+      if (!localTaskId) {
+        return;
+      }
+      await clearMirroredAssignee(localTaskId);
+      await updateTaskAssignee({
+        id: localTaskId,
+        userId: null,
+        currentUserId: "",
+      });
+      return;
+    }
+
     // Moved under (or to) another parent on kaneo-mia's side.
     case "task.parent_changed": {
       const localTaskId = await findMirroredTaskId(payload.task.id);
@@ -461,16 +493,20 @@ async function applyMirrorEvent(payload: MirrorTaskPayload): Promise<void> {
 
     case "task.comment_created": {
       const localTaskId = await findMirroredTaskId(payload.task.id);
-      // The comment text kaneo-mia's own webhook sends is already formatted
-      // as "**<real name>** commented: > <text>" -- the actual author is in
-      // there, so external.userName below only needs to say where it came
-      // from, not who wrote it.
-      const comment = payload.data?.comment;
-      if (!localTaskId || typeof comment !== "string") {
+      // Recreated under the name of whoever actually wrote it there, not a
+      // generic "Kaneo Mia" -- the origin is kept in `source`, not the name.
+      const raw = payload.data?.content ?? payload.data?.comment;
+      const comment = typeof raw === "string" ? raw : undefined;
+      if (!localTaskId || !comment) {
         return;
       }
+      const author =
+        (typeof payload.data?.authorName === "string" &&
+          payload.data.authorName) ||
+        payload.actor?.name ||
+        "Kaneo Mia";
       const activity = await createComment(localTaskId, null, comment, {
-        userName: "Kaneo Mia",
+        userName: author,
         source: "kaneo-mia",
       });
       const localized = await localizeAssetLinks(

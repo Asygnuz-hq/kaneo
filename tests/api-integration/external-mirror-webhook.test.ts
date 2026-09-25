@@ -520,7 +520,10 @@ describe("external mirror webhook", () => {
       app,
       taskEvent("task.comment_created", {
         id: "ext-task-comment",
-        data: { comment: "**Andrés Agudelo** commented:\n> Ya casi queda" },
+        data: {
+          comment: "**Andrés Agudelo** commented:\n> Ya casi queda",
+          content: "Ya casi queda",
+        },
       }),
     );
     expect(response.status).toBe(200);
@@ -530,11 +533,10 @@ describe("external mirror webhook", () => {
       .from(schema.activityTable)
       .where(eq(schema.activityTable.taskId, mirror?.localTaskId ?? ""));
     const comment = activities.find((a) => a.type === "comment");
-    expect(comment?.content).toBe(
-      "**Andrés Agudelo** commented:\n> Ya casi queda",
-    );
+    // the text as written, under its real author -- not a "Kaneo Mia" bot
+    expect(comment?.content).toBe("Ya casi queda");
     expect(comment?.userId).toBeNull();
-    expect(comment?.externalUserName).toBe("Kaneo Mia");
+    expect(comment?.externalUserName).toBe("Andrés Agudelo");
   });
 
   it("attaches the kaneo-mia assignee as an external assignee on creation", async () => {
@@ -880,11 +882,11 @@ describe("external mirror webhook", () => {
       return { ...base, task: { ...base.task, ...extra } };
     }
 
-    it("mirrors a story as an epic", async () => {
+    it("keeps a story as a story (their historia de usuario)", async () => {
       await setup();
       const { app } = createApp();
       await postEvent(app, withTask("task.created", "st-1", { type: "story" }));
-      expect((await localOf("st-1"))?.issueType).toBe("epic");
+      expect((await localOf("st-1"))?.issueType).toBe("story");
     });
 
     it("hangs a child under its parent, creating the parent when never seen", async () => {
@@ -901,7 +903,7 @@ describe("external mirror webhook", () => {
       const parent = await localOf("story-9");
       const child = await localOf("child-1");
       expect(parent?.title).toBe("Historia madre");
-      expect(parent?.issueType).toBe("epic");
+      expect(parent?.issueType).toBe("story");
       const [relation] = await db
         .select()
         .from(schema.taskRelationTable)
@@ -1063,6 +1065,117 @@ describe("external mirror webhook", () => {
       vi.unstubAllGlobals();
       delete process.env.FINANCIEREMENTE_BASE_URL;
       delete process.env.KANEO_ALLOW_PRIVATE_WEBHOOK_DESTINATIONS;
+    });
+
+    it("applies title, priority, due date and description edits from kaneo-mia", async () => {
+      await setup();
+      const { app } = createApp();
+      await postEvent(app, taskEvent("task.created", { id: "ed-1" }));
+      await postEvent(
+        app,
+        withTask("task.title_changed", "ed-1", { title: "Título nuevo" }),
+      );
+      await postEvent(
+        app,
+        withTask("task.priority_changed", "ed-1", { priority: "urgent" }),
+      );
+      await postEvent(app, {
+        ...taskEvent("task.due_date_changed", { id: "ed-1" }),
+        data: { newDueDate: "2026-10-01T00:00:00.000Z" },
+      });
+      await postEvent(app, {
+        ...taskEvent("task.description_changed", { id: "ed-1" }),
+        data: {
+          newDescription:
+            "Texto editado\n\nReflejado desde Kaneo Mia: https://x/y",
+        },
+      });
+      const task = await localOf("ed-1");
+      expect(task?.title).toBe("Título nuevo");
+      expect(task?.priority).toBe("urgent");
+      expect(task?.dueDate?.toISOString()).toBe("2026-10-01T00:00:00.000Z");
+      // their footnote comes off and ours goes on -- never both
+      expect(task?.description).toBe(
+        "Texto editado\n\nReflejado desde Kaneo Mia: https://to-do.financieramentecu.com/task/ext-task-1",
+      );
+    });
+
+    it("clears the assignee when kaneo-mia unassigns, and replaces rather than piles up", async () => {
+      await setup();
+      const { app } = createApp();
+      await postEvent(
+        app,
+        taskEvent("task.created", {
+          id: "un-1",
+          assignee: { name: "Primera Persona", email: null },
+        }),
+      );
+      await postEvent(
+        app,
+        taskEvent("task.assignee_changed", {
+          id: "un-1",
+          assignee: { name: "Segunda Persona", email: null },
+        }),
+      );
+      let contacts = await db
+        .select({ name: schema.externalContactTable.name })
+        .from(schema.taskExternalAssigneeTable)
+        .innerJoin(
+          schema.externalContactTable,
+          eq(
+            schema.externalContactTable.id,
+            schema.taskExternalAssigneeTable.externalContactId,
+          ),
+        );
+      expect(contacts.map((c) => c.name)).toEqual(["Segunda Persona"]);
+
+      await postEvent(app, taskEvent("task.unassigned", { id: "un-1" }));
+      contacts = await db
+        .select({ name: schema.externalContactTable.name })
+        .from(schema.taskExternalAssigneeTable)
+        .innerJoin(
+          schema.externalContactTable,
+          eq(
+            schema.externalContactTable.id,
+            schema.taskExternalAssigneeTable.externalContactId,
+          ),
+        );
+      expect(contacts).toHaveLength(0);
+    });
+
+    it("lets their description edits through to OUR task without adding a note", async () => {
+      const { project } = await setup();
+      const [ours] = await db
+        .insert(schema.taskTable)
+        .values({
+          projectId: project.id,
+          title: "Nacida aquí",
+          description: "Original",
+          status: "to-do",
+          priority: "low",
+          number: 901,
+          position: 1,
+        })
+        .returning();
+      if (!ours) throw new Error("seed failed");
+      const { app } = createApp();
+      await postEvent(
+        app,
+        withTask("task.status_changed", "copy-2", { mirroredFrom: ours.id }),
+      );
+      await postEvent(app, {
+        ...withTask("task.description_changed", "copy-2", {
+          mirroredFrom: ours.id,
+        }),
+        data: {
+          newDescription: "Editado en Mía\n\nReflejado desde Kaneo de Asygnuz.",
+        },
+      });
+      const [after] = await db
+        .select()
+        .from(schema.taskTable)
+        .where(eq(schema.taskTable.id, ours.id));
+      expect(after?.description).toBe("Editado en Mía");
     });
   });
 });

@@ -54,6 +54,10 @@ export type TaskCommentCreatedEvent = {
   projectId: string;
   userId: string;
   comment: string;
+  // The comment as written (no "X commented:" wrapper) and who wrote it, for
+  // consumers that recreate it elsewhere under the real author's name.
+  content?: string;
+  authorName?: string | null;
 };
 
 export type TaskDeletedEvent = {

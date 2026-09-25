@@ -44,7 +44,7 @@ async function updateTaskTitle({
     await tx.insert(activityTable).values({
       taskId: task.id,
       type: "title_changed",
-      userId: currentUserId,
+      userId: currentUserId || null,
       content: null,
       eventData: { oldTitle: existingTask.title, newTitle: title },
     });

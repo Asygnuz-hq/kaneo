@@ -867,6 +867,42 @@ export const externalTaskMirrorTable = pgTable(
   ],
 );
 
+// Events the Generic Webhook could not deliver (the other side was down, or
+// restarting). Only a description of the event is kept, not the payload: a
+// retry rebuilds it from the task as it is NOW, so a late "status changed"
+// can never push an old status over a newer one.
+export const genericWebhookRetryTable = pgTable(
+  "generic_webhook_retry",
+  {
+    id: text("id")
+      .$defaultFn(() => createId())
+      .primaryKey(),
+    projectId: text("project_id")
+      .notNull()
+      .references(() => projectTable.id, {
+        onDelete: "cascade",
+        onUpdate: "cascade",
+      }),
+    eventName: text("event_name").notNull(),
+    taskId: text("task_id").notNull(),
+    userId: text("user_id"),
+    data: text("data").notNull().default("{}"),
+    attempts: integer("attempts").notNull().default(0),
+    lastError: text("last_error"),
+    nextAttemptAt: timestamp("next_attempt_at", { mode: "date" })
+      .defaultNow()
+      .notNull(),
+    createdAt: timestamp("created_at", { mode: "date" }).defaultNow().notNull(),
+  },
+  (table) => [
+    index("generic_webhook_retry_nextAttemptAt_idx").on(table.nextAttemptAt),
+    index("generic_webhook_retry_projectId_taskId_idx").on(
+      table.projectId,
+      table.taskId,
+    ),
+  ],
+);
+
 export const taskAssigneeTable = pgTable(
   "task_assignee",
   {
