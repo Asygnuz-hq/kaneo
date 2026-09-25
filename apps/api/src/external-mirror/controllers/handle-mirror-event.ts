@@ -9,6 +9,7 @@ import {
   taskRelationTable,
   taskTable,
   userTable,
+  workspaceUserTable,
 } from "../../database/schema";
 import createLabel from "../../label/controllers/create-label";
 import createTask from "../../task/controllers/create-task";
@@ -37,6 +38,7 @@ import {
 } from "../config";
 import { runAsMirror } from "../context";
 import { stripMirrorFootnote } from "../footnote";
+import { normalizeName } from "../names";
 import { registerReverseMirror } from "../register-reverse-mirror";
 import type { MirrorTaskPayload } from "../schema";
 
@@ -213,6 +215,27 @@ async function syncAssignee(
         });
         return;
       }
+    }
+  }
+  // No account with that email (or none in this workspace): try the name.
+  // Weaker than an email, so it only counts when exactly one member carries
+  // it -- two people with the same name must never be guessed between.
+  const wanted = normalizeName(assignee.name);
+  if (wanted) {
+    const workspaceId = await getProjectWorkspaceId(projectId);
+    const members = await db
+      .select({ id: userTable.id, name: userTable.name })
+      .from(workspaceUserTable)
+      .innerJoin(userTable, eq(userTable.id, workspaceUserTable.userId))
+      .where(eq(workspaceUserTable.workspaceId, workspaceId));
+    const sameName = members.filter((m) => normalizeName(m.name) === wanted);
+    if (sameName.length === 1 && sameName[0]) {
+      await updateTaskAssignee({
+        id: taskId,
+        userId: sameName[0].id,
+        currentUserId: "",
+      });
+      return;
     }
   }
   await syncExternalAssignee(taskId, projectId, assignee.name);

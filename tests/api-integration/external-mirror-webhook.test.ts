@@ -1249,5 +1249,55 @@ describe("external mirror webhook", () => {
         "2026-10-03T12:00:00.000Z",
       );
     });
+
+    it("assigns by name when the email doesn't match, ignoring case and accents", async () => {
+      const { owner } = await setup();
+      await db
+        .update(schema.userTable)
+        .set({ name: "Juan Manuel Márin" })
+        .where(eq(schema.userTable.id, owner.user.id));
+      const { app } = createApp();
+      await postEvent(
+        app,
+        taskEvent("task.created", {
+          id: "nm-1",
+          assignee: { name: "  juan MANUEL marin ", email: "otro@x.com" },
+        }),
+      );
+      expect((await localOf("nm-1"))?.userId).toBe(owner.user.id);
+      expect(await db.select().from(schema.externalContactTable)).toHaveLength(
+        0,
+      );
+    });
+
+    it("never guesses between two members with the same name", async () => {
+      const { owner } = await setup();
+      const twin = await createWorkspaceMember({ userName: "Gemelo Uno" });
+      await db
+        .update(schema.userTable)
+        .set({ name: "Nombre Repetido" })
+        .where(eq(schema.userTable.id, owner.user.id));
+      await db
+        .update(schema.userTable)
+        .set({ name: "Nombre Repetido" })
+        .where(eq(schema.userTable.id, twin.user.id));
+      await db.insert(schema.workspaceUserTable).values({
+        workspaceId: owner.workspace.id,
+        userId: twin.user.id,
+        role: "member",
+        joinedAt: new Date(),
+      });
+      const { app } = createApp();
+      await postEvent(
+        app,
+        taskEvent("task.created", {
+          id: "nm-2",
+          assignee: { name: "Nombre Repetido", email: null },
+        }),
+      );
+      expect((await localOf("nm-2"))?.userId).toBeNull();
+      const contacts = await db.select().from(schema.externalContactTable);
+      expect(contacts.map((c) => c.name)).toEqual(["Nombre Repetido"]);
+    });
   });
 });
