@@ -19,6 +19,9 @@
 						"cancel": {
 							"type": "string"
 						},
+						"save": {
+							"type": "string"
+						},
 						"add": {
 							"type": "string"
 						},
@@ -55,6 +58,7 @@
 					},
 					"required": [
 						"cancel",
+						"save",
 						"add",
 						"close",
 						"edit",
@@ -1021,9 +1025,18 @@
 						},
 						"signIn": {
 							"type": "string"
+						},
+						"forgotPassword": {
+							"type": "string"
 						}
 					},
-					"required": ["failedSignIn", "signedInSuccess", "signingIn", "signIn"]
+					"required": [
+						"failedSignIn",
+						"signedInSuccess",
+						"signingIn",
+						"signIn",
+						"forgotPassword"
+					]
 				},
 				"signUpForm": {
 					"type": "object",
@@ -1323,6 +1336,94 @@
 						"toast",
 						"validation"
 					]
+				},
+				"forgotPassword": {
+					"type": "object",
+					"additionalProperties": false,
+					"properties": {
+						"pageTitle": {
+							"type": "string"
+						},
+						"title": {
+							"type": "string"
+						},
+						"subtitle": {
+							"type": "string"
+						},
+						"sendLink": {
+							"type": "string"
+						},
+						"sending": {
+							"type": "string"
+						},
+						"failed": {
+							"type": "string"
+						}
+					},
+					"required": [
+						"pageTitle",
+						"title",
+						"subtitle",
+						"sendLink",
+						"sending",
+						"failed"
+					]
+				},
+				"resetPassword": {
+					"type": "object",
+					"additionalProperties": false,
+					"properties": {
+						"pageTitle": {
+							"type": "string"
+						},
+						"title": {
+							"type": "string"
+						},
+						"subtitle": {
+							"type": "string"
+						},
+						"newPassword": {
+							"type": "string"
+						},
+						"confirmPassword": {
+							"type": "string"
+						},
+						"save": {
+							"type": "string"
+						},
+						"saving": {
+							"type": "string"
+						},
+						"success": {
+							"type": "string"
+						},
+						"failed": {
+							"type": "string"
+						},
+						"passwordsDontMatch": {
+							"type": "string"
+						},
+						"invalidLinkTitle": {
+							"type": "string"
+						},
+						"invalidLinkMessage": {
+							"type": "string"
+						}
+					},
+					"required": [
+						"pageTitle",
+						"title",
+						"subtitle",
+						"newPassword",
+						"confirmPassword",
+						"save",
+						"saving",
+						"success",
+						"failed",
+						"passwordsDontMatch",
+						"invalidLinkTitle",
+						"invalidLinkMessage"
+					]
 				}
 			},
 			"required": [
@@ -1337,7 +1438,9 @@
 				"signUpForm",
 				"invitation",
 				"onboarding",
-				"profileSetup"
+				"profileSetup",
+				"forgotPassword",
+				"resetPassword"
 			]
 		},
 		"settings": {
@@ -7886,6 +7989,18 @@
 						},
 						"milestoneError": {
 							"type": "string"
+						},
+						"blocked": {
+							"type": "string"
+						},
+						"unblock": {
+							"type": "string"
+						},
+						"blockedHint": {
+							"type": "string"
+						},
+						"blockedError": {
+							"type": "string"
 						}
 					},
 					"required": [
@@ -7901,7 +8016,11 @@
 						"noDate",
 						"milestone",
 						"milestoneHint",
-						"milestoneError"
+						"milestoneError",
+						"blocked",
+						"unblock",
+						"blockedHint",
+						"blockedError"
 					]
 				},
 				"move": {
@@ -9163,9 +9282,12 @@
 						},
 						"epic": {
 							"type": "string"
+						},
+						"requirement": {
+							"type": "string"
 						}
 					},
-					"required": ["label", "task", "story", "bug", "epic"]
+					"required": ["label", "task", "story", "bug", "epic", "requirement"]
 				},
 				"sprint": {
 					"type": "object",
@@ -9295,6 +9417,55 @@
 						"statusCompleted",
 						"noTasksInSprint"
 					]
+				},
+				"timeTracker": {
+					"type": "object",
+					"additionalProperties": false,
+					"properties": {
+						"start": {
+							"type": "string"
+						},
+						"stop": {
+							"type": "string"
+						},
+						"logTime": {
+							"type": "object",
+							"additionalProperties": false,
+							"properties": {
+								"trigger": {
+									"type": "string"
+								},
+								"dateLabel": {
+									"type": "string"
+								},
+								"hoursLabel": {
+									"type": "string"
+								},
+								"submit": {
+									"type": "string"
+								},
+								"invalidHours": {
+									"type": "string"
+								},
+								"success": {
+									"type": "string"
+								},
+								"error": {
+									"type": "string"
+								}
+							},
+							"required": [
+								"trigger",
+								"dateLabel",
+								"hoursLabel",
+								"submit",
+								"invalidHours",
+								"success",
+								"error"
+							]
+						}
+					},
+					"required": ["start", "stop", "logTime"]
 				}
 			},
 			"required": [
@@ -9329,7 +9500,8 @@
 				"bulk",
 				"editor",
 				"type",
-				"sprint"
+				"sprint",
+				"timeTracker"
 			]
 		},
 		"invitations": {
@@ -9501,9 +9673,12 @@
 								},
 								"inProgress": {
 									"type": "string"
+								},
+								"overdue": {
+									"type": "string"
 								}
 							},
-							"required": ["notStarted", "complete", "inProgress"]
+							"required": ["notStarted", "complete", "inProgress", "overdue"]
 						},
 						"noDueDate": {
 							"type": "string"
@@ -9513,6 +9688,46 @@
 						},
 						"reorderError": {
 							"type": "string"
+						},
+						"portfolio": {
+							"type": "object",
+							"additionalProperties": false,
+							"properties": {
+								"activeProjects": {
+									"type": "string"
+								},
+								"overdue": {
+									"type": "string"
+								},
+								"avgProgress": {
+									"type": "string"
+								},
+								"dueThisWeek": {
+									"type": "string"
+								},
+								"distributionTitle": {
+									"type": "string"
+								},
+								"notStarted": {
+									"type": "string"
+								},
+								"inProgress": {
+									"type": "string"
+								},
+								"complete": {
+									"type": "string"
+								}
+							},
+							"required": [
+								"activeProjects",
+								"overdue",
+								"avgProgress",
+								"dueThisWeek",
+								"distributionTitle",
+								"notStarted",
+								"inProgress",
+								"complete"
+							]
 						}
 					},
 					"required": [
@@ -9529,7 +9744,8 @@
 						"projectStatus",
 						"noDueDate",
 						"reorderHandle",
-						"reorderError"
+						"reorderError",
+						"portfolio"
 					]
 				},
 				"search": {
@@ -9812,6 +10028,12 @@
 								"role": {
 									"type": "string"
 								},
+								"costRate": {
+									"type": "string"
+								},
+								"billRate": {
+									"type": "string"
+								},
 								"joined": {
 									"type": "string"
 								},
@@ -9819,7 +10041,26 @@
 									"type": "string"
 								}
 							},
-							"required": ["name", "role", "joined", "actions"]
+							"required": [
+								"name",
+								"role",
+								"costRate",
+								"billRate",
+								"joined",
+								"actions"
+							]
+						},
+						"rateValue": {
+							"type": "string"
+						},
+						"rateEmptyPlaceholder": {
+							"type": "string"
+						},
+						"rateInvalid": {
+							"type": "string"
+						},
+						"rateUpdateError": {
+							"type": "string"
 						},
 						"memberRolePending": {
 							"type": "string"
@@ -9874,6 +10115,10 @@
 						"emptyTitle",
 						"emptyDescription",
 						"columns",
+						"rateValue",
+						"rateEmptyPlaceholder",
+						"rateInvalid",
+						"rateUpdateError",
 						"memberRolePending",
 						"ariaCancelInvitation",
 						"ariaInvitationActions",
@@ -10079,6 +10324,309 @@
 				},
 				"openOfTotal": {
 					"type": "string"
+				},
+				"crossProjectTitle": {
+					"type": "string"
+				},
+				"crossProjectDescription": {
+					"type": "string"
+				},
+				"overdueCount_one": {
+					"type": "string"
+				},
+				"overdueCount_zero": {
+					"type": "string"
+				},
+				"overdueCount_two": {
+					"type": "string"
+				},
+				"overdueCount_few": {
+					"type": "string"
+				},
+				"overdueCount_many": {
+					"type": "string"
+				},
+				"overdueCount_other": {
+					"type": "string"
+				},
+				"recentlyClosed": {
+					"type": "object",
+					"additionalProperties": false,
+					"properties": {
+						"title_one": {
+							"type": "string"
+						},
+						"title_zero": {
+							"type": "string"
+						},
+						"title_two": {
+							"type": "string"
+						},
+						"title_few": {
+							"type": "string"
+						},
+						"title_many": {
+							"type": "string"
+						},
+						"title_other": {
+							"type": "string"
+						},
+						"description": {
+							"type": "string"
+						},
+						"empty": {
+							"type": "string"
+						},
+						"andMore": {
+							"type": "string"
+						},
+						"andMore_zero": {
+							"type": "string"
+						},
+						"andMore_one": {
+							"type": "string"
+						},
+						"andMore_two": {
+							"type": "string"
+						},
+						"andMore_few": {
+							"type": "string"
+						},
+						"andMore_many": {
+							"type": "string"
+						},
+						"andMore_other": {
+							"type": "string"
+						}
+					},
+					"required": ["description", "empty"]
+				},
+				"upcomingWorkload": {
+					"type": "object",
+					"additionalProperties": false,
+					"properties": {
+						"title": {
+							"type": "string"
+						},
+						"description": {
+							"type": "string"
+						},
+						"empty": {
+							"type": "string"
+						},
+						"taskCount_one": {
+							"type": "string"
+						},
+						"taskCount_zero": {
+							"type": "string"
+						},
+						"taskCount_two": {
+							"type": "string"
+						},
+						"taskCount_few": {
+							"type": "string"
+						},
+						"taskCount_many": {
+							"type": "string"
+						},
+						"taskCount_other": {
+							"type": "string"
+						}
+					},
+					"required": ["title", "description", "empty"]
+				},
+				"scheduleCompliance": {
+					"type": "object",
+					"additionalProperties": false,
+					"properties": {
+						"title": {
+							"type": "string"
+						},
+						"description": {
+							"type": "string"
+						},
+						"empty": {
+							"type": "string"
+						},
+						"onTime": {
+							"type": "string"
+						},
+						"onTime_zero": {
+							"type": "string"
+						},
+						"onTime_one": {
+							"type": "string"
+						},
+						"onTime_two": {
+							"type": "string"
+						},
+						"onTime_few": {
+							"type": "string"
+						},
+						"onTime_many": {
+							"type": "string"
+						},
+						"onTime_other": {
+							"type": "string"
+						},
+						"avgDeviation": {
+							"type": "string"
+						}
+					},
+					"required": ["title", "description", "empty", "avgDeviation"]
+				},
+				"budget": {
+					"type": "object",
+					"additionalProperties": false,
+					"properties": {
+						"title": {
+							"type": "string"
+						},
+						"description": {
+							"type": "string"
+						},
+						"notSet": {
+							"type": "string"
+						},
+						"addBudget": {
+							"type": "string"
+						},
+						"edit": {
+							"type": "string"
+						},
+						"amountLabel": {
+							"type": "string"
+						},
+						"currencyLabel": {
+							"type": "string"
+						},
+						"ofBudget": {
+							"type": "string"
+						},
+						"projected": {
+							"type": "string"
+						},
+						"unratedBillWarning": {
+							"type": "string"
+						},
+						"unratedCostWarning": {
+							"type": "string"
+						},
+						"internalCost": {
+							"type": "string"
+						},
+						"margin": {
+							"type": "string"
+						},
+						"invalidAmount": {
+							"type": "string"
+						},
+						"saveError": {
+							"type": "string"
+						}
+					},
+					"required": [
+						"title",
+						"description",
+						"notSet",
+						"addBudget",
+						"edit",
+						"amountLabel",
+						"currencyLabel",
+						"ofBudget",
+						"projected",
+						"unratedBillWarning",
+						"unratedCostWarning",
+						"internalCost",
+						"margin",
+						"invalidAmount",
+						"saveError"
+					]
+				},
+				"forecast": {
+					"type": "object",
+					"additionalProperties": false,
+					"properties": {
+						"title": {
+							"type": "string"
+						},
+						"description": {
+							"type": "string"
+						},
+						"empty": {
+							"type": "string"
+						},
+						"team": {
+							"type": "string"
+						},
+						"summary": {
+							"type": "string"
+						},
+						"detail": {
+							"type": "string"
+						},
+						"atRisk_one": {
+							"type": "string"
+						},
+						"atRisk_zero": {
+							"type": "string"
+						},
+						"atRisk_two": {
+							"type": "string"
+						},
+						"atRisk_few": {
+							"type": "string"
+						},
+						"atRisk_many": {
+							"type": "string"
+						},
+						"atRisk_other": {
+							"type": "string"
+						},
+						"lowConfidence": {
+							"type": "string"
+						},
+						"unassigned": {
+							"type": "string"
+						},
+						"reliability": {
+							"type": "string"
+						},
+						"status": {
+							"type": "object",
+							"additionalProperties": false,
+							"properties": {
+								"idle": {
+									"type": "string"
+								},
+								"ok": {
+									"type": "string"
+								},
+								"tight": {
+									"type": "string"
+								},
+								"overloaded": {
+									"type": "string"
+								},
+								"noHistory": {
+									"type": "string"
+								}
+							},
+							"required": ["idle", "ok", "tight", "overloaded", "noHistory"]
+						}
+					},
+					"required": [
+						"title",
+						"description",
+						"empty",
+						"team",
+						"summary",
+						"detail",
+						"lowConfidence",
+						"unassigned",
+						"reliability",
+						"status"
+					]
 				}
 			},
 			"required": [
@@ -10093,7 +10641,14 @@
 				"workload",
 				"workloadDescription",
 				"unassigned",
-				"openOfTotal"
+				"openOfTotal",
+				"crossProjectTitle",
+				"crossProjectDescription",
+				"recentlyClosed",
+				"upcomingWorkload",
+				"scheduleCompliance",
+				"budget",
+				"forecast"
 			]
 		}
 	},

@@ -2560,6 +2560,27 @@
 			"margin": "Margen",
 			"invalidAmount": "Ingresá un monto válido, no negativo",
 			"saveError": "No se pudo guardar el presupuesto"
+		},
+		"forecast": {
+			"title": "Pronóstico de capacidad",
+			"description": "¿Puede el equipo con lo que vence en los próximos {{days}} días? Compara las tareas abiertas y atrasadas con cuántas cierra cada persona por semana.",
+			"empty": "No vence nada en este periodo.",
+			"team": "Todo el equipo",
+			"summary": "{{demand}} por hacer frente a unas {{capacity}} al ritmo actual",
+			"detail": "{{upcoming}} por vencer · {{overdue}} atrasadas · cierra {{velocity}}/semana",
+			"atRisk_one": "{{count}} no alcanza",
+			"atRisk_other": "{{count}} no alcanzan",
+			"lowConfidence": "poco historial, estimación aproximada",
+			"unassigned": "Sin asignar: {{upcoming}} por vencer, {{overdue}} atrasadas",
+			"reliability": "Las fechas se cumplen el {{percentage}}% de las veces, con {{days}} días de desviación promedio.",
+			"status": {
+				"idle": "Nada por vencer",
+				"ok": "En camino",
+				"tight": "Justo",
+				"overloaded": "Sobrecargado",
+				"noHistory": "Sin historial"
+			},
+			"atRisk_many": "{{count}} no alcanzan"
 		}
 	}
 }

@@ -8,6 +8,7 @@ import { requireWorkspacePermission } from "../utils/require-workspace-permissio
 import { workspaceAccess } from "../utils/workspace-access-middleware";
 import getProjectBudget from "./controllers/get-project-budget";
 import getProjectMetrics from "./controllers/get-project-metrics";
+import getWorkspaceForecast from "./controllers/get-workspace-forecast";
 import getWorkspaceRecentlyClosed from "./controllers/get-workspace-recently-closed";
 import getWorkspaceScheduleCompliance from "./controllers/get-workspace-schedule-compliance";
 import getWorkspaceUpcomingWorkload from "./controllers/get-workspace-upcoming-workload";
@@ -15,6 +16,7 @@ import getWorkspaceWorkload from "./controllers/get-workspace-workload";
 import {
   projectBudgetSchema,
   projectMetricsSchema,
+  workspaceForecastSchema,
   workspaceMetricsSchema,
   workspaceRecentlyClosedSchema,
   workspaceScheduleComplianceSchema,
@@ -98,6 +100,22 @@ const getWorkspaceUpcomingWorkloadRoute = createRoute({
   },
 });
 
+const getWorkspaceForecastRoute = createRoute({
+  method: "get",
+  operationId: "getWorkspaceForecast",
+  path: "/workspace/{workspaceId}/forecast",
+  tags: ["Project Metrics"],
+  summary: "Forecast whether the team can take the upcoming workload",
+  description:
+    "For each assignee: how many tasks they close per week (last 8 weeks) against the open tasks due in the next N days (default 30) plus what is already overdue, with a verdict (ok, tight, overloaded) and how many tasks will not fit at that pace. Based on task counts and dates only, not effort.",
+  middleware: [workspaceAccess.fromParam("workspaceId")] as const,
+  request: { params: workspaceIdParam, query: daysQuery },
+  responses: {
+    200: jsonResponse("Workload forecast", workspaceForecastSchema),
+    403: errorResponse("No access to the workspace"),
+  },
+});
+
 const getWorkspaceScheduleComplianceRoute = createRoute({
   method: "get",
   operationId: "getWorkspaceScheduleCompliance",
@@ -157,6 +175,11 @@ const projectMetrics = apiRouter()
     const { workspaceId } = c.req.valid("param");
     const { days } = c.req.valid("query");
     return c.json(await getWorkspaceUpcomingWorkload(workspaceId, days), 200);
+  })
+  .openapi(getWorkspaceForecastRoute, async (c) => {
+    const { workspaceId } = c.req.valid("param");
+    const { days } = c.req.valid("query");
+    return c.json(await getWorkspaceForecast(workspaceId, days), 200);
   })
   .openapi(getWorkspaceScheduleComplianceRoute, async (c) =>
     c.json(

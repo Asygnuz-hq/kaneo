@@ -2549,6 +2549,26 @@
 			"margin": "Margin",
 			"invalidAmount": "Enter a valid, non-negative amount",
 			"saveError": "Failed to save the budget"
+		},
+		"forecast": {
+			"title": "Capacity forecast",
+			"description": "Can the team take what is due in the next {{days}} days? Compares open and overdue tasks with how many each person closes per week.",
+			"empty": "Nothing due in this window.",
+			"team": "Whole team",
+			"summary": "{{demand}} to do vs about {{capacity}} at the current pace",
+			"detail": "{{upcoming}} due · {{overdue}} overdue · closes {{velocity}}/week",
+			"atRisk_one": "{{count}} won't fit",
+			"atRisk_other": "{{count}} won't fit",
+			"lowConfidence": "little history, rough estimate",
+			"unassigned": "Unassigned: {{upcoming}} due, {{overdue}} overdue",
+			"reliability": "Dates are met {{percentage}}% of the time, {{days}} days off on average.",
+			"status": {
+				"idle": "Nothing due",
+				"ok": "On track",
+				"tight": "Tight",
+				"overloaded": "Overloaded",
+				"noHistory": "No history"
+			}
 		}
 	}
 }

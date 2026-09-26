@@ -51,6 +51,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import ForecastSummary from "@/components/workspace/forecast-summary";
 import PortfolioSummary from "@/components/workspace/portfolio-summary";
 import RecentlyClosedSummary from "@/components/workspace/recently-closed-summary";
 import ScheduleComplianceSummary from "@/components/workspace/schedule-compliance-summary";
@@ -60,6 +61,7 @@ import icons from "@/constants/project-icons";
 import { shortcuts } from "@/constants/shortcuts";
 import useReorderProjects from "@/hooks/mutations/project/use-reorder-projects";
 import useGetProjects from "@/hooks/queries/project/use-get-projects";
+import { useGetWorkspaceForecast } from "@/hooks/queries/project-metrics/use-get-workspace-forecast";
 import { useGetWorkspaceRecentlyClosed } from "@/hooks/queries/project-metrics/use-get-workspace-recently-closed";
 import { useGetWorkspaceScheduleCompliance } from "@/hooks/queries/project-metrics/use-get-workspace-schedule-compliance";
 import { useGetWorkspaceUpcomingWorkload } from "@/hooks/queries/project-metrics/use-get-workspace-upcoming-workload";
@@ -146,6 +148,7 @@ function RouteComponent() {
     useGetWorkspaceUpcomingWorkload(workspaceId);
   const { data: scheduleComplianceData } =
     useGetWorkspaceScheduleCompliance(workspaceId);
+  const { data: forecastData } = useGetWorkspaceForecast(workspaceId);
   const reorderProjects = useReorderProjects();
 
   // React state, not the query cache: dnd-kit clears its transforms with a
@@ -483,6 +486,15 @@ function RouteComponent() {
             people={upcomingWorkloadData?.people ?? []}
             days={upcomingWorkloadData?.windowDays ?? 30}
           />
+          {forecastData && (
+            <ForecastSummary
+              team={forecastData.team}
+              people={forecastData.people}
+              unassigned={forecastData.unassigned}
+              scheduleReliability={forecastData.scheduleReliability}
+              days={forecastData.windowDays}
+            />
+          )}
           <RecentlyClosedSummary
             totalCount={recentlyClosedData?.totalCount ?? 0}
             tasks={recentlyClosedData?.tasks ?? []}

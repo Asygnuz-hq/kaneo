@@ -2571,6 +2571,28 @@
 			"taskCount_one": "{{count}} task",
 			"taskCount_other": "{{count}} tasks",
 			"title": "Upcoming workload"
+		},
+		"forecast": {
+			"atRisk_few": "{{count}} won't fit",
+			"atRisk_many": "{{count}} won't fit",
+			"atRisk_one": "{{count}} won't fit",
+			"atRisk_other": "{{count}} won't fit",
+			"description": "Can the team take what is due in the next {{days}} days? Compares open and overdue tasks with how many each person closes per week.",
+			"detail": "{{upcoming}} due · {{overdue}} overdue · closes {{velocity}}/week",
+			"empty": "Nothing due in this window.",
+			"lowConfidence": "little history, rough estimate",
+			"reliability": "Dates are met {{percentage}}% of the time, {{days}} days off on average.",
+			"status": {
+				"idle": "Nothing due",
+				"noHistory": "No history",
+				"ok": "On track",
+				"overloaded": "Overloaded",
+				"tight": "Tight"
+			},
+			"summary": "{{demand}} to do vs about {{capacity}} at the current pace",
+			"team": "Whole team",
+			"title": "Capacity forecast",
+			"unassigned": "Unassigned: {{upcoming}} due, {{overdue}} overdue"
 		}
 	}
 }

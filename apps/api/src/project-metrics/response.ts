@@ -97,6 +97,65 @@ export const workspaceUpcomingWorkloadSchema = z
   })
   .openapi("WorkspaceUpcomingWorkload");
 
+const forecastStatusSchema = z.enum([
+  "idle",
+  "ok",
+  "tight",
+  "overloaded",
+  "no-history",
+]);
+
+const forecastProjectionSchema = z.object({
+  closedInHistory: z.number().openapi({
+    description: "Tasks closed during the history window.",
+  }),
+  velocityPerWeek: z.number().openapi({
+    description: "Average tasks closed per week over the history window.",
+  }),
+  capacity: z.number().openapi({
+    description: "Tasks expected to be closed within the projection window.",
+  }),
+  upcoming: z.number().openapi({
+    description: "Open tasks due within the projection window.",
+  }),
+  overdue: z.number().openapi({
+    description: "Open tasks already past their due date.",
+  }),
+  demand: z.number().openapi({
+    description: "upcoming + overdue: what has to be done in the window.",
+  }),
+  utilization: z.number().nullable().openapi({
+    description: "demand / capacity. Null when there is no history to compare.",
+  }),
+  status: forecastStatusSchema,
+  atRisk: z.number().openapi({
+    description: "Tasks that will not fit in the window at the current pace.",
+  }),
+  confidence: z.enum(["low", "medium", "high"]).openapi({
+    description: "How much history the pace is based on.",
+  }),
+});
+
+export const workspaceForecastSchema = z
+  .object({
+    windowDays: z.number(),
+    historyDays: z.number(),
+    team: forecastProjectionSchema,
+    people: z.array(
+      forecastProjectionSchema.extend({
+        userId: z.string(),
+        userName: z.string().nullable(),
+        userImage: z.string().nullable(),
+      }),
+    ),
+    unassigned: z.object({ upcoming: z.number(), overdue: z.number() }),
+    scheduleReliability: z.object({
+      onTimePercentage: z.number().nullable(),
+      averageDeviationDays: z.number().nullable(),
+    }),
+  })
+  .openapi("WorkspaceForecast");
+
 export const workspaceScheduleComplianceSchema = z
   .object({
     totalMeasured: z.number().openapi({
