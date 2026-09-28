@@ -14,11 +14,19 @@ export async function withJobLease<T>(
   whenHeldElsewhere: () => T,
   leaseMs: number = DEFAULT_LEASE_MS,
 ): Promise<T> {
-  const expiresAt = new Date(Date.now() + leaseMs);
+  // expires_at is a plain "timestamp" column (no time zone), and job_lease.sql
+  // wants that stored value to mean UTC. A JS Date bound as a parameter is
+  // serialized using the pg driver's LOCAL wall-clock, so on a machine whose
+  // timezone isn't UTC (this fork develops from Colombia, UTC-5) the row ends
+  // up several hours off from the real instant -- on a negative offset, early
+  // enough to already look expired to `now()`, letting a second caller steal
+  // a lease the first one still legitimately holds. Computing the expiry with
+  // Postgres's own `now()` sidesteps any client-side timezone entirely.
+  const leaseSeconds = leaseMs / 1000;
 
   const claimed = await db.execute(sql`
     INSERT INTO job_lease ("name", "owner", "expires_at")
-    VALUES (${name}, ${INSTANCE_ID}, ${expiresAt})
+    VALUES (${name}, ${INSTANCE_ID}, now() + make_interval(secs => ${leaseSeconds}))
     ON CONFLICT ("name") DO UPDATE
       SET "owner" = EXCLUDED."owner", "expires_at" = EXCLUDED."expires_at"
       WHERE job_lease."expires_at" < now()
