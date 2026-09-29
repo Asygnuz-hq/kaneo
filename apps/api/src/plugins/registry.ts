@@ -237,6 +237,44 @@ export function initializeEventSubscriptions(): void {
     });
   });
 
+  // Swapping a mirrored task's origin label (e.g. Tecnología -> Comisiones)
+  // is two separate actions here -- unassign the old one, assign the new
+  // one -- in either order. Both removal paths reuse the same broadcast as
+  // an add: the receiver only reads the task's CURRENT full label set from
+  // the envelope, so whichever of the two actions happens last carries the
+  // final, correct list and is what actually moves the task in kaneo-mia.
+  subscribeToEvent<{
+    taskId: string;
+    projectId: string;
+    userId: string | null;
+    label?: { name?: string };
+  }>("task.label_unassigned", async (data) => {
+    const labelName = data.label?.name;
+    if (!labelName) return;
+    await broadcastTaskLabeled({
+      taskId: data.taskId,
+      projectId: data.projectId,
+      userId: data.userId,
+      labelName,
+    });
+  });
+
+  subscribeToEvent<{
+    taskId: string;
+    projectId: string;
+    userId: string | null;
+    label?: { name?: string };
+  }>("task.label_deleted", async (data) => {
+    const labelName = data.label?.name;
+    if (!labelName) return;
+    await broadcastTaskLabeled({
+      taskId: data.taskId,
+      projectId: data.projectId,
+      userId: data.userId,
+      labelName,
+    });
+  });
+
   subscribeToEvent<{
     taskId: string;
     userId: string | null;

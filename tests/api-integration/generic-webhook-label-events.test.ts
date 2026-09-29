@@ -11,6 +11,8 @@ import db, { schema } from "../../apps/api/src/database";
 import { createApp } from "../../apps/api/src/index";
 import assignLabelToTask from "../../apps/api/src/label/controllers/assign-label-to-task";
 import createLabel from "../../apps/api/src/label/controllers/create-label";
+import deleteLabel from "../../apps/api/src/label/controllers/delete-label";
+import unassignLabelFromTask from "../../apps/api/src/label/controllers/unassign-label-from-task";
 import { initializePlugins } from "../../apps/api/src/plugins";
 import { resetTestDatabase } from "./helpers/database";
 import {
@@ -110,5 +112,79 @@ describe("generic webhook: labeling a task emits task.labeled", () => {
     await vi.waitFor(() => expect(labeledBodies(fetchMock)).toHaveLength(1));
     expect(labeledBodies(fetchMock)[0].data.label).toBe("Comisiones");
     expect(labeledBodies(fetchMock)[0].task.labels).toEqual(["Comisiones"]);
+  });
+
+  // Symmetric with the other direction: kaneo-mia moving a task between its
+  // own projects fires one event with both project names attached. Here,
+  // there is only one project, so "moving" it is unassigning the old origin
+  // label and assigning the new one -- two separate actions, in either
+  // order -- and BOTH removal paths (unassign keeps the label definition
+  // around for reuse; delete removes it outright) must reach the webhook too,
+  // or whichever of the two actions happens first would go unheard.
+  it("when a label is unassigned from the task (kept for reuse elsewhere)", async () => {
+    const { owner, task, fetchMock } = await setup();
+    const attached = await createLabel(
+      "Tecnología",
+      "yellow",
+      task.id,
+      owner.workspace.id,
+      owner.user.id,
+    );
+    // let the creation's own (unrelated) background send land first, or its
+    // fetch call can arrive AFTER mockClear() and get mistaken for this one.
+    await vi.waitFor(() => expect(labeledBodies(fetchMock)).toHaveLength(1));
+    fetchMock.mockClear();
+
+    await unassignLabelFromTask(attached.id, owner.user.id);
+    await vi.waitFor(() => expect(labeledBodies(fetchMock)).toHaveLength(1));
+    expect(labeledBodies(fetchMock)[0].data.label).toBe("Tecnología");
+    // it's gone from the task by the time the envelope is built
+    expect(labeledBodies(fetchMock)[0].task.labels).toEqual([]);
+  });
+
+  it("when a label is deleted outright", async () => {
+    const { owner, task, fetchMock } = await setup();
+    const attached = await createLabel(
+      "Comisiones",
+      "gray",
+      task.id,
+      owner.workspace.id,
+      owner.user.id,
+    );
+    await vi.waitFor(() => expect(labeledBodies(fetchMock)).toHaveLength(1));
+    fetchMock.mockClear();
+
+    await deleteLabel(attached.id, owner.user.id);
+    await vi.waitFor(() => expect(labeledBodies(fetchMock)).toHaveLength(1));
+    expect(labeledBodies(fetchMock)[0].data.label).toBe("Comisiones");
+    expect(labeledBodies(fetchMock)[0].task.labels).toEqual([]);
+  });
+
+  it("swapping origin labels ends with only the new one in the envelope, in either order", async () => {
+    const { owner, task, fetchMock } = await setup();
+    const oldLabel = await createLabel(
+      "Tecnología",
+      "yellow",
+      task.id,
+      owner.workspace.id,
+      owner.user.id,
+    );
+    await vi.waitFor(() => expect(labeledBodies(fetchMock)).toHaveLength(1));
+    fetchMock.mockClear();
+
+    // add-then-remove: whichever finishes last carries the true final state
+    await createLabel(
+      "Comisiones",
+      "gray",
+      task.id,
+      owner.workspace.id,
+      owner.user.id,
+    );
+    await vi.waitFor(() => expect(labeledBodies(fetchMock)).toHaveLength(1));
+    await unassignLabelFromTask(oldLabel.id, owner.user.id);
+    await vi.waitFor(() => expect(labeledBodies(fetchMock)).toHaveLength(2));
+
+    const last = labeledBodies(fetchMock).at(-1);
+    expect(last.task.labels).toEqual(["Comisiones"]);
   });
 });
