@@ -5,6 +5,7 @@ import {
   activityTable,
   externalContactTable,
   externalTaskMirrorTable,
+  labelTable,
   taskExternalAssigneeTable,
   taskRelationTable,
   taskTable,
@@ -133,6 +134,31 @@ async function labelWithOrigin(
     workspaceId,
     "",
   );
+}
+
+// The origin label is set once, at creation, from whichever kaneo-mia
+// project the task was born in -- moving it between THEIR own projects later
+// leaves that label stale (Asygnuz never hears about a plain project-to-
+// project move unless it carries a status change too). task.moved is the one
+// event kaneo-mia sends specifically for that, with both the old and new
+// project name attached, so this is the only place that can catch it: drop
+// the label that no longer applies and add the one that does.
+async function resyncOriginLabel(
+  taskId: string,
+  projectId: string,
+  payload: MirrorTaskPayload,
+): Promise<void> {
+  const fromName = payload.data?.fromProjectName;
+  const toName = payload.data?.toProjectName ?? payload.project?.name;
+  if (typeof toName !== "string" || !toName) {
+    return;
+  }
+  if (typeof fromName === "string" && fromName && fromName !== toName) {
+    await db
+      .delete(labelTable)
+      .where(and(eq(labelTable.taskId, taskId), eq(labelTable.name, fromName)));
+  }
+  await labelWithOrigin(taskId, projectId, toName);
 }
 
 // kaneo-mia's assignee is a real account over there with nothing matching
@@ -440,6 +466,9 @@ async function applyMirrorEvent(payload: MirrorTaskPayload): Promise<void> {
       // Tasks mirrored before subtasks were supported have no link yet; any
       // later event is a chance to add it.
       await linkParent(localTaskId, mirrorTargetProjectId(), payload);
+      if (payload.event === "task.moved") {
+        await resyncOriginLabel(localTaskId, mirrorTargetProjectId(), payload);
+      }
       const validStatuses = await getValidTaskStatuses(mirrorTargetProjectId());
       const { status } = coerceStatus(
         payload.task.status ?? "to-do",

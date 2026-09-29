@@ -898,6 +898,79 @@ describe("external mirror webhook", () => {
       return { ...base, task: { ...base.task, ...extra } };
     }
 
+    async function labelsOn(externalId: string) {
+      const task = await localOf(externalId);
+      const rows = await db
+        .select({ name: schema.labelTable.name })
+        .from(schema.labelTable)
+        .where(eq(schema.labelTable.taskId, task?.id ?? ""));
+      return rows.map((r) => r.name);
+    }
+
+    it("relabels a task when kaneo-mia moves it to a different one of their own projects", async () => {
+      await setup();
+      const { app } = createApp();
+      await postEvent(
+        app,
+        taskEvent("task.created", {
+          id: "mv-1",
+          projectName: "Service Desk",
+        }),
+      );
+      expect(await labelsOn("mv-1")).toEqual(["Service Desk"]);
+
+      await postEvent(
+        app,
+        taskEvent("task.moved", {
+          id: "mv-1",
+          status: "in-progress",
+          data: {
+            fromProjectName: "Service Desk",
+            toProjectName: "Tecnología",
+          },
+        }),
+      );
+      expect(await labelsOn("mv-1")).toEqual(["Tecnología"]);
+      expect((await localOf("mv-1"))?.status).toBe("in-progress");
+    });
+
+    it("does not touch the label on an ordinary status_changed (no project rename data)", async () => {
+      await setup();
+      const { app } = createApp();
+      await postEvent(
+        app,
+        taskEvent("task.created", { id: "mv-2", projectName: "Comisiones" }),
+      );
+      await postEvent(
+        app,
+        taskEvent("task.status_changed", { id: "mv-2", status: "in-progress" }),
+      );
+      expect(await labelsOn("mv-2")).toEqual(["Comisiones"]);
+    });
+
+    it("is idempotent: repeating the same move does not duplicate or drop the label", async () => {
+      await setup();
+      const { app } = createApp();
+      await postEvent(
+        app,
+        taskEvent("task.created", {
+          id: "mv-3",
+          projectName: "UAT - Pruebas QA",
+        }),
+      );
+      const moved = taskEvent("task.moved", {
+        id: "mv-3",
+        status: "to-do",
+        data: {
+          fromProjectName: "UAT - Pruebas QA",
+          toProjectName: "Comisiones",
+        },
+      });
+      await postEvent(app, moved);
+      await postEvent(app, moved);
+      expect(await labelsOn("mv-3")).toEqual(["Comisiones"]);
+    });
+
     it("keeps a story as a story (their historia de usuario)", async () => {
       await setup();
       const { app } = createApp();
