@@ -1,6 +1,10 @@
-import { eq } from "drizzle-orm";
+import { and, eq, inArray } from "drizzle-orm";
 import db from "../database";
-import { projectTable, taskTable } from "../database/schema";
+import {
+  projectTable,
+  taskTable,
+  workspaceUserTable,
+} from "../database/schema";
 import { subscribeToEvent } from "../events";
 import {
   apiRouter,
@@ -138,20 +142,43 @@ subscribeToEvent<{
   title: string;
   projectId: string;
 }>("task.created", async (data) => {
-  if (data.userId && data.userId !== data.currentUserId) {
-    const [project] = await db
-      .select({ workspaceId: projectTable.workspaceId })
-      .from(projectTable)
-      .where(eq(projectTable.id, data.projectId))
-      .limit(1);
+  const [project] = await db
+    .select({ workspaceId: projectTable.workspaceId })
+    .from(projectTable)
+    .where(eq(projectTable.id, data.projectId))
+    .limit(1);
+  if (!project) return;
 
+  // Whoever got the task, plus the workspace owner/admin -- they want to
+  // know a task exists at all, not just the ones handed to them. Neither
+  // hears about their own action, even when they are both at once.
+  const recipients = new Set<string>();
+  if (data.userId && data.userId !== data.currentUserId) {
+    recipients.add(data.userId);
+  }
+  const leads = await db
+    .select({ userId: workspaceUserTable.userId })
+    .from(workspaceUserTable)
+    .where(
+      and(
+        eq(workspaceUserTable.workspaceId, project.workspaceId),
+        inArray(workspaceUserTable.role, ["owner", "admin"]),
+      ),
+    );
+  for (const lead of leads) {
+    if (lead.userId !== data.currentUserId) {
+      recipients.add(lead.userId);
+    }
+  }
+
+  for (const userId of recipients) {
     await createNotification({
-      userId: data.userId,
+      userId,
       type: "task_created",
       eventData: {
         taskTitle: data.title,
         projectId: data.projectId,
-        workspaceId: project?.workspaceId ?? null,
+        workspaceId: project.workspaceId,
       },
       resourceId: data.taskId,
       resourceType: "task",

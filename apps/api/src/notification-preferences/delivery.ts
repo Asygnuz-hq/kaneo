@@ -505,7 +505,18 @@ export async function deliverNotification(
 
   const deliveries: Array<Promise<void>> = [];
 
-  if (decryptedPreference.emailEnabled && rule.emailEnabled && user.email) {
+  // Email is noisy at every status change, comment or mention -- cut down to
+  // the one moment someone actually needs to be pulled out of their inbox
+  // for: a task showing up that is now theirs. Everything else still shows
+  // up in-app (the bell), just never lands in a mailbox.
+  const EMAIL_NOTIFIED_TYPES = new Set(["task_created"]);
+
+  if (
+    EMAIL_NOTIFIED_TYPES.has(notification.type) &&
+    decryptedPreference.emailEnabled &&
+    rule.emailEnabled &&
+    user.email
+  ) {
     deliveries.push(
       sendNotificationEmail(user.email, content.title, {
         title: content.title,
