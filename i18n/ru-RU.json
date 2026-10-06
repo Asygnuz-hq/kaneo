@@ -1688,6 +1688,10 @@
 			"task_overdue": {
 				"title": "Задача просрочена",
 				"content": "Срок выполнения задачи «{{taskTitle}}» истёк"
+			},
+			"task_updated": {
+				"content": "\"{{taskTitle}}\" was updated",
+				"title": "Task updated"
 			}
 		},
 		"reminderLeadTime": {
@@ -1703,6 +1707,10 @@
 			"days_few": "{{count}} дня",
 			"days_many": "{{count}} дней",
 			"days_other": "{{count}} дней"
+		},
+		"sound": {
+			"turnOff": "Turn notification sound off",
+			"turnOn": "Turn notification sound on"
 		}
 	},
 	"activity": {

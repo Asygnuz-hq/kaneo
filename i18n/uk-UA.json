@@ -1680,6 +1680,10 @@
 			"task_overdue": {
 				"title": "Завдання прострочено",
 				"content": "Дата завершення {{taskTitle}} вже минула"
+			},
+			"task_updated": {
+				"content": "\"{{taskTitle}}\" was updated",
+				"title": "Task updated"
 			}
 		},
 		"reminderLeadTime": {
@@ -1695,6 +1699,10 @@
 			"days_few": "{{count}} дні",
 			"days_many": "{{count}} днів",
 			"days_other": "{{count}} днів"
+		},
+		"sound": {
+			"turnOff": "Turn notification sound off",
+			"turnOn": "Turn notification sound on"
 		}
 	},
 	"activity": {

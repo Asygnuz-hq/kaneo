@@ -1637,6 +1637,10 @@
 		"clearAll": "Borrar todas las notificaciones",
 		"clearDialogTitle": "¿Borrar notificaciones?",
 		"clearDialogDescription": "Esto eliminará todas las notificaciones. Esta acción no puede deshacerse.",
+		"sound": {
+			"turnOn": "Activar el sonido de notificaciones",
+			"turnOff": "Silenciar el sonido de notificaciones"
+		},
 		"shortcuts": {
 			"open": "Abrir notificaciones"
 		},
@@ -1677,6 +1681,10 @@
 			"task_overdue": {
 				"title": "Tarea vencida",
 				"content": "{{taskTitle}} ha superado su fecha de vencimiento"
+			},
+			"task_updated": {
+				"title": "Tarea actualizada",
+				"content": "Se actualizó \"{{taskTitle}}\""
 			}
 		},
 		"reminderLeadTime": {

@@ -181,6 +181,15 @@ function buildDeliveryContent(notification: {
           : "You were mentioned in a Kaneo task.",
       };
     }
+    case "task_updated": {
+      const taskTitle = getStringValue(notification.eventData, "taskTitle");
+      return {
+        title: "Task updated",
+        body: taskTitle
+          ? `${taskTitle} was updated.`
+          : "A task was updated in Kaneo.",
+      };
+    }
     case "task_comment": {
       const taskTitle = getStringValue(notification.eventData, "taskTitle");
       const commenterName = getStringValue(

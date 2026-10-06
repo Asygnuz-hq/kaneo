@@ -1676,6 +1676,10 @@
 			"task_overdue": {
 				"title": "Taak te laat",
 				"content": "{{taskTitle}} is over de einddatum heen"
+			},
+			"task_updated": {
+				"content": "\"{{taskTitle}}\" was updated",
+				"title": "Task updated"
 			}
 		},
 		"reminderLeadTime": {
@@ -1685,6 +1689,10 @@
 			"hours_other": "{{count}} uur",
 			"days_one": "{{count}} dag",
 			"days_other": "{{count}} dagen"
+		},
+		"sound": {
+			"turnOff": "Turn notification sound off",
+			"turnOn": "Turn notification sound on"
 		}
 	},
 	"activity": {

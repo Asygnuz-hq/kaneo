@@ -1636,6 +1636,10 @@
 		"clearAll": "Clear all notifications",
 		"clearDialogTitle": "Clear all notifications?",
 		"clearDialogDescription": "This will permanently remove all notifications. You can't undo this action.",
+		"sound": {
+			"turnOn": "Turn notification sound on",
+			"turnOff": "Turn notification sound off"
+		},
 		"shortcuts": {
 			"open": "Open notifications"
 		},
@@ -1684,6 +1688,10 @@
 				"title": "Time tracking started",
 				"contentWithTask": "Time tracking started on task: {{taskTitle}}",
 				"contentWithoutTask": "Time tracking started on a task"
+			},
+			"task_updated": {
+				"title": "Task updated",
+				"content": "\"{{taskTitle}}\" was updated"
 			}
 		}
 	},

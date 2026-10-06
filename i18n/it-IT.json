@@ -1688,9 +1688,17 @@
 				"title": "Tracciamento tempo iniziato",
 				"contentWithTask": "Tracciamento tempo iniziato sull'attività: {{taskTitle}}",
 				"contentWithoutTask": "Tracciamento tempo iniziato su un'attività"
+			},
+			"task_updated": {
+				"content": "\"{{taskTitle}}\" was updated",
+				"title": "Task updated"
 			}
 		},
-		"newCount_many": "{{count}} nuove"
+		"newCount_many": "{{count}} nuove",
+		"sound": {
+			"turnOff": "Turn notification sound off",
+			"turnOn": "Turn notification sound on"
+		}
 	},
 	"activity": {
 		"assignedToSelf": "ha assegnato l'attività a sé stesso",

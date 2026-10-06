@@ -1684,7 +1684,15 @@
 				"title": "समय ट्रैकिंग शुरू",
 				"contentWithTask": "कार्य पर समय ट्रैकिंग शुरू: {{taskTitle}}",
 				"contentWithoutTask": "एक कार्य पर समय ट्रैकिंग शुरू"
+			},
+			"task_updated": {
+				"content": "\"{{taskTitle}}\" was updated",
+				"title": "Task updated"
 			}
+		},
+		"sound": {
+			"turnOff": "Turn notification sound off",
+			"turnOn": "Turn notification sound on"
 		}
 	},
 	"activity": {

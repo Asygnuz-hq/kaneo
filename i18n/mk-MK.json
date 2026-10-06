@@ -1676,6 +1676,10 @@
 			"task_overdue": {
 				"title": "Задачата е задоцнета",
 				"content": "{{taskTitle}} го помина крајниот рок"
+			},
+			"task_updated": {
+				"content": "\"{{taskTitle}}\" was updated",
+				"title": "Task updated"
 			}
 		},
 		"reminderLeadTime": {
@@ -1685,6 +1689,10 @@
 			"hours_other": "{{count}} часа",
 			"days_one": "{{count}} ден",
 			"days_other": "{{count}} дена"
+		},
+		"sound": {
+			"turnOff": "Turn notification sound off",
+			"turnOn": "Turn notification sound on"
 		}
 	},
 	"activity": {

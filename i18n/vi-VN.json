@@ -1679,7 +1679,15 @@
 				"title": "Đã bắt đầu theo dõi thời gian",
 				"contentWithTask": "Đã bắt đầu theo dõi thời gian trên công việc: {{taskTitle}}",
 				"contentWithoutTask": "Đã bắt đầu theo dõi thời gian trên một công việc"
+			},
+			"task_updated": {
+				"content": "\"{{taskTitle}}\" was updated",
+				"title": "Task updated"
 			}
+		},
+		"sound": {
+			"turnOff": "Turn notification sound off",
+			"turnOn": "Turn notification sound on"
 		}
 	},
 	"activity": {

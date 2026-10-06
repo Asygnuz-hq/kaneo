@@ -26,7 +26,7 @@ async function createNotification({
       ? "taskAssignmentEnabled"
       : type === "task_comment" || type === "task_mention"
         ? "taskCommentEnabled"
-        : type === "task_status_changed"
+        : type === "task_status_changed" || type === "task_updated"
           ? "taskStatusChangeEnabled"
           : type === "due_date_reminder" || type === "task_overdue"
             ? "dueDateReminderEnabled"

@@ -3,6 +3,7 @@ import { useQueryClient } from "@tanstack/react-query";
 import { useEffect, useRef } from "react";
 import { getApiUrl } from "@/fetchers/get-api-url";
 import { authClient } from "@/lib/auth-client";
+import { playNotificationSound } from "@/lib/notification-sound";
 
 export function getUserWsUrl() {
   const base = getApiUrl("ws");
@@ -61,6 +62,7 @@ export function useUserWebSocket() {
           };
           if (message.type === "NOTIFICATION_CREATED") {
             queryClient.invalidateQueries({ queryKey: ["notifications"] });
+            playNotificationSound();
           }
         } catch {
           // Ignore malformed messages

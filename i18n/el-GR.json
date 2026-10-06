@@ -1676,6 +1676,10 @@
 			"task_overdue": {
 				"title": "Εκπρόθεσμη εργασία",
 				"content": "Η εργασία {{taskTitle}} έχει ξεπεράσει την ημερομηνία λήξης της"
+			},
+			"task_updated": {
+				"content": "\"{{taskTitle}}\" was updated",
+				"title": "Task updated"
 			}
 		},
 		"reminderLeadTime": {
@@ -1685,6 +1689,10 @@
 			"hours_other": "{{count}} ώρες",
 			"days_one": "{{count}} ημέρα",
 			"days_other": "{{count}} ημέρες"
+		},
+		"sound": {
+			"turnOff": "Turn notification sound off",
+			"turnOn": "Turn notification sound on"
 		}
 	},
 	"activity": {

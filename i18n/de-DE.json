@@ -1684,7 +1684,15 @@
 				"title": "Zeiterfassung gestartet",
 				"contentWithTask": "Die Zeiterfassung für die Aufgabe \"{{taskTitle}}\" wurde gestartet",
 				"contentWithoutTask": "Die Zeiterfassung für eine Aufgabe wurde gestartet"
+			},
+			"task_updated": {
+				"content": "\"{{taskTitle}}\" was updated",
+				"title": "Task updated"
 			}
+		},
+		"sound": {
+			"turnOff": "Turn notification sound off",
+			"turnOn": "Turn notification sound on"
 		}
 	},
 	"activity": {

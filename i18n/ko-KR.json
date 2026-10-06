@@ -1674,12 +1674,20 @@
 			"task_overdue": {
 				"title": "작업 기한 초과",
 				"content": "{{taskTitle}}이(가) 마감일을 지났습니다"
+			},
+			"task_updated": {
+				"content": "\"{{taskTitle}}\" was updated",
+				"title": "Task updated"
 			}
 		},
 		"reminderLeadTime": {
 			"minutes_other": "{{count}}분",
 			"hours_other": "{{count}}시간",
 			"days_other": "{{count}}일"
+		},
+		"sound": {
+			"turnOff": "Turn notification sound off",
+			"turnOn": "Turn notification sound on"
 		}
 	},
 	"activity": {

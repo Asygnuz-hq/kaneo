@@ -1,6 +1,7 @@
-import { and, eq, inArray } from "drizzle-orm";
+import { and, eq, gt, inArray } from "drizzle-orm";
 import db from "../database";
 import {
+  notificationTable,
   projectTable,
   taskTable,
   workspaceUserTable,
@@ -185,6 +186,75 @@ subscribeToEvent<{
     });
   }
 });
+
+// A burst of edits to one task (typing a description, nudging a date) should
+// ring once, not once per keystroke.
+const TASK_UPDATE_COALESCE_MS = 60_000;
+
+async function notifyTaskUpdated(
+  data: { taskId: string; userId: string },
+  change: "title" | "description" | "priority" | "due_date",
+) {
+  const [task] = await db
+    .select({
+      title: taskTable.title,
+      projectId: taskTable.projectId,
+      assigneeId: taskTable.userId,
+      workspaceId: projectTable.workspaceId,
+    })
+    .from(taskTable)
+    .innerJoin(projectTable, eq(taskTable.projectId, projectTable.id))
+    .where(eq(taskTable.id, data.taskId))
+    .limit(1);
+  if (!task?.assigneeId || task.assigneeId === data.userId) return;
+
+  const [recent] = await db
+    .select({ id: notificationTable.id })
+    .from(notificationTable)
+    .where(
+      and(
+        eq(notificationTable.userId, task.assigneeId),
+        eq(notificationTable.resourceId, data.taskId),
+        eq(notificationTable.type, "task_updated"),
+        gt(
+          notificationTable.createdAt,
+          new Date(Date.now() - TASK_UPDATE_COALESCE_MS),
+        ),
+      ),
+    )
+    .limit(1);
+  if (recent) return;
+
+  await createNotification({
+    userId: task.assigneeId,
+    type: "task_updated",
+    eventData: {
+      taskTitle: task.title,
+      change,
+      projectId: task.projectId,
+      workspaceId: task.workspaceId,
+    },
+    resourceId: data.taskId,
+    resourceType: "task",
+  });
+}
+
+subscribeToEvent<{ taskId: string; userId: string }>(
+  "task.title_changed",
+  (data) => notifyTaskUpdated(data, "title"),
+);
+subscribeToEvent<{ taskId: string; userId: string }>(
+  "task.description_changed",
+  (data) => notifyTaskUpdated(data, "description"),
+);
+subscribeToEvent<{ taskId: string; userId: string }>(
+  "task.priority_changed",
+  (data) => notifyTaskUpdated(data, "priority"),
+);
+subscribeToEvent<{ taskId: string; userId: string }>(
+  "task.due_date_changed",
+  (data) => notifyTaskUpdated(data, "due_date"),
+);
 
 subscribeToEvent<{
   workspaceId: string;

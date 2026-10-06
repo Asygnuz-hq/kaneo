@@ -1677,6 +1677,10 @@
 			"task_overdue": {
 				"title": "Tâche en retard",
 				"content": "{{taskTitle}} a dépassé sa date d'échéance"
+			},
+			"task_updated": {
+				"content": "\"{{taskTitle}}\" was updated",
+				"title": "Task updated"
 			}
 		},
 		"reminderLeadTime": {
@@ -1690,7 +1694,11 @@
 			"days_many": "{{count}} jours",
 			"hours_many": "{{count}} heures"
 		},
-		"newCount_many": "{{count}} nouvelles"
+		"newCount_many": "{{count}} nouvelles",
+		"sound": {
+			"turnOff": "Turn notification sound off",
+			"turnOn": "Turn notification sound on"
+		}
 	},
 	"activity": {
 		"assignedToSelf": "s'est assigné la tâche",

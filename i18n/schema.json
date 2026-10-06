@@ -6601,6 +6601,19 @@
 				"clearDialogDescription": {
 					"type": "string"
 				},
+				"sound": {
+					"type": "object",
+					"additionalProperties": false,
+					"properties": {
+						"turnOn": {
+							"type": "string"
+						},
+						"turnOff": {
+							"type": "string"
+						}
+					},
+					"required": ["turnOn", "turnOff"]
+				},
 				"shortcuts": {
 					"type": "object",
 					"additionalProperties": false,
@@ -6795,6 +6808,19 @@
 								}
 							},
 							"required": ["title", "contentWithTask", "contentWithoutTask"]
+						},
+						"task_updated": {
+							"type": "object",
+							"additionalProperties": false,
+							"properties": {
+								"title": {
+									"type": "string"
+								},
+								"content": {
+									"type": "string"
+								}
+							},
+							"required": ["title", "content"]
 						}
 					},
 					"required": [
@@ -6806,7 +6832,8 @@
 						"task_comment",
 						"due_date_reminder",
 						"task_overdue",
-						"time_entry_created"
+						"time_entry_created",
+						"task_updated"
 					]
 				}
 			},
@@ -6817,6 +6844,7 @@
 				"clearAll",
 				"clearDialogTitle",
 				"clearDialogDescription",
+				"sound",
 				"shortcuts",
 				"reminderLeadTime",
 				"events"

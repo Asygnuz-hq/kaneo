@@ -1679,7 +1679,15 @@
 				"title": "已开始计时",
 				"contentWithTask": "已开始为任务 {{taskTitle}} 计时",
 				"contentWithoutTask": "已开始为某个任务计时"
+			},
+			"task_updated": {
+				"content": "\"{{taskTitle}}\" was updated",
+				"title": "Task updated"
 			}
+		},
+		"sound": {
+			"turnOff": "Turn notification sound off",
+			"turnOn": "Turn notification sound on"
 		}
 	},
 	"activity": {

@@ -1679,7 +1679,15 @@
 				"title": "時間計測を開始しました",
 				"contentWithTask": "タスク「{{taskTitle}}」の時間計測を開始しました",
 				"contentWithoutTask": "タスクの時間計測を開始しました"
+			},
+			"task_updated": {
+				"content": "\"{{taskTitle}}\" was updated",
+				"title": "Task updated"
 			}
+		},
+		"sound": {
+			"turnOff": "Turn notification sound off",
+			"turnOn": "Turn notification sound on"
 		}
 	},
 	"activity": {

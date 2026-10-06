@@ -1674,12 +1674,20 @@
 			"task_overdue": {
 				"title": "Tugas terlambat",
 				"content": "{{taskTitle}} telah melewati tenggatnya"
+			},
+			"task_updated": {
+				"content": "\"{{taskTitle}}\" was updated",
+				"title": "Task updated"
 			}
 		},
 		"reminderLeadTime": {
 			"minutes_other": "{{count}} menit",
 			"hours_other": "{{count}} jam",
 			"days_other": "{{count}} hari"
+		},
+		"sound": {
+			"turnOff": "Turn notification sound off",
+			"turnOn": "Turn notification sound on"
 		}
 	},
 	"activity": {

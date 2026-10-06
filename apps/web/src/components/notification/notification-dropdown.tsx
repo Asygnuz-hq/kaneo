@@ -1,5 +1,5 @@
 import { useNavigate } from "@tanstack/react-router";
-import { Bell } from "lucide-react";
+import { Bell, Volume2, VolumeX } from "lucide-react";
 import { forwardRef, useCallback, useImperativeHandle, useState } from "react";
 import { useTranslation } from "react-i18next";
 import {
@@ -34,6 +34,10 @@ import { useRegisterShortcuts } from "@/hooks/use-keyboard-shortcuts";
 import { cn } from "@/lib/cn";
 import { formatRelativeTime } from "@/lib/format";
 import { getStatusLabel } from "@/lib/i18n/domain";
+import {
+  isNotificationSoundEnabled,
+  setNotificationSoundEnabled,
+} from "@/lib/notification-sound";
 import type { Notification } from "@/types/notification";
 
 export type NotificationDropdownRef = {
@@ -110,6 +114,11 @@ export function getNotificationTitle(
           ...eventData,
           defaultValue: notification.title ?? notification.type,
         });
+      case "task_updated":
+        return t("notifications:events.task_updated.title", {
+          ...eventData,
+          defaultValue: notification.title ?? notification.type,
+        });
       case "due_date_reminder":
         return t("notifications:events.due_date_reminder.title", {
           ...eventData,
@@ -177,6 +186,11 @@ export function getNotificationContent(
           ...eventData,
           defaultValue: notification.content ?? "",
         });
+      case "task_updated":
+        return t("notifications:events.task_updated.content", {
+          ...eventData,
+          defaultValue: notification.content ?? "",
+        });
       case "due_date_reminder":
         return t("notifications:events.due_date_reminder.content", {
           ...eventData,
@@ -206,6 +220,7 @@ const NotificationDropdown = forwardRef<NotificationDropdownRef>(
 
     const { mutate: markAllAsRead } = useMarkAllNotificationsAsRead();
     const { mutate: clearAll } = useClearNotifications();
+    const [soundOn, setSoundOn] = useState(isNotificationSoundEnabled);
     const { mutate: markAsRead } = useMarkNotificationAsRead();
 
     const handleNotificationClick = useCallback(
@@ -298,6 +313,30 @@ const NotificationDropdown = forwardRef<NotificationDropdownRef>(
                 <h3 className="font-medium text-sm">
                   {t("notifications:title")}
                 </h3>
+                <DropdownMenuItem
+                  closeOnClick={false}
+                  aria-label={
+                    soundOn
+                      ? t("notifications:sound.turnOff")
+                      : t("notifications:sound.turnOn")
+                  }
+                  title={
+                    soundOn
+                      ? t("notifications:sound.turnOff")
+                      : t("notifications:sound.turnOn")
+                  }
+                  onClick={() => {
+                    setNotificationSoundEnabled(!soundOn);
+                    setSoundOn(!soundOn);
+                  }}
+                  className="ml-auto min-h-0 w-auto cursor-pointer rounded-md px-1.5 py-1 text-muted-foreground sm:min-h-0 data-highlighted:text-foreground"
+                >
+                  {soundOn ? (
+                    <Volume2 className="size-3.5" />
+                  ) : (
+                    <VolumeX className="size-3.5" />
+                  )}
+                </DropdownMenuItem>
                 {unreadNotifications.length > 0 && (
                   <DropdownMenuItem
                     closeOnClick={false}
