@@ -11,6 +11,10 @@ import {
   userTable,
   workspaceTable,
 } from "../../database/schema";
+import {
+  remoteAssigneeEmail,
+  remoteStatusFor,
+} from "../../external-mirror/config";
 import { isApplyingMirror } from "../../external-mirror/context";
 import type {
   PluginContext,
@@ -154,10 +158,13 @@ async function getTaskData(
     ...rest,
     mirroredFrom: origin?.externalTaskId ?? null,
     assignee: assigneeName
-      ? { name: assigneeName, email: assigneeEmail }
+      ? {
+          name: assigneeName,
+          email: remoteAssigneeEmail(assigneeEmail) ?? null,
+        }
       : null,
     parent: parentRow ?? null,
-    status: taskRow.status,
+    status: remoteStatusFor(taskRow.status, effectiveLabels),
     statusName: taskRow.columnName ?? taskRow.status,
     taskUrl: `${clientUrl}/dashboard/workspace/${taskRow.workspaceId}/project/${taskRow.projectId}/task/${taskId}`,
     labels: effectiveLabels,
