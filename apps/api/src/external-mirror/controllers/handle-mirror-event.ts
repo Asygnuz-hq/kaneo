@@ -34,6 +34,8 @@ import {
 import { localizeAssetLinks, mirrorAsset, ownApiBase } from "../assets";
 import {
   financieramenteBaseUrl,
+  localAssigneeEmail,
+  localStatusFor,
   mirrorSource,
   mirrorTargetProjectId,
 } from "../config";
@@ -223,7 +225,7 @@ async function syncAssignee(
   // kaneo-mia has exactly one assignee, so the mirror holds exactly one too:
   // whoever was mirrored before is replaced, not kept alongside.
   await clearMirroredAssignee(taskId);
-  const email = assignee.email?.trim();
+  const email = localAssigneeEmail(assignee.email)?.trim();
   if (email) {
     const [user] = await db
       .select({ id: userTable.id })
@@ -379,7 +381,7 @@ async function ensureLocalTask(payload: MirrorTaskPayload): Promise<string> {
   const projectId = mirrorTargetProjectId();
   const validStatuses = await getValidTaskStatuses(projectId);
   const { status } = coerceStatus(
-    payload.task.status ?? "to-do",
+    localStatusFor(payload.task.status ?? "to-do", payload.project?.name),
     validStatuses,
   );
   const { priority } = coercePriority(payload.task.priority ?? "no-priority");
@@ -471,7 +473,7 @@ async function applyMirrorEvent(payload: MirrorTaskPayload): Promise<void> {
       }
       const validStatuses = await getValidTaskStatuses(mirrorTargetProjectId());
       const { status } = coerceStatus(
-        payload.task.status ?? "to-do",
+        localStatusFor(payload.task.status ?? "to-do", payload.project?.name),
         validStatuses,
       );
 
