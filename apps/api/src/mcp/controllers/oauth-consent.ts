@@ -13,6 +13,7 @@ import {
 import type {
   authorizationDecisionSchema,
   authorizationQuerySchema,
+  clientRegistrationResponseSchema,
   clientRegistrationSchema,
 } from "../schemas";
 
@@ -54,7 +55,9 @@ function isTrustedConsentOrigin(origin: string | undefined): boolean {
   }
 }
 
-export async function registerMcpClient(input: ClientRegistrationInput) {
+export async function registerMcpClient(
+  input: ClientRegistrationInput,
+): Promise<z.infer<typeof clientRegistrationResponseSchema>> {
   const client = await registerClient({
     redirectUris: input.redirect_uris,
     clientName: input.client_name,
@@ -65,10 +68,11 @@ export async function registerMcpClient(input: ClientRegistrationInput) {
     client_id_issued_at: client.issuedAt,
     redirect_uris: client.redirectUris,
     client_name: client.clientName,
-    token_endpoint_auth_method: input.token_endpoint_auth_method ?? "none",
-    grant_types: input.grant_types ?? ["authorization_code"],
-    response_types: input.response_types ?? ["code"],
-  } as const;
+    token_endpoint_auth_method: "none",
+    // Refresh tokens are not issued, so only the code grant is registered.
+    grant_types: ["authorization_code"],
+    response_types: ["code"],
+  };
 }
 
 export async function beginMcpAuthorization(

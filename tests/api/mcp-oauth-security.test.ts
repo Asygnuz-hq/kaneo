@@ -168,6 +168,32 @@ describe("MCP OAuth security", () => {
     expect(remoteHttp.status).toBe(400);
   });
 
+  it("accepts clients that also request refresh_token and registers only authorization_code", async () => {
+    const accepted = await mcpRoutes.request("/mcp/register", {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({
+        client_name: "Claude",
+        redirect_uris: ["https://claude.ai/api/mcp/auth_callback"],
+        grant_types: ["authorization_code", "refresh_token"],
+        response_types: ["code"],
+        token_endpoint_auth_method: "none",
+      }),
+    });
+    expect(accepted.status).toBe(200);
+    expect((await accepted.json()).grant_types).toEqual(["authorization_code"]);
+
+    const refreshOnly = await mcpRoutes.request("/mcp/register", {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({
+        redirect_uris: ["https://claude.ai/api/mcp/auth_callback"],
+        grant_types: ["refresh_token"],
+      }),
+    });
+    expect(refreshOnly.status).toBe(400);
+  });
+
   it("requires an exact registered redirect URI", async () => {
     const registeredRedirect = "https://client.example/callback";
     const client = await registerClient(registeredRedirect);
