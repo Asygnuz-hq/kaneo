@@ -31,7 +31,14 @@ export const clientRegistrationSchema = z.object({
   redirect_uris: z.array(redirectUriSchema).min(1),
   client_name: z.string().max(100).optional(),
   token_endpoint_auth_method: z.literal("none").optional(),
-  grant_types: z.tuple([z.literal("authorization_code")]).optional(),
+  // Clients such as Claude also request refresh_token; RFC 7591 lets the
+  // server register only the grants it supports, so accept and narrow it.
+  grant_types: z
+    .array(z.enum(["authorization_code", "refresh_token"]))
+    .refine((grants) => grants.includes("authorization_code"), {
+      message: "grant_types must include authorization_code",
+    })
+    .optional(),
   response_types: z.tuple([z.literal("code")]).optional(),
 });
 
